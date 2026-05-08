@@ -41,6 +41,17 @@
 - This keeps business logic testable and allows swapping implementations without touching service code
 - Never call an external service SDK directly from a service — wrap it in an adapter
 
+## Zero Trust — Never Trust Request Content
+
+- Every request is untrusted by default, regardless of origin — internal services, authenticated users, and trusted IPs are not exceptions
+- Validate all input at every layer independently; do not assume upstream validation was correct or complete
+- Never use client-supplied values to construct queries, file paths, shell commands, or redirect URLs without strict validation and sanitization
+- Never trust client-supplied IDs to determine ownership — always verify that the authenticated user has permission to access the requested resource
+- Reject requests that contain unexpected fields, malformed data, or values outside defined ranges; do not silently ignore them
+- Never rely on a single security check — apply defense in depth: validate at the boundary, enforce authorization in the service, and constrain at the data layer
+- Treat data from your own database as untrusted when it will be rendered or executed — stored XSS, second-order injection, and deserialization attacks originate from trusted storage
+- Secrets (tokens, keys, passwords) in a request body or header must be treated as potentially compromised — rotate on any suspicion, do not log them
+
 ## Authentication and Authorization
 
 - Authentication (who is this?) is handled at the middleware layer before the handler is reached
