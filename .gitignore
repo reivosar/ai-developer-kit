@@ -39,3 +39,6 @@ coverage/
 
 # Worktrees (Claude Code)
 .claude/worktrees/
+
+# Session trash (Claude Code)
+.trash/

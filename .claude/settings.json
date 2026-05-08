@@ -39,7 +39,9 @@
       "Bash(make*)",
       "Bash(gh issue*)",
       "Bash(gh pr*)",
-      "Bash(gh repo*)"
+      "Bash(gh repo*)",
+      "Bash(.claude/hooks/trash.sh*)",
+      "Bash(chmod +x .claude/hooks/*)"
     ],
     "deny": [
       "Bash(git push --force*)",
@@ -92,6 +94,16 @@
           {
             "type": "command",
             "command": ".claude/hooks/notify.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-start.sh"
           }
         ]
       }
