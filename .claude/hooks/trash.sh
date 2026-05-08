@@ -18,7 +18,7 @@ for target in "$@"; do
   ABS_TARGET="$(cd "$(dirname "$target")" 2>/dev/null && pwd)/$(basename "$target")"
   if [[ "$ABS_TARGET" != "$PROJECT_ROOT/"* ]]; then
     echo "BLOCKED: $target is outside project root" >&2
-    exit 1
+    exit 2
   fi
   mv "$target" "$TRASH_DIR/"
 done
