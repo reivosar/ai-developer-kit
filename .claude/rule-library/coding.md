@@ -20,6 +20,8 @@
 - A function does one thing; if you need "and" to describe what it does, split it
 - A module owns one concept; if it changes for two different reasons, split it
 - Orchestration (calling A then B then C) is a separate concern from logic (what A, B, C each do)
+- An orchestrating function contains only calls to other functions — no inline logic mixed in; if it does, split the logic into a named function
+- If a function body needs a comment to divide it into sections, those sections are separate functions waiting to be extracted
 
 ## Explicit Over Implicit
 
