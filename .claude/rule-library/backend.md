@@ -67,3 +67,22 @@
 - Mutating operations must validate that the current state permits the transition before executing
 - Illegal state transitions are rejected with a domain error, not silently ignored or partially applied
 - Side effects (emails, events, notifications) triggered by a state change happen after the transaction commits, not inside it
+
+## Idempotency and Retry Safety
+
+- Classify every operation as idempotent or non-idempotent before designing it
+- GET, DELETE, and PUT must be idempotent by design — repeating them produces the same result
+- POST operations that create resources should accept a client-supplied idempotency key to allow safe retries
+- Non-idempotent operations (charge a card, send an email, publish an event) must not be retried without deduplication — use idempotency keys or at-least-once delivery with dedup logic
+- Retries apply only to transient failures (network timeout, 503, lock contention) — never retry on permanent failures (400, 404, 409, 422)
+- Use exponential backoff with jitter for all retry loops; never retry in a tight loop
+- Set a maximum retry count and a total deadline — unbounded retries cause cascading failures
+
+## Resilience
+
+- Every call to an external service (DB, cache, third-party API, internal microservice) has a defined timeout — never rely on the default
+- Design for partial failure: if a non-critical dependency is unavailable, degrade gracefully rather than failing the entire request
+- Apply the circuit breaker pattern for external dependencies that are prone to prolonged failure — fail fast instead of accumulating waiting threads
+- Distinguish between read and write paths: read degradation (stale cache, reduced data) is often acceptable; write degradation must be explicit and safe
+- Isolate failure domains — a failure in one subsystem (search, notifications, analytics) must not propagate to core workflows
+- When a operation cannot complete due to a transient failure, return a retriable error code (503 with Retry-After) so callers know they can try again safely
