@@ -1,36 +1,55 @@
 # Frontend Rules
 
-## Framework & Tooling
+## Components
 
-<!-- Specify the framework and build tooling in use -->
-<!-- Example: React 18 + Vite, Next.js 14, Vue 3 + Nuxt, etc. -->
+- One component per file; filename matches the component name in PascalCase
+- Keep components small and focused — if a component needs more than one screen of code, split it
+- Co-locate styles, tests, and sub-components with the component they belong to
+- Prefer composition over prop drilling; lift state only as high as necessary
 
-## Component Conventions
+## Naming
 
-<!-- How components are organized and named -->
-<!-- Example: PascalCase filenames, one component per file, co-located styles -->
-
-## Styling
-
-<!-- Styling approach in use -->
-<!-- Example: Tailwind CSS, CSS Modules, styled-components, etc. -->
+- Components: PascalCase (`UserCard`, `LoginForm`)
+- Hooks: camelCase prefixed with `use` (`useAuth`, `usePagination`)
+- Event handlers: prefixed with `handle` (`handleSubmit`, `handleClick`)
+- Boolean props/variables: prefixed with `is`, `has`, or `can` (`isLoading`, `hasError`)
 
 ## State Management
 
-<!-- How state is managed -->
-<!-- Example: useState/useContext for local, Zustand for global, React Query for server state -->
-
-## File Structure
-
-<!-- Where components, pages, hooks, utils live -->
-<!-- Example: src/components/, src/pages/, src/hooks/, src/utils/ -->
+- Local UI state: component-level state (`useState`)
+- Shared UI state: context or lightweight global store
+- Server state: dedicated data-fetching library (React Query, SWR, etc.) — do not manually manage loading/error/data in local state
+- Avoid storing derived data in state; compute it from existing state instead
 
 ## TypeScript
 
-<!-- TypeScript usage and strictness level -->
-<!-- Example: strict mode, prefer interfaces over types for object shapes -->
+- Strict mode enabled
+- No `any` — use `unknown` and narrow explicitly if the type is truly unknown
+- Prefer `interface` for object shapes, `type` for unions and primitives
+- Export prop types alongside their components
+
+## Styling
+
+- Use CSS variables for colors, spacing, and typography tokens
+- Avoid inline styles except for dynamic values that cannot be expressed in CSS
+- Responsive design mobile-first; use breakpoints consistently
+
+## Accessibility
+
+- Use semantic HTML elements (`button`, `nav`, `main`, `section`) over generic `div`
+- Every interactive element must be keyboard-accessible and have a visible focus state
+- Images require `alt` text; decorative images use `alt=""`
+- Form inputs must have associated `label` elements
+
+## Error & Loading States
+
+- Every async operation must handle loading, error, and empty states explicitly
+- Show meaningful error messages to the user — never silently swallow errors
+- Use skeleton screens or spinners consistently; do not mix both in the same product
 
 ## Testing
 
-<!-- Frontend testing approach -->
-<!-- Example: Vitest + Testing Library for unit/component tests, Playwright for e2e -->
+- Test behavior, not implementation — assert what the user sees and can do
+- Unit test pure functions and custom hooks in isolation
+- Component tests cover the main interaction flow and key edge cases
+- Avoid snapshot tests; they break on trivial changes and provide little signal
