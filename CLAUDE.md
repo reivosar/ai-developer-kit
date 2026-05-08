@@ -27,3 +27,5 @@ Always invoke the corresponding skill — never handle these tasks inline:
 - Reviewing changes → `/code-review`
 - Committing → `/commit`
 - Worktree operations → `/worktree`
+
+Once a rule file from `.claude/rule-library/` has been read in a session, never read it again — treat it as cached.
