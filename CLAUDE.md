@@ -22,7 +22,9 @@ Template kit for Claude Code-powered development workflows.
 
 Always invoke the corresponding skill — never handle these tasks inline:
 
-- Writing/fixing code → `/fix-bug`
+- Frontend tasks (HTML/CSS/JS/TS/React/Vue/etc.) → `/frontend`
+- Backend tasks (APIs/services/DB/server-side) → `/backend`
+- General/ambiguous coding, scripts, CLI, full-stack → `/coding`
 - Planning a feature → `/plan`
 - Reviewing changes → `/code-review`
 - Committing → `/commit`
