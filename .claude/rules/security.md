@@ -1,0 +1,5 @@
+# Security
+
+- Never write secrets or API keys directly in code — use `.env` + `.gitignore`
+- Validate all external input
+- Regularly audit dependencies for vulnerabilities (`npm audit`, `pip audit`, etc.)

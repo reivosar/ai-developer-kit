@@ -1,0 +1,6 @@
+# Testing
+
+- All new features must include tests
+- Tests verify real behavior — avoid over-mocking
+- Prioritize testing critical paths over chasing coverage numbers
+- Always run tests after implementation and confirm they pass before calling a task done
