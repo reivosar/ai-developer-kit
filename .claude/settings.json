@@ -21,6 +21,11 @@
       "Bash(git commit*)",
       "Bash(git checkout*)",
       "Bash(git switch*)",
+      "Bash(git push*)",
+      "Bash(git merge*)",
+      "Bash(git fetch*)",
+      "Bash(git pull*)",
+      "Bash(git rebase*)",
       "Bash(git worktree*)",
       "Bash(ls*)",
       "Bash(find . *)",
@@ -46,6 +51,8 @@
     "deny": [
       "Bash(git push --force*)",
       "Bash(git push -f*)",
+      "Bash(git push* main)",
+      "Bash(git push* origin main)",
       "Bash(git reset --hard*)",
       "Bash(rm -rf /*)",
       "Bash(rm -rf ~*)",
@@ -63,6 +70,10 @@
           {
             "type": "command",
             "command": ".claude/hooks/pre-bash.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-commit.sh"
           }
         ]
       },
