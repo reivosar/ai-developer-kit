@@ -9,6 +9,7 @@ description: Design and implement backend features. Use this skill when the user
 
 Read before proceeding:
 - `.claude/rule-library/backend.md`
+- `.claude/rule-library/coding.md`
 - `.claude/rule-library/code-style.md`
 - `.claude/rule-library/security.md`
 - `.claude/rule-library/testing.md`

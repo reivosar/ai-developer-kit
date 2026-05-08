@@ -9,6 +9,7 @@ description: Design and implement frontend features. Use this skill when the use
 
 Read before proceeding:
 - `.claude/rule-library/frontend.md`
+- `.claude/rule-library/coding.md`
 - `.claude/rule-library/code-style.md`
 - `.claude/rule-library/security.md`
 

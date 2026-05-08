@@ -28,6 +28,21 @@
 - **Repository**: data access only — no business logic, no HTTP concerns
 - **Domain Model**: entities and value objects expressing business concepts — no framework dependencies
 
+## Domain-Driven Source Organization
+
+- Organize source code by domain (e.g. `users/`, `orders/`, `billing/`), not by technical layer (e.g. `controllers/`, `services/`, `models/`)
+- Each domain owns its handlers, services, repositories, and models — all co-located under its directory
+- A domain's internal files are private; only explicitly exported interfaces, query functions, and events are accessible to other domains
+- Design each domain so it could be extracted into a separate service without restructuring — avoid assumptions that domains share a process or a database forever
+
+## Cross-Domain Data Access
+
+- A domain never reads another domain's database tables or internal repositories directly
+- Cross-domain data access goes through the owning domain's published query interface (a service method, a query function, or a read model)
+- The consuming domain depends on the interface, not the implementation — the owning domain can change its storage freely
+- If a domain frequently needs data from another domain, consider whether an event-driven approach (the owning domain publishes events, the consumer maintains a local read model) is more appropriate than synchronous queries
+- Circular dependencies between domains are a design error — resolve by extracting a shared domain or inverting the dependency through events
+
 ## Transaction Boundaries
 
 - A single service method represents a single unit of work — it either fully succeeds or fully rolls back

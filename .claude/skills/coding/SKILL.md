@@ -11,6 +11,7 @@ Implement or fix code for any domain — frontend, backend, scripts, CLI, full-s
 
 Always read:
 - `.claude/rule-library/code-style.md`
+- `.claude/rule-library/coding.md`
 - `.claude/rule-library/testing.md`
 - `.claude/rule-library/security.md`
 
