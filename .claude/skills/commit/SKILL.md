@@ -11,7 +11,19 @@ Create a Conventional Commits message for what is staged and commit it.
 
 Read `.claude/rule-library/git-workflow.md` before proceeding.
 
-## Step 1: Understand what's staged
+## Step 1: Verify branch
+
+```bash
+git branch --show-current
+```
+
+If on `main` — stop. Do not commit to main directly. Tell the user to create a feature branch:
+
+```bash
+git checkout -b feat/<short-description>
+```
+
+## Step 2: Understand what's staged
 
 ```bash
 git status
@@ -20,7 +32,7 @@ git diff --staged
 
 Read the diff carefully. The commit message should reflect the *intent* of the change, not just list files modified.
 
-## Step 2: Draft the message
+## Step 3: Draft the message
 
 **Format:**
 ```
@@ -48,11 +60,11 @@ Read the diff carefully. The commit message should reflect the *intent* of the c
 - Explain *why* the change was made, not what it does (the diff shows what)
 - Mention tradeoffs or alternatives considered if relevant
 
-## Step 3: Propose and confirm
+## Step 4: Propose and confirm
 
 Show the proposed message to the user and wait for approval or edits before committing. Do not stage unstaged files unless explicitly asked.
 
-## Step 4: Commit
+## Step 5: Commit
 
 ```bash
 git commit -m "$(cat <<'EOF'
