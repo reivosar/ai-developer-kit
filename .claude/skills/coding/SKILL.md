@@ -1,11 +1,11 @@
 ---
 name: coding
-description: Coding skill for all implementation work — frontend, backend, CLI tools, scripts, full-stack, shared utilities, configuration, or anything else. Use this skill whenever the task is to write, fix, or modify code, regardless of domain. This is the single skill for all coding tasks.
+description: Coding skill for all implementation work — frontend, backend, CLI tools, scripts, full-stack, shared utilities, configuration, or anything else. Use this skill whenever the task is to write or modify code against a known design. Do NOT use for bug investigation — use fix-bug instead.
 ---
 
 # Coding
 
-Implement or fix code for any domain — frontend, backend, scripts, CLI, full-stack, or general utilities.
+Implement code for any domain — frontend, backend, scripts, CLI, full-stack, or general utilities. The design or requirement is already known; this skill writes it.
 
 ## Setup
 
@@ -14,10 +14,12 @@ Always read:
 - `.claude/rule-library/coding.md`
 - `.claude/rule-library/testing.md`
 - `.claude/rule-library/security.md`
+- `.claude/rule-library/errors.md`
+- `.claude/rule-library/logging.md`
 
 Then read based on the task domain:
 - Frontend (UI, components, browser code) → `.claude/rule-library/frontend.md`
-- Backend (APIs, services, DB, server-side) → `.claude/rule-library/backend.md`
+- Backend (APIs, services, DB, server-side) → `.claude/rule-library/backend.md`, `.claude/rule-library/database.md`, `.claude/rule-library/configuration.md`
 - Both apply for full-stack tasks
 
 ## Arguments
@@ -32,8 +34,7 @@ Before writing anything:
 
 - Identify the language, toolchain, and conventions in use
 - Locate the relevant entry point or file — search by symbol or filename, don't read speculatively
-- For bug fixes: trace the execution path to the failure and state the root cause first
-- For new work: clarify ambiguous requirements before writing code
+- Clarify ambiguous requirements before writing code
 
 ### 2. Plan the change
 

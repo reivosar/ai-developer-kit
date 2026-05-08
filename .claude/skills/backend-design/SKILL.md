@@ -13,6 +13,10 @@ Read before proceeding:
 - `.claude/rule-library/code-style.md`
 - `.claude/rule-library/security.md`
 - `.claude/rule-library/testing.md`
+- `.claude/rule-library/database.md`
+- `.claude/rule-library/errors.md`
+- `.claude/rule-library/logging.md`
+- `.claude/rule-library/monitoring.md`
 
 ## Steps
 

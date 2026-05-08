@@ -1,11 +1,11 @@
 ---
 name: fix-bug
-description: Diagnose and fix a bug from an error message, stack trace, or problem description. Use this skill whenever the user shares an error, a failing test, unexpected behavior, or says something like "this is broken", "it's not working", or "help me debug this." Don't wait for the user to explicitly say "fix bug" — if there's a problem to solve, use this skill.
+description: Investigate and fix broken behavior. The defining condition is uncertainty about the cause — something is wrong but why is unknown. Use this skill when the user shares an error message, stack trace, failing test, or unexpected behavior, or says "this is broken", "it's not working", "help me debug this." Do NOT use coding skill for this — diagnosis must come before any fix.
 ---
 
 # Fix Bug
 
-Diagnose the root cause and fix it with minimal scope change.
+Start from broken behavior with unknown cause. Diagnose first — do not write any fix until the root cause is stated. Change only what the root cause requires.
 
 ## Setup
 

@@ -22,12 +22,16 @@ Template kit for Claude Code-powered development workflows.
 
 Always invoke the corresponding skill — never handle these tasks inline:
 
-- All coding (new features, bug fixes, any domain) → `/coding`
-- Frontend architecture/design → `/frontend-design`
-- Backend architecture/design → `/backend-design`
-- Planning a feature → `/plan`
+- All coding (implementation against a known design) → `/coding`
+- Bug / error / test failure investigation → `/fix-bug`
+- Frontend architecture/design (component design, state management, routing design) → `/frontend-design`
+- Backend architecture/design (API design, DB model, service boundaries) → `/backend-design`
+- Planning a multi-file feature → `/plan`
 - Reviewing changes → `/code-review`
 - Committing → `/commit`
 - Worktree operations → `/worktree`
+- Documentation (README, ADR, OpenAPI spec) → `/documentation`
+
+When to use `/coding` vs. a design skill: use a design skill when the structure or boundaries are undecided; use `/coding` once the design is settled and the task is implementation.
 
 Once a rule file from `.claude/rule-library/` has been read in a session, never read it again — treat it as cached.
