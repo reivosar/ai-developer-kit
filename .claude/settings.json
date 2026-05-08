@@ -22,6 +22,7 @@
       "Bash(git checkout*)",
       "Bash(git switch*)",
       "Bash(git push*)",
+      "Bash(git merge*)",
       "Bash(git worktree*)",
       "Bash(ls*)",
       "Bash(find . *)",
