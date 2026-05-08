@@ -1,5 +1,3 @@
-# Testing
-
 - All new features must include tests
 - Tests verify real behavior — avoid over-mocking
 - Prioritize testing critical paths over chasing coverage numbers

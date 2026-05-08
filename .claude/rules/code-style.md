@@ -1,5 +1,3 @@
-# Code Style
-
 - Indent: 2 spaces (unless language conventions dictate otherwise)
 - No trailing whitespace
 - Single blank line at end of file

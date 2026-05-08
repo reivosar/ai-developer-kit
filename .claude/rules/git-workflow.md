@@ -1,5 +1,3 @@
-# Git Workflow
-
 - Branch names: use `feat/`, `fix/`, `docs/`, `chore/` prefixes
 - Commit messages: follow Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
 - Never push directly to `main` — always go through a PR
