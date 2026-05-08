@@ -1,48 +1,43 @@
 ---
 name: backend-design
-description: Backend design skill for planning and designing API structure, service architecture, database schema, and system interactions. Use this skill when the task involves designing how a backend feature should be structured — endpoints, data models, service boundaries, error handling strategy — before or instead of writing code. Trigger for backend architecture decisions, schema design, or "how should we build this API/service?" questions.
+description: Design and implement backend features. Use this skill when the user wants to build or redesign APIs, services, database models, or backend logic — whether from scratch or modifying existing ones.
 ---
 
 # Backend Design
 
-Design the structure, architecture, and approach for backend work before implementation begins.
-
 ## Setup
 
-Read the following rule files before proceeding:
+Read before proceeding:
+- `.claude/rule-library/backend.md`
 - `.claude/rule-library/code-style.md`
+- `.claude/rule-library/security.md`
+- `.claude/rule-library/testing.md`
 
-## Arguments
+## Steps
 
-The design goal or question is passed as `$ARGUMENTS`. If existing code is relevant, read it first.
+### 1. Investigate
 
-## Process
-
-### 1. Understand the requirement
-
-Before proposing anything:
-
-- Clarify what the user is trying to build and why
-- Identify constraints: existing framework, database, auth system, performance requirements
-- Check what already exists in the codebase that's relevant
+Understand the existing codebase before touching anything:
+- Identify the language, framework, and directory structure
+- Find handlers, services, or models adjacent to the target area
+- Note the API conventions, error handling patterns, and validation approach in use
 
 ### 2. Design
 
-Produce a concrete design covering:
+Decide the structure before writing code:
+- API surface: endpoints, methods, request/response shapes, status codes
+- Data model: tables/fields/relationships or document structure
+- Service boundaries: what this layer is responsible for vs. what it delegates
+- Failure modes: what can go wrong and how errors propagate to the caller
 
-- **API surface**: endpoints, methods, request/response shapes, status codes
-- **Data model**: tables/collections, fields, relationships, indexes
-- **Service boundaries**: what each service/module is responsible for
-- **Error handling**: what can fail, how errors propagate, what the caller receives
-- **Security**: auth requirements, input validation points, data exposure risks
-- **Tradeoffs**: alternatives considered and why this approach was chosen
+State the design in a short summary before implementing.
 
-### 3. Present
+### 3. Implement
 
-Output a clear design document:
-- API spec (route, method, request/response shape)
-- Schema diagram or table definitions
-- Service interaction diagram if multiple services are involved
-- Open questions or decisions the user should make
+Write the code following the conventions from the rule files. Match the existing codebase style exactly — do not introduce new patterns without reason.
 
-Do not write implementation code unless explicitly asked — the goal is a design the user can hand to `/coding`.
+### 4. Verify
+
+- Run existing tests; add an integration or unit test for the changed path if none exist
+- Confirm auth, input validation, and error responses are correct
+- Check for obvious security issues: injection, missing auth checks, data over-exposure
