@@ -1,11 +1,11 @@
 ---
 name: coding
-description: General-purpose coding skill for tasks that don't clearly belong to frontend or backend — CLI tools, scripts, full-stack changes, shared utilities, configuration, build tooling, or anything cross-cutting. Also use this as a fallback when the domain is ambiguous. Handles new feature creation, bug fixes, and light design decisions. If you're unsure whether to use /frontend, /backend, or /coding, use /coding.
+description: Coding skill for all implementation work — frontend, backend, CLI tools, scripts, full-stack, shared utilities, configuration, or anything else. Use this skill whenever the task is to write, fix, or modify code, regardless of domain. This is the single skill for all coding tasks.
 ---
 
 # Coding
 
-Implement or fix code for general-purpose, cross-cutting, or ambiguous tasks.
+Implement or fix code for any domain — frontend, backend, scripts, CLI, full-stack, or general utilities.
 
 ## Setup
 
