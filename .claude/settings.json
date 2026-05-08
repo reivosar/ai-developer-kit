@@ -54,7 +54,7 @@
     "defaultMode": "acceptEdits"
   },
   "hooks": {
-    "PreToolCall": [
+    "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
@@ -74,7 +74,7 @@
         ]
       }
     ],
-    "PostToolCall": [
+    "PostToolUse": [
       {
         "matcher": "Write|Edit",
         "hooks": [
