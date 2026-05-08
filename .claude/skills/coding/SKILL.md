@@ -1,6 +1,6 @@
 ---
 name: coding
-description: Coding skill for all implementation work — frontend, backend, CLI tools, scripts, full-stack, shared utilities, configuration, or anything else. Use this skill whenever the task is to write or modify code against a known design. Do NOT use for bug investigation — use fix-bug instead.
+description: Coding skill for all implementation work — frontend, backend, CLI tools, scripts, full-stack, shared utilities, configuration, or anything else. Use this skill whenever the task is to write or modify code against a known design. Do NOT use for bug investigation — use troubleshooting instead.
 ---
 
 # Coding
@@ -38,7 +38,7 @@ Before writing anything:
 
 ### 2. Plan the change
 
-State in one sentence what you're going to build or fix. Consider:
+State in one sentence what you're going to build. Consider:
 - What does this change affect?
 - What are the inputs and outputs?
 - What are the failure modes?
@@ -59,5 +59,5 @@ State in one sentence what you're going to build or fix. Consider:
 
 When done:
 - **What changed**: files/functions affected
-- **Why**: the design decision or root cause
+- **Why**: the design decision behind the implementation
 - **Caveats**: anything the caller should know about edge cases or follow-up work

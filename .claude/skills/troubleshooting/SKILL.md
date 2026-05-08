@@ -1,9 +1,9 @@
 ---
-name: fix-bug
-description: Investigate and fix broken behavior. The defining condition is uncertainty about the cause — something is wrong but why is unknown. Use this skill when the user shares an error message, stack trace, failing test, or unexpected behavior, or says "this is broken", "it's not working", "help me debug this." Do NOT use coding skill for this — diagnosis must come before any fix.
+name: troubleshooting
+description: Investigate and resolve broken behavior. The defining condition is uncertainty about the cause — something is wrong but why is unknown. Use this skill when the user shares an error message, stack trace, failing test, or unexpected behavior, or says "this is broken", "it's not working", "help me debug this." Do NOT use the coding skill for this — diagnosis must come before any fix.
 ---
 
-# Fix Bug
+# Troubleshooting
 
 Start from broken behavior with unknown cause. Diagnose first — do not write any fix until the root cause is stated. Change only what the root cause requires.
 
@@ -20,7 +20,7 @@ The problem description or error message is passed as `$ARGUMENTS`. If the user 
 
 ## Process
 
-### 1. Explore (read only)
+### 1. Investigate (read only)
 
 Before touching anything, understand the system:
 

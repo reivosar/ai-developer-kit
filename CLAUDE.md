@@ -23,7 +23,7 @@ Template kit for Claude Code-powered development workflows.
 Always invoke the corresponding skill — never handle these tasks inline:
 
 - All coding (implementation against a known design) → `/coding`
-- Bug / error / test failure investigation → `/fix-bug`
+- Bug / error / test failure investigation → `/troubleshooting`
 - Frontend architecture/design (component design, state management, routing design) → `/frontend-design`
 - Backend architecture/design (API design, DB model, service boundaries) → `/backend-design`
 - Planning a multi-file feature → `/plan`
