@@ -68,15 +68,21 @@
 - Illegal state transitions are rejected with a domain error, not silently ignored or partially applied
 - Side effects (emails, events, notifications) triggered by a state change happen after the transaction commits, not inside it
 
+## External System Connections
+
+- Treat every external system (database, cache, third-party API, internal service, message broker) as unreliable by default — it can be slow, unavailable, or return unexpected errors at any time
+- Every call to an external system must have retry logic; absence of retry is a design defect, not an acceptable default
+- Retry only on transient failures (network timeout, connection refused, 429, 503) — never retry on permanent failures (400, 401, 403, 404, 422)
+- Use exponential backoff with jitter on all retries; tight retry loops amplify load on an already struggling system
+- Set a maximum retry count and a total timeout budget — unbounded retries cause cascading failures across the call chain
+- Log each retry attempt with the failure reason and attempt number; silent retries make incidents invisible
+
 ## Idempotency and Retry Safety
 
-- Classify every operation as idempotent or non-idempotent before designing it
+- Classify every write operation as idempotent or non-idempotent before designing it
 - GET, DELETE, and PUT must be idempotent by design — repeating them produces the same result
 - POST operations that create resources should accept a client-supplied idempotency key to allow safe retries
 - Non-idempotent operations (charge a card, send an email, publish an event) must not be retried without deduplication — use idempotency keys or at-least-once delivery with dedup logic
-- Retries apply only to transient failures (network timeout, 503, lock contention) — never retry on permanent failures (400, 404, 409, 422)
-- Use exponential backoff with jitter for all retry loops; never retry in a tight loop
-- Set a maximum retry count and a total deadline — unbounded retries cause cascading failures
 
 ## Resilience
 
