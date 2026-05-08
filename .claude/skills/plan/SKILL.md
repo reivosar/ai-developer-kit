@@ -7,6 +7,13 @@ description: Explore the codebase and produce a detailed implementation plan bef
 
 Produce a concrete implementation plan without modifying any files.
 
+## Setup
+
+Read the following rule files before proceeding:
+- `.claude/rule-library/code-style.md`
+- `.claude/rule-library/testing.md`
+- `.claude/rule-library/security.md`
+
 ## Arguments
 
 The task or feature to plan is `$ARGUMENTS`.

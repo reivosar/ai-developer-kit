@@ -7,6 +7,10 @@ description: Create and manage git worktrees for parallel isolated work. Use thi
 
 Create an isolated git worktree so parallel work doesn't interfere with the main branch.
 
+## Setup
+
+Read `.claude/rule-library/git-workflow.md` before proceeding.
+
 ## Arguments
 
 Worktree name is `$ARGUMENTS`. If omitted, Claude Code generates a random name automatically.

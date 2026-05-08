@@ -7,6 +7,10 @@ description: Create a well-formed git commit for staged changes using Convention
 
 Create a Conventional Commits message for what is staged and commit it.
 
+## Setup
+
+Read `.claude/rule-library/git-workflow.md` before proceeding.
+
 ## Step 1: Understand what's staged
 
 ```bash

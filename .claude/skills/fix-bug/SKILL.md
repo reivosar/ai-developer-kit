@@ -7,6 +7,13 @@ description: Diagnose and fix a bug from an error message, stack trace, or probl
 
 Diagnose the root cause and fix it with minimal scope change.
 
+## Setup
+
+Read the following rule files before proceeding:
+- `.claude/rule-library/code-style.md`
+- `.claude/rule-library/testing.md`
+- `.claude/rule-library/security.md`
+
 ## Arguments
 
 The problem description or error message is passed as `$ARGUMENTS`. If the user pasted it inline, use that. If they mentioned a file, read it first.
