@@ -19,6 +19,19 @@
 
 Names must be self-documenting — if a reader needs a comment to understand a name, rename it.
 
+**Method / function names** — use verb + noun that state the purpose precisely:
+- Good: `calculateInvoiceTotal`, `sendPasswordResetEmail`, `validateShippingAddress`
+- Bad: `process`, `handle`, `manage`, `execute`, `run`, `doStuff` — too vague to understand without reading the body
+
+**Class / module names** — include the domain concept, not just the role:
+- Good: `InvoiceCalculator`, `PasswordResetMailer`, `ShippingAddressValidator`
+- Bad: `InvoiceService`, `UserManager`, `DataHelper`, `CommonUtil` — generic suffixes carry no meaning; name what the class *does*, not what kind of thing it is
+
+**Self-documenting structure** — the code is the documentation:
+- A reader should understand what any function does from its name and signature alone
+- If understanding requires reading the body, the name is wrong or the function does too much
+- Intermediate variables with names beat inline expressions: `const discountedTotal = basePrice * (1 - discountRate)` over `return price * (1 - r)`
+
 ## Type Annotations
 
 - TypeScript: always annotate function parameters and return types; avoid `any`; use `unknown` + narrowing when the type is genuinely unknown
