@@ -28,6 +28,8 @@ The task description is passed as `$ARGUMENTS`. If files are mentioned, read the
 
 ## Process
 
+Follow Red-Green-Refactor strictly. Tests come before implementation.
+
 ### 1. Understand the context
 
 Before writing anything:
@@ -38,22 +40,33 @@ Before writing anything:
 
 ### 2. Plan the change
 
-State in one sentence what you're going to build. Consider:
-- What does this change affect?
+State in one sentence what you're going to build. Identify:
 - What are the inputs and outputs?
 - What are the failure modes?
+- What test cases cover the happy path and each failure mode?
 
-### 3. Implement
+### 3. Red — write failing tests first
 
+Write tests that describe the expected behavior before any implementation exists:
+- One test per behavior (happy path, each error path, each edge case)
+- Tests must fail at this point — if a test passes without implementation, it tests nothing
+- Run the test suite and confirm the new tests fail
+
+### 4. Green — implement to pass the tests
+
+Write the minimum code required to make the failing tests pass:
 - Match the existing code style and conventions
 - Validate inputs at system boundaries
-- Keep the change tightly scoped — do not refactor unrelated code
-- Write the simplest correct solution; avoid over-engineering
+- Do not add logic not required by a currently failing test
+- Run the test suite and confirm all tests pass
 
-### 4. Verify
+### 5. Refactor — clean up without changing behavior
 
-- Run existing tests; write a focused test for the changed path if none exist
-- Confirm the happy path and at least one error path
+With tests green, improve the implementation:
+- Remove duplication
+- Improve naming
+- Extract if a function has grown beyond a single responsibility
+- Run the test suite again — all tests must still pass after refactoring
 
 ## Report
 

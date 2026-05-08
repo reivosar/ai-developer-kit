@@ -42,3 +42,6 @@ coverage/
 
 # Session trash (Claude Code)
 .trash/
+
+# Serena MCP workspace index
+.serena/
