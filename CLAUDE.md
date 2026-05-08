@@ -24,6 +24,8 @@ Always invoke the corresponding skill — never handle these tasks inline:
 
 - All coding (implementation against a known design) → `/coding`
 - Bug / error / test failure investigation → `/troubleshooting`
+- Creating a pull request → `/pull-request`
+- Reviewing a PR or branch → `/code-review`
 - Frontend architecture/design (component design, state management, routing design) → `/frontend-design`
 - Backend architecture/design (API design, DB model, service boundaries) → `/backend-design`
 - Planning a multi-file feature → `/plan`

@@ -15,11 +15,22 @@ Read the following rule files before proceeding:
 - `.claude/rule-library/testing.md`
 - `.claude/rule-library/security.md`
 
+## Arguments
+
+`$ARGUMENTS` is optional. If a PR number is passed (e.g. `42`), review that PR. Otherwise review the current branch.
+
 ## Gather the diff
 
+**Current branch:**
 ```bash
 git diff main...HEAD
 git log main...HEAD --oneline
+```
+
+**PR number given:**
+```bash
+gh pr view $ARGUMENTS
+gh pr diff $ARGUMENTS
 ```
 
 Read each changed file to understand the intent behind the change, not just the mechanics.
