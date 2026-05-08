@@ -25,7 +25,6 @@
       "Bash(git merge*)",
       "Bash(git fetch*)",
       "Bash(git pull*)",
-      "Bash(git rebase*)",
       "Bash(git worktree*)",
       "Bash(ls*)",
       "Bash(find . *)",
