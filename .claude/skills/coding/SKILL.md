@@ -9,10 +9,15 @@ Implement or fix code for any domain — frontend, backend, scripts, CLI, full-s
 
 ## Setup
 
-Read the following rule files before proceeding:
+Always read:
 - `.claude/rule-library/code-style.md`
 - `.claude/rule-library/testing.md`
 - `.claude/rule-library/security.md`
+
+Then read based on the task domain:
+- Frontend (UI, components, browser code) → `.claude/rule-library/frontend.md`
+- Backend (APIs, services, DB, server-side) → `.claude/rule-library/backend.md`
+- Both apply for full-stack tasks
 
 ## Arguments
 
