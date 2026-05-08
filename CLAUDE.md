@@ -2,6 +2,16 @@
 
 Template kit for Claude Code-powered development workflows.
 
+## Skill Dispatch
+
+Always invoke the corresponding skill — never handle these tasks inline:
+
+- Writing/fixing code → `/fix-bug`
+- Planning a feature → `/plan`
+- Reviewing changes → `/code-review`
+- Committing → `/commit`
+- Worktree operations → `/worktree`
+
 ## Behavior
 
 - Never use `rm` — always use `.claude/hooks/trash.sh <file>` to move files to the session trash (`.trash/<timestamp>/`)
