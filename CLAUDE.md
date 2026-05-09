@@ -37,6 +37,7 @@ Always invoke the corresponding skill — never handle these tasks inline:
 - Documentation (README, ADR, OpenAPI spec) → `/documentation`
 - Filing a rule/skill gap or improvement insight → `/feedback`
 - Updating rule-library and skills from the upstream kit → `/update-kit`
+- Editing kit configuration (settings.json, hooks, permissions) → `/edit-kit`
 
 When to use `/coding` vs. a design skill: use a design skill when the structure or boundaries are undecided; use `/coding` once the design is settled and the task is implementation.
 
