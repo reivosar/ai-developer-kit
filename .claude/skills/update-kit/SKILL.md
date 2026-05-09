@@ -29,12 +29,13 @@ If not authenticated, stop and ask the user to run `gh auth login`.
 
 ## Step 2: Clone the kit to a fixed temp path
 
-Clean up any previous clone, then clone fresh:
+Clone fresh (trash.sh cannot remove /tmp paths — skip cleanup):
 
 ```bash
-.claude/hooks/trash.sh /tmp/ai-developer-kit-update
 gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=1 --quiet
 ```
+
+If the clone fails because the directory already exists, proceed using the existing files.
 
 ## Step 3: Update rule-library
 
@@ -62,13 +63,7 @@ For each skill directory listed:
 - If `.claude/skills/<name>/SKILL.md` exists locally → **Edit** (replace full content)
 - If it does not exist → **Write** (create new file; Write creates parent directories automatically)
 
-## Step 5: Clean up
-
-```bash
-.claude/hooks/trash.sh /tmp/ai-developer-kit-update
-```
-
-## Step 6: Report
+## Step 5: Report
 
 Show what changed:
 
