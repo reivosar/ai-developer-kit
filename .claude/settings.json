@@ -41,6 +41,7 @@
       "Bash(python*)",
       "Bash(pip*)",
       "Bash(make*)",
+      "Bash(gh auth*)",
       "Bash(gh issue*)",
       "Bash(gh pr*)",
       "Bash(gh repo*)",
