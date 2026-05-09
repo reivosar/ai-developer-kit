@@ -18,11 +18,15 @@ def read_command():
         return None
 
 
-def load_allow_patterns(settings_path):
+def load_patterns(settings_path, key):
     with open(settings_path) as f:
         settings = json.load(f)
-    entries = settings.get("permissions", {}).get("allow", [])
+    entries = settings.get("permissions", {}).get(key, [])
     return [e[5:-1] for e in entries if e.startswith("Bash(") and e.endswith(")")]
+
+
+def is_denied(command, patterns):
+    return any(fnmatch.fnmatch(command, p) for p in patterns)
 
 
 def is_whitelisted(command, patterns):
@@ -76,12 +80,17 @@ def main():
         sys.exit(0)
 
     try:
-        patterns = load_allow_patterns(settings_path)
+        allow_patterns = load_patterns(settings_path, "allow")
+        deny_patterns = load_patterns(settings_path, "deny")
     except Exception as e:
         print(f"BLOCKED: could not read settings.json — {e}", file=sys.stderr)
         sys.exit(2)
 
-    if not is_whitelisted(command, patterns):
+    if is_denied(command, deny_patterns):
+        print(f"BLOCKED: command matches deny list: {command[:300]}", file=sys.stderr)
+        sys.exit(2)
+
+    if not is_whitelisted(command, allow_patterns):
         print(f"BLOCKED: command not in allow list: {command[:300]}", file=sys.stderr)
         sys.exit(2)
 
