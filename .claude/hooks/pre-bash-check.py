@@ -25,12 +25,19 @@ def load_patterns(settings_path, key):
     return [e[5:-1] for e in entries if e.startswith("Bash(") and e.endswith(")")]
 
 
-def is_denied(command, patterns):
-    return any(fnmatch.fnmatch(command, p) for p in patterns)
+def split_segments(command: str) -> list[str]:
+    parts = re.split(r'&&|;', command)
+    return [p.strip() for p in parts if p.strip()]
 
 
-def is_whitelisted(command, patterns):
-    return any(fnmatch.fnmatch(command, p) for p in patterns)
+def is_denied(command: str, patterns: list[str]) -> bool:
+    candidates = [command] + split_segments(command)
+    return any(fnmatch.fnmatch(c, p) for c in candidates for p in patterns)
+
+
+def is_whitelisted(command: str, patterns: list[str]) -> bool:
+    segments = split_segments(command)
+    return all(any(fnmatch.fnmatch(seg, p) for p in patterns) for seg in segments)
 
 
 def block(reason):

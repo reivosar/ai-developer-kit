@@ -44,6 +44,7 @@
       "Bash(gh issue*)",
       "Bash(gh pr*)",
       "Bash(gh repo*)",
+      "Bash(cd *)",
       "Bash(.claude/hooks/trash.sh*)",
       "Bash(chmod +x .claude/hooks/*)"
     ],
