@@ -8,7 +8,7 @@ Template kit for Claude Code-powered development workflows.
 - Ask before any destructive operation — `git reset --hard`, force push
 - Fix root causes; never suppress errors or skip hooks
 - Clarify ambiguous instructions before writing code
-- All project files must be written in English — comments, descriptions, and body text; Japanese is for conversation only
+- All project files must be written in English — comments, descriptions, and body text; Japanese is for conversation only; exception: Japanese is permitted in program files where the application requires it (user-facing strings, locale files, UI copy)
 - Never use emojis anywhere — not in files, not in responses, not in commit messages; use plain text ("Good:" / "Bad:") instead
 - When the next step is unambiguous, commit without asking for confirmation; reserve confirmation for destructive or irreversible actions only
 
@@ -36,6 +36,7 @@ Always invoke the corresponding skill — never handle these tasks inline:
 - Worktree operations → `/worktree`
 - Documentation (README, ADR, OpenAPI spec) → `/documentation`
 - Filing a rule/skill gap or improvement insight → `/feedback`
+- Updating rule-library and skills from the upstream kit → `/update-kit`
 
 When to use `/coding` vs. a design skill: use a design skill when the structure or boundaries are undecided; use `/coding` once the design is settled and the task is implementation.
 
