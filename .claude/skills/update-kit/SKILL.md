@@ -27,35 +27,45 @@ gh auth status
 
 If not authenticated, stop and ask the user to run `gh auth login`.
 
-## Step 2: Clone the kit to a temp directory
+## Step 2: Clone the kit to a fixed temp path
+
+Clean up any previous clone, then clone fresh:
 
 ```bash
-KITDIR=$(mktemp -d)
-gh repo clone reivosar/ai-developer-kit "$KITDIR" -- --depth=1 --quiet
+.claude/hooks/trash.sh /tmp/ai-developer-kit-update
+gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=1 --quiet
 ```
 
 ## Step 3: Update rule-library
 
+List upstream rule files:
+
 ```bash
-cp "$KITDIR/.claude/rule-library/"*.md .claude/rule-library/
+ls /tmp/ai-developer-kit-update/.claude/rule-library/
 ```
+
+For each `.md` file listed:
+- Read `/tmp/ai-developer-kit-update/.claude/rule-library/<file>.md` to get upstream content
+- If `.claude/rule-library/<file>.md` exists locally → **Edit** (replace full content)
+- If it does not exist → **Write** (create new file)
 
 ## Step 4: Update skills
 
-For each skill directory in the kit, copy its SKILL.md into the project:
+List upstream skill directories:
 
 ```bash
-for skill_dir in "$KITDIR/.claude/skills"/*/; do
-  skill_name=$(basename "$skill_dir")
-  mkdir -p ".claude/skills/$skill_name"
-  cp "$skill_dir/SKILL.md" ".claude/skills/$skill_name/SKILL.md"
-done
+ls /tmp/ai-developer-kit-update/.claude/skills/
 ```
+
+For each skill directory listed:
+- Read `/tmp/ai-developer-kit-update/.claude/skills/<name>/SKILL.md` to get upstream content
+- If `.claude/skills/<name>/SKILL.md` exists locally → **Edit** (replace full content)
+- If it does not exist → **Write** (create new file; Write creates parent directories automatically)
 
 ## Step 5: Clean up
 
 ```bash
-rm -rf "$KITDIR"
+.claude/hooks/trash.sh /tmp/ai-developer-kit-update
 ```
 
 ## Step 6: Report
@@ -69,5 +79,5 @@ git diff --stat .claude/rule-library/ .claude/skills/
 List any new files added (skills or rules not previously in the project):
 
 ```bash
-git status --short .claude/rule-library/ .claude/skills/
+git status
 ```
