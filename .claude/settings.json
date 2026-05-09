@@ -79,6 +79,19 @@
           {
             "type": "command",
             "command": ".claude/hooks/pre-write.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-edit.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-edit.sh"
           }
         ]
       }
