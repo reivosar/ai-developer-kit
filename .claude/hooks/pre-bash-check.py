@@ -8,6 +8,7 @@ import json
 import fnmatch
 import os
 import re
+import subprocess
 
 
 def read_command():
@@ -72,11 +73,28 @@ def check_redirect_overwrite(command):
                   f"Use '>>' to append, or remove the file first if overwriting is intended.")
 
 
+def check_commit_on_main(command):
+    if not re.match(r"git\s+commit\b", command.strip()):
+        return
+    branch = os.environ.get("MOCK_BRANCH")
+    if branch is None:
+        result = subprocess.run(
+            ["git", "branch", "--show-current"],
+            capture_output=True, text=True
+        )
+        branch = result.stdout.strip()
+    if branch == "main":
+        block("Cannot commit directly to main. "
+              "Run: git checkout main && git pull "
+              "&& git checkout -b <type>/<description>")
+
+
 def run_blocklist_checks(command):
     check_stash_destructive(command)
     check_checkout_discard(command)
     check_branch_force_delete(command)
     check_redirect_overwrite(command)
+    check_commit_on_main(command)
 
 
 def main():

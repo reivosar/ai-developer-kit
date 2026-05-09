@@ -45,6 +45,33 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
+    # check_commit_on_main
+    if not hasattr(mod, "check_commit_on_main"):
+        print("[FAIL] check_commit_on_main not found in module")
+        unit_failed += 1
+    else:
+        for cmd, branch, expect_block in [
+            ("git commit -m 'test'", "main",         True),
+            ("git commit -m 'test'", "feat/my-feat", False),
+            ("git status",           "main",         False),
+        ]:
+            env_backup = os.environ.get("MOCK_BRANCH")
+            os.environ["MOCK_BRANCH"] = branch
+            try:
+                mod.check_commit_on_main(cmd)
+                blocked = False
+            except SystemExit:
+                blocked = True
+            finally:
+                if env_backup is None:
+                    os.environ.pop("MOCK_BRANCH", None)
+                else:
+                    os.environ["MOCK_BRANCH"] = env_backup
+            ok = blocked == expect_block
+            print(f"[{'PASS' if ok else 'FAIL'}] check_commit_on_main({cmd!r}, branch={branch!r}) blocked=={expect_block}")
+            if ok: unit_passed += 1
+            else: unit_failed += 1
+
     return unit_passed, unit_failed
 
 unit_passed, unit_failed = run_unit_tests()
@@ -124,7 +151,38 @@ for cmd, expect_blocked in cases:
     else:
         failed += 1
 
-total_passed = unit_passed + passed
-total_failed = unit_failed + failed
+# check_commit_on_main: uses MOCK_BRANCH env var to simulate branch context
+print()
+branch_cases = [
+    # (command, expect_blocked, branch)
+    ("git commit -m 'test'",    True,  "main"),
+    ("git commit -F /tmp/msg",  True,  "main"),
+    ("git commit --amend",      True,  "main"),
+    ("git commit -m 'test'",    False, "feat/my-feature"),
+    ("git commit -m 'test'",    False, "fix/some-bug"),
+    ("git status",              False, "main"),
+    ("git log --oneline",       False, "main"),
+]
+
+b_passed = b_failed = 0
+for cmd, expect_blocked, branch in branch_cases:
+    payload = json.dumps({"tool_input": {"command": cmd}})
+    env = {**os.environ, "MOCK_BRANCH": branch}
+    result = subprocess.run(
+        ["python3", HOOK, SETTINGS],
+        input=payload, capture_output=True, text=True, env=env
+    )
+    blocked = result.returncode == 2
+    ok = blocked == expect_blocked
+    status = "PASS" if ok else "FAIL"
+    label = "blocked" if expect_blocked else "allowed"
+    print(f"[{status}] branch={branch!r:20s} {cmd!r:30s} → expected {label}, got {'blocked' if blocked else 'allowed'}")
+    if ok:
+        b_passed += 1
+    else:
+        b_failed += 1
+
+total_passed = unit_passed + passed + b_passed
+total_failed = unit_failed + failed + b_failed
 print(f"\n{total_passed} passed, {total_failed} failed")
 sys.exit(0 if total_failed == 0 else 1)

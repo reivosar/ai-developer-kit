@@ -17,11 +17,21 @@ Read `.claude/rule-library/git-workflow.md` before proceeding.
 git branch --show-current
 ```
 
-If on `main` — stop. Do not commit to main directly. Tell the user to create a feature branch:
+If on `main`:
+  STOP. Never commit directly to main. Branch first:
+  ```bash
+  git pull
+  git checkout -b <type>/<short-description>
+  ```
+  Then return to commit.
 
-```bash
-git checkout -b feat/<short-description>
-```
+If on a branch unrelated to this task:
+  STOP. Go back to main and cut a proper branch for this task:
+  ```bash
+  git checkout main
+  git pull
+  git checkout -b <type>/<short-description>
+  ```
 
 ## Step 2: Understand what's staged
 
