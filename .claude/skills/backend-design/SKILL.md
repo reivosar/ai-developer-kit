@@ -7,16 +7,20 @@ description: Design and implement backend features. Use this skill when the user
 
 ## Setup
 
-Read before proceeding:
+Always read:
 - `.claude/docs/backend.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/code-style.md`
-- `.claude/docs/security.md`
 - `.claude/docs/testing.md`
-- `.claude/docs/database.md`
-- `.claude/docs/errors.md`
-- `.claude/docs/logging.md`
-- `.claude/docs/monitoring.md`
+
+Read only when the task explicitly involves:
+- Auth, input validation, or external API calls → `.claude/docs/security.md`
+- Database tables, schemas, or queries → `.claude/docs/database.md`
+- Error handling or failure paths → `.claude/docs/errors.md`
+- Log statements → `.claude/docs/logging.md`
+- Metrics, health checks, or alerting → `.claude/docs/monitoring.md`
+
+Do not read a conditional file unless the task description or codebase investigation confirms it applies.
 
 ## Steps
 

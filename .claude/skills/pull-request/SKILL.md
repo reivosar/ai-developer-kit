@@ -13,6 +13,7 @@ Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Step 1: Verify branch state
 
+Run in a single parallel batch:
 ```bash
 git status
 git fetch origin

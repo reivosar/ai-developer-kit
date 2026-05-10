@@ -11,35 +11,24 @@ Create a Conventional Commits message for what is staged and commit it.
 
 Read `.claude/docs/git-workflow.md` before proceeding.
 
-## Step 1: Verify branch
+## Step 1: Verify branch and staged changes
 
-```bash
-git status
-```
-
-If on `main`:
-  STOP. Never commit directly to main. Branch first:
-  ```bash
-  git pull
-  git checkout -b <type>/<short-description>
-  ```
-  Then return to commit.
-
-If on a branch unrelated to this task:
-  STOP. Go back to main and cut a proper branch for this task:
-  ```bash
-  git checkout main
-  git pull
-  git checkout -b <type>/<short-description>
-  ```
-
-## Step 2: Understand what's staged
-
+Run in a single parallel batch:
 ```bash
 git status
 git diff --staged
 ```
 
+From `git status`:
+- If on `main`: STOP. Never commit directly to main. Branch first:
+  ```bash
+  git pull
+  git checkout -b <type>/<short-description>
+  ```
+  Then return to commit.
+- If on a branch unrelated to this task: STOP. Go back to main and cut a proper branch for this task.
+
+From `git diff --staged`:
 Read the diff carefully. The commit message should reflect the *intent* of the change, not just list files modified.
 
 ## Step 3: Draft the message

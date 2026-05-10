@@ -21,19 +21,19 @@ Read the following rule files before proceeding:
 
 ## Gather the diff
 
-**Current branch:**
+**Current branch** — run both in a single parallel batch:
 ```bash
 git diff main...HEAD
 git log main...HEAD --oneline
 ```
 
-**PR number given:**
+**PR number given** — run both in a single parallel batch:
 ```bash
 gh pr view $ARGUMENTS
 gh pr diff $ARGUMENTS
 ```
 
-Read each changed file to understand the intent behind the change, not just the mechanics.
+Use grep to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
 
 ## Review areas
 

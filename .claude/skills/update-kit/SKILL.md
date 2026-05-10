@@ -41,7 +41,7 @@ Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`.
 
 ### 3a. Overwrite changed or new files
 
-Enumerate every file in the upstream clone (run each separately):
+Enumerate every file in the upstream clone — run all three in a single parallel batch:
 
 ```bash
 cd /tmp/ai-developer-kit-update && find . -path './.claude/docs/*' -type f
@@ -62,7 +62,7 @@ For each upstream file:
 
 ### 3b. Trash local-only files
 
-Find local files absent from upstream and trash them one at a time:
+Find local files absent from upstream — run all three in a single parallel batch:
 
 ```bash
 find . -path './.claude/docs/*' -type f
