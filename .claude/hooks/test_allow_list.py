@@ -44,15 +44,13 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
-    # is_denied
+    # is_denied — only git switch --detach* is in deny now
     for cmd, expect in [
-        ('python3 -c "import os; os.remove(\'x\')"', True),
-        ('python3 -c "import shutil; shutil.rmtree(\'d\')"', True),
-        ('python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"', True),
-        ('node -e "require(\'fs\').unlinkSync(\'x\')"', True),
-        ('node -e "require(\'fs\').cpSync(\'a\',\'b\')"', True),
-        ('python3 --version', False),
-        ('node --version', False),
+        ('git switch --detach HEAD', True),
+        ('git switch main',          False),
+        ('git switch -c feat/foo',   False),
+        ('python3 --version',        False),  # not in deny (blocked by allowlist instead)
+        ('node --version',           False),
     ]:
         ok = mod.is_denied(cmd, deny_pats) == expect
         print(f"[{'PASS' if ok else 'FAIL'}] is_denied({cmd!r}) == {expect}")
@@ -158,6 +156,7 @@ cases = [
     ("git checkout -b feat/foo",     False),  # create new branch — allowed
     ("git switch main",              False),  # switch branch — allowed
     ("git switch -c feat/foo",       False),  # create new branch — allowed
+    ("git switch --detach HEAD",     True),   # denied explicitly
     ("git pull",                     True),
     ("git pull origin main",         True),
     ("git merge feature/foo",        True),
@@ -220,6 +219,14 @@ cases = [
     ("python3 main.py", True),
     ("python3 -m pytest", True),
     ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
+    # deny: gh destructive subcommands not in allow list
+    ("gh pr merge feat/foo",          True),
+    ("gh pr close 123",               True),
+    ("gh issue delete 123",           True),
+    ("gh repo delete foo/bar",        True),
+    # deny: worktree destructive subcommands not in allow list
+    ("git worktree remove mywork",    True),
+    ("git worktree prune",            True),
     # allowed: update-kit sync commands
     ("find /tmp/ai-developer-kit-update/.claude/rules -type f", False),
     ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
