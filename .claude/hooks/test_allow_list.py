@@ -23,8 +23,8 @@ def run_unit_tests():
     # is_whitelisted
     for cmd, expect in [
         ("git status", True),
-        ("python3 --version", True),
-        ("node --version", True),
+        ("python3 --version", False),
+        ("node --version", False),
         ("rm -rf /", False),
     ]:
         ok = mod.is_whitelisted(cmd, allow_pats) == expect
@@ -98,11 +98,11 @@ cases = [
     ('python3 -c "import os; os.unlink(\'x\')"',   True),
     ('python3 -c "import shutil; shutil.rmtree(\'d\')"', True),
     ('python3 -c "import shutil; shutil.move(\'a\', \'b\')"', True),
-    ('python3 --version',                            False),
-    ('python3 -c "print(\'hello\')"',               False),
+    ('python3 --version',                            True),
+    ('python3 -c "print(\'hello\')"',               True),
     ('node -e "require(\'fs\').unlinkSync(\'x\')"', True),
     ('node -e "require(\'fs\').rmSync(\'x\')"',     True),
-    ('node --version',                               False),
+    ('node --version',                               True),
     ('ruby -e "File.delete(\'x\')"',                True),
     ('ruby -e "puts \'hello\'"',                    True),   # ruby not in allow list
     ('perl -e "unlink \'x\'"',                      True),
@@ -121,9 +121,9 @@ cases = [
     ("git branch -a",         False),
     ("git branch -v",         False),
     ("git checkout --",       True),   # Stage-2 catch
-    # allow: npx (generic pattern covers non-destructive use)
-    ("npx prettier --write foo.ts", False),
-    ("npx tsc --noEmit",            False),
+    # blocked: npx no longer in allow list
+    ("npx prettier --write foo.ts", True),
+    ("npx tsc --noEmit",            True),
     # deny: npx rimraf matches npx*rimraf* deny pattern
     ("npx rimraf dist",             True),
     # allow: gh auth commands
@@ -143,7 +143,7 @@ cases = [
     # allow: compound commands with cd prefix
     ("cd frontend && npm run dev",             False),
     ("cd client && npm test",                  False),
-    ("cd web && npm install",                  False),
+    ("cd web && npm install",                  True),
     # deny: compound command where one segment is denied
     ("cd frontend && git reset --hard HEAD",   True),
     ("cd frontend && rm -rf /tmp",             True),
@@ -159,8 +159,14 @@ cases = [
     ("python3 -c \"import shutil; shutil.copytree('a','b')\"", True),
     ('node -e "require(\'fs\').cpSync(\'a\',\'b\',{recursive:true})"', True),
     ('node -e "require(\'fs\').readFile(\'x\',()=>{})"', True),
-    # allowed: replacement commands used in skills
-    ("python3 -c \"import webbrowser; webbrowser.open('x')\"", False),
+    # blocked: python/node/npx/make/npm install no longer in allow list
+    ("python3 -c \"import webbrowser; webbrowser.open('x')\"", True),
+    # allowed: hook test runner only
+    ("python3 .claude/hooks/test_allow_list.py", False),
+    ("python3 .claude/hooks/test_pre_edit_check.py", False),
+    # blocked: other python usage
+    ("python3 main.py", True),
+    ("python3 -m pytest", True),
     ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
     # allowed: update-kit sync commands
     ("find /tmp/ai-developer-kit-update/.claude/rules -type f", False),
