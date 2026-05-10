@@ -121,6 +121,16 @@ cases = [
     ("git branch -a",         False),
     ("git branch -v",         False),
     ("git checkout --",       True),   # Stage-2 catch
+    ("git checkout .",        True),   # discard all changes
+    ("git checkout HEAD~3 -- .", True), # checkout old revision
+    # allow: exact push patterns only
+    ("git push",                          False),
+    ("git push -u origin HEAD",           False),
+    ("git push origin HEAD",              False),
+    # deny: push to main via various forms
+    ("git push origin HEAD:main",         True),
+    ("git push upstream main",            True),
+    ("git push origin refs/heads/main",   True),  # blocked: not in explicit allow list
     # blocked: npx no longer in allow list
     ("npx prettier --write foo.ts", True),
     ("npx tsc --noEmit",            True),
