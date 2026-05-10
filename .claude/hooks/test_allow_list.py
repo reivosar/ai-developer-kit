@@ -295,13 +295,13 @@ cases = [
     # deny: worktree destructive subcommands not in allow list
     ("git worktree remove mywork",    True),
     ("git worktree prune",            True),
-    # allowed: update-kit sync commands — exact subdirs only
-    ("find /tmp/ai-developer-kit-update/.claude/rules -type f",        False),
-    ("find /tmp/ai-developer-kit-update/.claude/rule-library -type f", False),
-    ("find /tmp/ai-developer-kit-update/.claude/skills -type f",       False),
+    # allowed: update-kit sync commands
     ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
-    # blocked: other /tmp paths not in allow list
+    # blocked: find on /tmp paths not in allow list
+    ("find /tmp/ai-developer-kit-update/.claude/rules -type f",        True),
+    ("find /tmp/ai-developer-kit-update/.claude/rule-library -type f", True),
+    ("find /tmp/ai-developer-kit-update/.claude/skills -type f",       True),
     ("find /tmp/ai-developer-kit-update -type f",                      True),
     ("find /tmp/malicious -type f",                                    True),
 ]
