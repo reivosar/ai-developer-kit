@@ -25,7 +25,9 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 gh auth status
 ```
 
-If not authenticated, stop and ask the user to run `gh auth login`.
+If the command is blocked by the target project's allow list, skip this step and proceed to Step 2 — the clone will fail if not authenticated, which is sufficient signal.
+
+If the command runs and shows unauthenticated, stop and ask the user to run `gh auth login`.
 
 ## Step 2: Clone the kit to a fixed temp path
 
