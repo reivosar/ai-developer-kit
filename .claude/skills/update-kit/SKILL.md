@@ -41,13 +41,12 @@ Target directories: `.claude/rule-library`, `.claude/rules`, `.claude/skills`.
 
 ### 3a. Overwrite changed or new files
 
-Enumerate every file in the upstream clone:
+Enumerate every file in the upstream clone (run each separately):
 
 ```bash
-find /tmp/ai-developer-kit-update/.claude/rule-library \
-     /tmp/ai-developer-kit-update/.claude/rules \
-     /tmp/ai-developer-kit-update/.claude/skills \
-     -type f
+cd /tmp/ai-developer-kit-update && find . -path './.claude/rule-library/*' -type f
+cd /tmp/ai-developer-kit-update && find . -path './.claude/rules/*' -type f
+cd /tmp/ai-developer-kit-update && find . -path './.claude/skills/*' -type f
 ```
 
 For each upstream file:
@@ -66,7 +65,9 @@ For each upstream file:
 Find local files absent from upstream and trash them one at a time:
 
 ```bash
-find .claude/rule-library .claude/rules .claude/skills -type f 2>/dev/null
+find . -path './.claude/rule-library/*' -type f
+find . -path './.claude/rules/*' -type f
+find . -path './.claude/skills/*' -type f
 ```
 
 For each local file, check whether the corresponding upstream file exists:
