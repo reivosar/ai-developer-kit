@@ -44,6 +44,7 @@
       "Bash(gh auth*)",
       "Bash(gh issue*)",
       "Bash(gh pr*)",
+      "Bash(gh label*)",
       "Bash(gh repo*)",
       "Bash(cd *)",
       "Bash(.claude/hooks/trash.sh*)",
