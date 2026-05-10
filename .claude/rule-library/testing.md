@@ -37,6 +37,17 @@ Use the right type for each scenario:
 
 Prefer unit tests for speed; add integration tests at every external boundary; limit E2E to the top 3–5 critical user journeys.
 
+## Test Design Techniques
+
+Apply these techniques when identifying what to test:
+
+- **Equivalence Partitioning** — divide inputs into classes the system treats identically; write one test per class. For an age field accepting 0–120: test one value below 0, one in 0–120, one above 120.
+- **Boundary Value Analysis** — test at and just beyond partition edges where defects cluster. For range [min, max]: test min-1, min, max, max+1.
+- **Decision Table** — enumerate combinations of conditions and their expected actions in a table; use when rules involve multiple interdependent conditions.
+- **State Transition** — model the system as states and events; cover every valid transition and at least one invalid transition per state.
+- **Error Guessing** — add cases drawn from experience: empty string, null, zero, negative numbers, max int, Unicode edge cases, duplicate submissions.
+- **Checklist-based** — maintain a reusable checklist of recurring concerns (auth boundaries, pagination edge cases, concurrent writes, timezone offsets); apply it to every new feature area.
+
 ## Prohibited Patterns
 
 - No snapshot tests — they fail on irrelevant changes and create false confidence
