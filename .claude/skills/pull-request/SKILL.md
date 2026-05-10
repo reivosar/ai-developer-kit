@@ -15,13 +15,28 @@ Read `.claude/rule-library/git-workflow.md` before proceeding.
 
 ```bash
 git status
-git log main...HEAD --oneline
+git fetch origin
+git log origin/main...HEAD --oneline
 ```
 
 Guards:
 - If `git status` shows `On branch main` — stop. Tell the user to create a feature branch first.
 - If there are unstaged changes — run the `commit` skill first, then return here.
-- If there are no commits ahead of `main` — stop. Nothing to PR.
+- If there are no commits ahead of `origin/main` — stop. Nothing to PR.
+
+Check if the current branch already has a merged PR:
+
+```bash
+gh pr view --json state 2>/dev/null
+```
+
+If `state` is `MERGED`, the branch was already merged. Create a new branch from the current HEAD before opening a PR:
+
+```bash
+git checkout -b <type>/<new-description>
+```
+
+Derive the new branch name from the unreleased commits. Then continue to Step 2 from the new branch.
 
 ## Step 2: Push the branch
 
