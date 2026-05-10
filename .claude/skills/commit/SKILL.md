@@ -31,7 +31,7 @@ From `git status`:
 From `git diff --staged`:
 Read the diff carefully. The commit message should reflect the *intent* of the change, not just list files modified.
 
-## Step 3: Draft the message
+## Step 2: Draft the message
 
 **Format:**
 ```
@@ -59,11 +59,11 @@ Read the diff carefully. The commit message should reflect the *intent* of the c
 - Explain *why* the change was made, not what it does (the diff shows what)
 - Mention tradeoffs or alternatives considered if relevant
 
-## Step 4: Propose and confirm
+## Step 3: Propose and confirm
 
 Show the proposed message to the user and wait for approval or edits before committing. Do not stage unstaged files unless explicitly asked.
 
-## Step 5: Commit
+## Step 4: Commit
 
 ```bash
 git commit -m "$(cat <<'EOF'
@@ -74,7 +74,7 @@ EOF
 )"
 ```
 
-## Step 6: Create PR
+## Step 5: Create PR
 
 After a successful commit on a feature branch, immediately invoke the pull-request skill.
 Do not wait for the user to ask.

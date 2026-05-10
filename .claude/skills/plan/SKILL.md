@@ -9,10 +9,14 @@ Produce a concrete implementation plan without modifying any files.
 
 ## Setup
 
-Read the following rule files before proceeding:
+Always read:
 - `.claude/docs/code-style.md`
-- `.claude/docs/testing.md`
-- `.claude/docs/security.md`
+
+Read only when the task involves:
+- Behavior or logic that will need tests → `.claude/docs/testing.md`
+- Auth, input validation, external APIs, or data boundaries → `.claude/docs/security.md`
+
+Do not read a conditional file before Phase 1 confirms the task touches that domain.
 
 ## Arguments
 

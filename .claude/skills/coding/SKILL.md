@@ -14,12 +14,14 @@ Always read (applies to every implementation):
 - `.claude/docs/coding.md`
 - `.claude/docs/testing.md`
 
-Read when the task involves:
+Read `$ARGUMENTS` first, then decide which conditional docs apply:
 - Input validation, auth, or external data → `.claude/docs/security.md`
 - Error handling or failure paths → `.claude/docs/errors.md`
 - Log statements → `.claude/docs/logging.md`
 - Frontend (UI, components, browser code) → `.claude/docs/frontend.md`
 - Backend (APIs, services, DB, server-side) → `.claude/docs/backend.md`, `.claude/docs/database.md`, `.claude/docs/configuration.md`
+
+Do not read a conditional doc unless `$ARGUMENTS` or initial investigation confirms the domain applies.
 
 ## Arguments
 
