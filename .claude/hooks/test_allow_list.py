@@ -162,6 +162,10 @@ cases = [
     # allowed: replacement commands used in skills
     ("python3 -c \"import webbrowser; webbrowser.open('x')\"", False),
     ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
+    # allowed: update-kit sync commands
+    ("find /tmp/ai-developer-kit-update/.claude/rules -type f", False),
+    ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
+    ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
 ]
 
 passed = failed = 0
