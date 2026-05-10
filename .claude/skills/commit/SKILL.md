@@ -84,3 +84,8 @@ git commit -m "$(cat <<'EOF'
 EOF
 )"
 ```
+
+## Step 6: Create PR
+
+After a successful commit on a feature branch, immediately invoke the pull-request skill.
+Do not wait for the user to ask.
