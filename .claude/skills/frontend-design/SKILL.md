@@ -12,6 +12,7 @@ Read before proceeding:
 - `.claude/rule-library/coding.md`
 - `.claude/rule-library/code-style.md`
 - `.claude/rule-library/security.md`
+- `.claude/rule-library/design-system.md`
 
 ## Steps
 
