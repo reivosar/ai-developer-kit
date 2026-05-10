@@ -59,6 +59,35 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
+    # check_checkout_discard, check_stash_destructive, check_branch_force_delete
+    # must check segments only — commit message content must not trigger false positives
+    for fn_name, safe_cmd, dangerous_cmd in [
+        ("check_checkout_discard",
+         'git commit -m "git checkout -- file"',
+         "git checkout -- README.md"),
+        ("check_stash_destructive",
+         'git commit -m "git stash drop"',
+         "git stash drop"),
+        ("check_branch_force_delete",
+         'git commit -m "git branch -D old"',
+         "git branch -D old"),
+    ]:
+        fn = getattr(mod, fn_name, None)
+        if fn is None:
+            print(f"[FAIL] {fn_name} not found")
+            unit_failed += 1
+            continue
+        for cmd, expect_block in [(safe_cmd, False), (dangerous_cmd, True)]:
+            try:
+                fn(cmd)
+                blocked = False
+            except SystemExit:
+                blocked = True
+            ok = blocked == expect_block
+            print(f"[{'PASS' if ok else 'FAIL'}] {fn_name}({cmd!r}) blocked=={expect_block}")
+            if ok: unit_passed += 1
+            else: unit_failed += 1
+
     # check_commit_on_main
     if not hasattr(mod, "check_commit_on_main"):
         print("[FAIL] check_commit_on_main not found in module")
@@ -111,18 +140,31 @@ cases = [
     ("git stash clear",       True),
     ("git branch -D my-branch", True),
     ("git stash list",        False),
-    ("git stash",             False),
-    ("git stash push",        False),
-    ("git stash pop",         False),
-    ("git stash apply",       False),
     ("git stash show",        False),
+    ("git stash",             True),
+    ("git stash push",        True),
+    ("git stash pop",         True),
+    ("git stash apply",       True),
     ("git branch",            False),
     ("git branch -d my-branch", False),
     ("git branch -a",         False),
     ("git branch -v",         False),
-    ("git checkout --",       True),   # Stage-2 catch
-    ("git checkout .",        True),   # discard all changes
-    ("git checkout HEAD~3 -- .", True), # checkout old revision
+    ("git checkout --",              True),   # file restore — denied (Stage-2)
+    ("git checkout .",               True),   # discard all
+    ("git checkout HEAD~3 -- .",     True),   # old revision restore
+    ("git checkout -- README.md",    True),   # single file restore
+    ('git commit -m "git checkout -- file"', False),  # message content must not trigger check
+    ("git checkout main",            True),   # switch existing branch — denied
+    ("git checkout -b feat/foo",     False),  # create new branch — allowed
+    ("git switch main",              False),  # switch branch — allowed
+    ("git switch -c feat/foo",       False),  # create new branch — allowed
+    ("git pull",                     True),
+    ("git pull origin main",         True),
+    ("git merge feature/foo",        True),
+    ("git restore .",                True),
+    ("git restore README.md",        True),
+    ("git reset",                    True),
+    ("git reset HEAD file.txt",      True),
     # allow: exact push patterns only
     ("git push",                          False),
     ("git push -u origin HEAD",           False),
