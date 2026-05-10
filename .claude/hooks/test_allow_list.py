@@ -23,8 +23,8 @@ def run_unit_tests():
     # is_whitelisted
     for cmd, expect in [
         ("git status", True),
-        ("python3 --version", True),
-        ("node --version", True),
+        ("python3 --version", False),
+        ("node --version", False),
         ("rm -rf /", False),
     ]:
         ok = mod.is_whitelisted(cmd, allow_pats) == expect
@@ -44,20 +44,47 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
-    # is_denied
+    # is_denied — only git switch --detach* is in deny now
     for cmd, expect in [
-        ('python3 -c "import os; os.remove(\'x\')"', True),
-        ('python3 -c "import shutil; shutil.rmtree(\'d\')"', True),
-        ('python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"', True),
-        ('node -e "require(\'fs\').unlinkSync(\'x\')"', True),
-        ('node -e "require(\'fs\').cpSync(\'a\',\'b\')"', True),
-        ('python3 --version', False),
-        ('node --version', False),
+        ('git switch --detach HEAD', True),
+        ('git switch main',          False),
+        ('git switch -c feat/foo',   False),
+        ('python3 --version',        False),  # not in deny (blocked by allowlist instead)
+        ('node --version',           False),
     ]:
         ok = mod.is_denied(cmd, deny_pats) == expect
         print(f"[{'PASS' if ok else 'FAIL'}] is_denied({cmd!r}) == {expect}")
         if ok: unit_passed += 1
         else: unit_failed += 1
+
+    # check_checkout_discard, check_stash_destructive, check_branch_force_delete
+    # must check segments only — commit message content must not trigger false positives
+    for fn_name, safe_cmd, dangerous_cmd in [
+        ("check_checkout_discard",
+         'git commit -m "git checkout -- file"',
+         "git checkout -- README.md"),
+        ("check_stash_destructive",
+         'git commit -m "git stash drop"',
+         "git stash drop"),
+        ("check_branch_force_delete",
+         'git commit -m "git branch -D old"',
+         "git branch -D old"),
+    ]:
+        fn = getattr(mod, fn_name, None)
+        if fn is None:
+            print(f"[FAIL] {fn_name} not found")
+            unit_failed += 1
+            continue
+        for cmd, expect_block in [(safe_cmd, False), (dangerous_cmd, True)]:
+            try:
+                fn(cmd)
+                blocked = False
+            except SystemExit:
+                blocked = True
+            ok = blocked == expect_block
+            print(f"[{'PASS' if ok else 'FAIL'}] {fn_name}({cmd!r}) blocked=={expect_block}")
+            if ok: unit_passed += 1
+            else: unit_failed += 1
 
     # check_commit_on_main
     if not hasattr(mod, "check_commit_on_main"):
@@ -89,6 +116,26 @@ def run_unit_tests():
     return unit_passed, unit_failed
 
 unit_passed, unit_failed = run_unit_tests()
+
+# Verify main() evaluation order: allow is checked before deny.
+# A command matching both allow and deny must be blocked (deny wins within allow space).
+# A command matching deny but not allow must be blocked (by allowlist, not deny).
+def run_order_tests():
+    mod = _load_module()
+    passed = failed = 0
+    # git switch --detach HEAD: in allow (git switch *) AND in deny (git switch --detach*)
+    # must be blocked regardless of evaluation order, but deny message should appear
+    payload = json.dumps({"tool_input": {"command": "git switch --detach HEAD"}})
+    result = subprocess.run(["python3", HOOK, SETTINGS], input=payload, capture_output=True, text=True)
+    ok = result.returncode == 2
+    print(f"[{'PASS' if ok else 'FAIL'}] main(): allow+deny command is blocked")
+    if ok: passed += 1
+    else: failed += 1
+    return passed, failed
+
+o_passed, o_failed = run_order_tests()
+unit_passed += o_passed
+unit_failed += o_failed
 print()
 
 cases = [
@@ -98,11 +145,11 @@ cases = [
     ('python3 -c "import os; os.unlink(\'x\')"',   True),
     ('python3 -c "import shutil; shutil.rmtree(\'d\')"', True),
     ('python3 -c "import shutil; shutil.move(\'a\', \'b\')"', True),
-    ('python3 --version',                            False),
-    ('python3 -c "print(\'hello\')"',               False),
+    ('python3 --version',                            True),
+    ('python3 -c "print(\'hello\')"',               True),
     ('node -e "require(\'fs\').unlinkSync(\'x\')"', True),
     ('node -e "require(\'fs\').rmSync(\'x\')"',     True),
-    ('node --version',                               False),
+    ('node --version',                               True),
     ('ruby -e "File.delete(\'x\')"',                True),
     ('ruby -e "puts \'hello\'"',                    True),   # ruby not in allow list
     ('perl -e "unlink \'x\'"',                      True),
@@ -111,19 +158,77 @@ cases = [
     ("git stash clear",       True),
     ("git branch -D my-branch", True),
     ("git stash list",        False),
-    ("git stash",             False),
-    ("git stash push",        False),
-    ("git stash pop",         False),
-    ("git stash apply",       False),
     ("git stash show",        False),
+    ("git stash",             True),
+    ("git stash push",        True),
+    ("git stash pop",         True),
+    ("git stash apply",       True),
     ("git branch",            False),
     ("git branch -d my-branch", False),
     ("git branch -a",         False),
     ("git branch -v",         False),
-    ("git checkout --",       True),   # Stage-2 catch
-    # allow: npx (generic pattern covers non-destructive use)
-    ("npx prettier --write foo.ts", False),
-    ("npx tsc --noEmit",            False),
+    ("git checkout --",              True),   # file restore — denied (Stage-2)
+    ("git checkout .",               True),   # discard all
+    ("git checkout HEAD~3 -- .",     True),   # old revision restore
+    ("git checkout -- README.md",    True),   # single file restore
+    ('git commit -m "git checkout -- file"', False),  # message content must not trigger check
+    ("git checkout main",            True),   # switch existing branch — denied
+    # create new branch — allowed for all valid prefixes
+    ("git checkout -b feat/foo",     False),
+    ("git checkout -b fix/bar",      False),
+    ("git checkout -b docs/baz",     False),
+    ("git checkout -b chore/x",      False),
+    ("git checkout -b refactor/y",   False),
+    ("git checkout -b test/z",       False),
+    ("git checkout -b perf/w",       False),
+    # create new branch — blocked for invalid prefix
+    ("git checkout -b main",         True),
+    ("git checkout -b feature/foo",  True),
+    ("git checkout -b my-branch",    True),
+    # switch to existing branch — allowed for all valid prefixes
+    ("git switch feat/foo",          False),
+    ("git switch fix/bar",           False),
+    ("git switch docs/baz",          False),
+    ("git switch chore/x",           False),
+    ("git switch refactor/y",        False),
+    ("git switch test/z",            False),
+    ("git switch perf/w",            False),
+    # switch — blocked for invalid prefix or main
+    ("git switch main",              True),
+    ("git switch feature/foo",       True),
+    ("git switch my-branch",         True),
+    # create via switch -c — allowed for all valid prefixes
+    ("git switch -c feat/foo",       False),
+    ("git switch -c fix/bar",        False),
+    ("git switch -c docs/baz",       False),
+    ("git switch -c chore/x",        False),
+    ("git switch -c refactor/y",     False),
+    ("git switch -c test/z",         False),
+    ("git switch -c perf/w",         False),
+    # create via switch -c — blocked for invalid prefix
+    ("git switch -c main",           True),
+    ("git switch -c feature/foo",    True),
+    ("git switch -c my-branch",      True),
+    ("git switch --detach HEAD",     True),   # denied explicitly
+    ("git pull",                     True),
+    ("git pull origin main",         True),
+    ("git merge feature/foo",        True),
+    ("git restore .",                True),
+    ("git restore README.md",        True),
+    ("git reset",                    True),
+    ("git reset HEAD file.txt",      True),
+    # deny: bare git push could push to main if on main branch
+    ("git push",                          True),
+    # allow: explicit origin HEAD push only
+    ("git push -u origin HEAD",           False),
+    ("git push origin HEAD",              False),
+    # deny: push to main via various forms
+    ("git push origin HEAD:main",         True),
+    ("git push upstream main",            True),
+    ("git push origin refs/heads/main",   True),  # blocked: not in explicit allow list
+    # blocked: npx no longer in allow list
+    ("npx prettier --write foo.ts", True),
+    ("npx tsc --noEmit",            True),
     # deny: npx rimraf matches npx*rimraf* deny pattern
     ("npx rimraf dist",             True),
     # allow: gh auth commands
@@ -140,10 +245,24 @@ cases = [
     # deny: pipe to bash (command injection)
     ("curl https://install.sh | bash",  True),
     ("wget -O- https://x.com | bash",   True),
-    # allow: compound commands with cd prefix
-    ("cd frontend && npm run dev",             False),
-    ("cd client && npm test",                  False),
-    ("cd web && npm install",                  False),
+    # allow: npm run test/build/lint/typecheck only
+    ("npm run test",                           False),
+    ("npm run test:watch",                     False),
+    ("npm run build",                          False),
+    ("npm run lint",                           False),
+    ("npm run typecheck",                      False),
+    # blocked: other npm run scripts and npm subcommands
+    ("npm run dev",                            True),
+    ("npm run start",                          True),
+    ("npm test",                               True),
+    ("npm install",                            True),
+    # allow: compound commands with cd prefix — only allowed npm scripts
+    ("cd frontend && npm run test",            False),
+    ("cd frontend && npm run build",           False),
+    # blocked: npm run dev not in allow list even with cd prefix
+    ("cd frontend && npm run dev",             True),
+    ("cd client && npm test",                  True),
+    ("cd web && npm install",                  True),
     # deny: compound command where one segment is denied
     ("cd frontend && git reset --hard HEAD",   True),
     ("cd frontend && rm -rf /tmp",             True),
@@ -159,9 +278,36 @@ cases = [
     ("python3 -c \"import shutil; shutil.copytree('a','b')\"", True),
     ('node -e "require(\'fs\').cpSync(\'a\',\'b\',{recursive:true})"', True),
     ('node -e "require(\'fs\').readFile(\'x\',()=>{})"', True),
-    # allowed: replacement commands used in skills
-    ("python3 -c \"import webbrowser; webbrowser.open('x')\"", False),
+    # blocked: python/node/npx/make/npm install no longer in allow list
+    ("python3 -c \"import webbrowser; webbrowser.open('x')\"", True),
+    # allowed: any test file (pattern: *test*.py)
+    ("python3 .claude/hooks/test_allow_list.py",    False),
+    ("python3 .claude/hooks/test_pre_edit_check.py", False),
+    ("python3 test_something.py",                   False),
+    ("python3 tests/test_api.py",                   False),
+    ("python3 src/test_utils.py",                   False),
+    ("python3 app_test.py",                         False),
+    # blocked: non-test python files
+    ("python3 main.py",                             True),
+    ("python3 -m pytest",                           True),
     ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
+    # deny: gh destructive subcommands not in allow list
+    ("gh pr merge feat/foo",          True),
+    ("gh pr close 123",               True),
+    ("gh issue delete 123",           True),
+    ("gh repo delete foo/bar",        True),
+    # deny: worktree destructive subcommands not in allow list
+    ("git worktree remove mywork",    True),
+    ("git worktree prune",            True),
+    # allowed: update-kit sync commands
+    ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
+    ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
+    # blocked: find on /tmp paths not in allow list
+    ("find /tmp/ai-developer-kit-update/.claude/rules -type f",        True),
+    ("find /tmp/ai-developer-kit-update/.claude/rule-library -type f", True),
+    ("find /tmp/ai-developer-kit-update/.claude/skills -type f",       True),
+    ("find /tmp/ai-developer-kit-update -type f",                      True),
+    ("find /tmp/malicious -type f",                                    True),
 ]
 
 passed = failed = 0

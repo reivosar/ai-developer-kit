@@ -82,19 +82,19 @@ def block(reason):
 
 
 def check_stash_destructive(command):
-    if re.search(r"git\s+stash\s+(drop|clear)", command):
+    if any(re.match(r"git\s+stash\s+(drop|clear)", seg.strip()) for seg in split_segments(command)):
         block("'git stash drop/clear' permanently deletes stashed work. "
               "Run 'git stash list' to review stashes before dropping.")
 
 
 def check_checkout_discard(command):
-    if re.search(r"git\s+checkout\s+--", command):
+    if any(re.match(r"git\s+checkout\s+--", seg.strip()) for seg in split_segments(command)):
         block("'git checkout --' discards uncommitted changes permanently. "
               "Use 'git diff' to review changes first, or 'git stash' to save them.")
 
 
 def check_branch_force_delete(command):
-    if re.search(r"git\s+branch\s+-D\b", command):
+    if any(re.match(r"git\s+branch\s+-D\b", seg.strip()) for seg in split_segments(command)):
         block("'git branch -D' force-deletes a branch. "
               "Use 'git branch -d' (safe delete) — it refuses to delete unmerged branches.")
 
@@ -146,12 +146,12 @@ def main():
         print(f"BLOCKED: could not read settings.json — {e}", file=sys.stderr)
         sys.exit(2)
 
-    if is_denied(command, deny_patterns):
-        print(f"BLOCKED: command matches deny list: {command[:300]}", file=sys.stderr)
-        sys.exit(2)
-
     if not is_whitelisted(command, allow_patterns):
         print(f"BLOCKED: command not in allow list: {command[:300]}", file=sys.stderr)
+        sys.exit(2)
+
+    if is_denied(command, deny_patterns):
+        print(f"BLOCKED: command matches deny list: {command[:300]}", file=sys.stderr)
         sys.exit(2)
 
     run_blocklist_checks(command)

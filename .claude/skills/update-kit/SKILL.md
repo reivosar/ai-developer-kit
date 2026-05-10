@@ -7,11 +7,11 @@ description: Update this project's rule-library and skills from the latest versi
 
 Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply them to this project.
 
-## What gets replaced (total replacement)
+## Sync behaviour
 
-- `.claude/rule-library/` — completely replaced with upstream (local-only files are deleted)
-- `.claude/rules/` — completely replaced with upstream (local-only files are deleted)
-- `.claude/skills/` — completely replaced with upstream (local-only skills are deleted)
+- Files whose size or mtime differ from upstream are overwritten.
+- Files present locally but absent in upstream are trashed.
+- Files identical to upstream are skipped.
 
 ## What is never touched
 
@@ -35,23 +35,52 @@ gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=
 
 If the clone fails because the directory already exists, proceed using the existing files.
 
-## Step 3: Replace rule-library, rules, and skills entirely
+## Step 3: Sync rule-library, rules, and skills
 
-Trash the local directories first:
+Target directories: `.claude/rule-library`, `.claude/rules`, `.claude/skills`.
 
-```bash
-.claude/hooks/trash.sh .claude/rule-library
-.claude/hooks/trash.sh .claude/rules
-.claude/hooks/trash.sh .claude/skills
-```
+### 3a. Overwrite changed or new files
 
-Then enumerate every file in each upstream directory:
+Enumerate every file in the upstream clone (run each separately):
 
 ```bash
-find /tmp/ai-developer-kit-update/.claude/rule-library /tmp/ai-developer-kit-update/.claude/rules /tmp/ai-developer-kit-update/.claude/skills -type f
+cd /tmp/ai-developer-kit-update && find . -path './.claude/rule-library/*' -type f
+cd /tmp/ai-developer-kit-update && find . -path './.claude/rules/*' -type f
+cd /tmp/ai-developer-kit-update && find . -path './.claude/skills/*' -type f
 ```
 
-For each file returned, read its content from `/tmp/ai-developer-kit-update/` and write it to the corresponding local path using the Write tool. Process files one at a time.
+For each upstream file:
+
+1. Derive the local path by stripping the `/tmp/ai-developer-kit-update/` prefix.
+2. Compare size and mtime:
+   ```bash
+   stat -f "%z %m" <upstream_file>
+   stat -f "%z %m" <local_file> 2>/dev/null
+   ```
+3. If the local file does not exist, or size/mtime differ: read the upstream file content and write it to the local path using the Write tool.
+4. If size and mtime are identical: skip the file.
+
+### 3b. Trash local-only files
+
+Find local files absent from upstream and trash them one at a time:
+
+```bash
+find . -path './.claude/rule-library/*' -type f
+find . -path './.claude/rules/*' -type f
+find . -path './.claude/skills/*' -type f
+```
+
+For each local file, check whether the corresponding upstream file exists:
+
+```bash
+test -f /tmp/ai-developer-kit-update/<local_path>
+```
+
+If not found upstream, trash it:
+
+```bash
+.claude/hooks/trash.sh <local_file>
+```
 
 ## Step 4: Report
 
