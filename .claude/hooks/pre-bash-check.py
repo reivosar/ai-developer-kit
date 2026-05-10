@@ -146,12 +146,12 @@ def main():
         print(f"BLOCKED: could not read settings.json — {e}", file=sys.stderr)
         sys.exit(2)
 
-    if is_denied(command, deny_patterns):
-        print(f"BLOCKED: command matches deny list: {command[:300]}", file=sys.stderr)
-        sys.exit(2)
-
     if not is_whitelisted(command, allow_patterns):
         print(f"BLOCKED: command not in allow list: {command[:300]}", file=sys.stderr)
+        sys.exit(2)
+
+    if is_denied(command, deny_patterns):
+        print(f"BLOCKED: command matches deny list: {command[:300]}", file=sys.stderr)
         sys.exit(2)
 
     run_blocklist_checks(command)

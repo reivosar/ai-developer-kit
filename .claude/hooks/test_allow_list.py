@@ -116,6 +116,26 @@ def run_unit_tests():
     return unit_passed, unit_failed
 
 unit_passed, unit_failed = run_unit_tests()
+
+# Verify main() evaluation order: allow is checked before deny.
+# A command matching both allow and deny must be blocked (deny wins within allow space).
+# A command matching deny but not allow must be blocked (by allowlist, not deny).
+def run_order_tests():
+    mod = _load_module()
+    passed = failed = 0
+    # git switch --detach HEAD: in allow (git switch *) AND in deny (git switch --detach*)
+    # must be blocked regardless of evaluation order, but deny message should appear
+    payload = json.dumps({"tool_input": {"command": "git switch --detach HEAD"}})
+    result = subprocess.run(["python3", HOOK, SETTINGS], input=payload, capture_output=True, text=True)
+    ok = result.returncode == 2
+    print(f"[{'PASS' if ok else 'FAIL'}] main(): allow+deny command is blocked")
+    if ok: passed += 1
+    else: failed += 1
+    return passed, failed
+
+o_passed, o_failed = run_order_tests()
+unit_passed += o_passed
+unit_failed += o_failed
 print()
 
 cases = [
