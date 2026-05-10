@@ -173,9 +173,42 @@ cases = [
     ("git checkout -- README.md",    True),   # single file restore
     ('git commit -m "git checkout -- file"', False),  # message content must not trigger check
     ("git checkout main",            True),   # switch existing branch — denied
-    ("git checkout -b feat/foo",     False),  # create new branch — allowed
-    ("git switch main",              False),  # switch branch — allowed
-    ("git switch -c feat/foo",       False),  # create new branch — allowed
+    # create new branch — allowed for all valid prefixes
+    ("git checkout -b feat/foo",     False),
+    ("git checkout -b fix/bar",      False),
+    ("git checkout -b docs/baz",     False),
+    ("git checkout -b chore/x",      False),
+    ("git checkout -b refactor/y",   False),
+    ("git checkout -b test/z",       False),
+    ("git checkout -b perf/w",       False),
+    # create new branch — blocked for invalid prefix
+    ("git checkout -b main",         True),
+    ("git checkout -b feature/foo",  True),
+    ("git checkout -b my-branch",    True),
+    # switch to existing branch — allowed for all valid prefixes
+    ("git switch feat/foo",          False),
+    ("git switch fix/bar",           False),
+    ("git switch docs/baz",          False),
+    ("git switch chore/x",           False),
+    ("git switch refactor/y",        False),
+    ("git switch test/z",            False),
+    ("git switch perf/w",            False),
+    # switch — blocked for invalid prefix or main
+    ("git switch main",              True),
+    ("git switch feature/foo",       True),
+    ("git switch my-branch",         True),
+    # create via switch -c — allowed for all valid prefixes
+    ("git switch -c feat/foo",       False),
+    ("git switch -c fix/bar",        False),
+    ("git switch -c docs/baz",       False),
+    ("git switch -c chore/x",        False),
+    ("git switch -c refactor/y",     False),
+    ("git switch -c test/z",         False),
+    ("git switch -c perf/w",         False),
+    # create via switch -c — blocked for invalid prefix
+    ("git switch -c main",           True),
+    ("git switch -c feature/foo",    True),
+    ("git switch -c my-branch",      True),
     ("git switch --detach HEAD",     True),   # denied explicitly
     ("git pull",                     True),
     ("git pull origin main",         True),
