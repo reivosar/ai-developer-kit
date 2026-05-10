@@ -32,6 +32,18 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
+    # split_segments: must not split on ; or && inside quotes
+    for cmd, expect in [
+        ('python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"', ['python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"']),
+        ("cd a && cd b",  ["cd a", "cd b"]),
+        ("echo 'a;b'",    ["echo 'a;b'"]),
+    ]:
+        result = mod.split_segments(cmd)
+        ok = result == expect
+        print(f"[{'PASS' if ok else 'FAIL'}] split_segments({cmd!r}) == {expect!r} (got {result!r})")
+        if ok: unit_passed += 1
+        else: unit_failed += 1
+
     # is_denied
     for cmd, expect in [
         ('python3 -c "import os; os.remove(\'x\')"', True),
@@ -132,6 +144,18 @@ cases = [
     # deny: compound command where one segment is denied
     ("cd frontend && git reset --hard HEAD",   True),
     ("cd frontend && rm -rf /tmp",             True),
+    # blocked: commands not in allow list (skills use replacements instead)
+    ("git branch --show-current",                              True),
+    ("gh label create rule-gap --repo foo",                    True),
+    ("nohup python generate_review.py",                        True),
+    ("kill 1234",                                              True),
+    ("cp -r src/ dst/",                                        True),
+    ("open /tmp/foo.html",                                     True),
+    ("claude --worktree mywork",                               True),
+    # allowed: replacement commands used in skills
+    ("python3 -c \"import shutil; shutil.copytree('a','b')\"", False),
+    ("python3 -c \"import webbrowser; webbrowser.open('x')\"", False),
+    ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
 ]
 
 passed = failed = 0

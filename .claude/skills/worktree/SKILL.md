@@ -15,15 +15,14 @@ Read `.claude/rule-library/git-workflow.md` before proceeding.
 
 Worktree name is `$ARGUMENTS`. If omitted, Claude Code generates a random name automatically.
 
-## Create via Claude Code
-
-The cleanest way is to let Claude Code handle it:
+## Create the worktree
 
 ```bash
-claude --worktree $ARGUMENTS
+git fetch origin
+git worktree add .claude/worktrees/<name> -b worktree-<name> origin/HEAD
 ```
 
-This creates `.claude/worktrees/<name>/` on a new branch `worktree-<name>`, forked from the default remote branch (`origin/HEAD`).
+This creates `.claude/worktrees/<name>/` on a new branch `worktree-<name>`, forked from `origin/HEAD`.
 
 ## When to use worktrees
 

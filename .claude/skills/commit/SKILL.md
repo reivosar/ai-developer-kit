@@ -14,7 +14,7 @@ Read `.claude/rule-library/git-workflow.md` before proceeding.
 ## Step 1: Verify branch
 
 ```bash
-git branch --show-current
+git status
 ```
 
 If on `main`:

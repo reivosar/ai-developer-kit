@@ -27,8 +27,43 @@ def load_patterns(settings_path, key):
 
 
 def split_segments(command: str) -> list[str]:
-    parts = re.split(r'&&|;', command)
-    return [p.strip() for p in parts if p.strip()]
+    """Split on && and ; that are outside of single or double quotes."""
+    segments: list[str] = []
+    current: list[str] = []
+    in_single = in_double = False
+    i = 0
+    while i < len(command):
+        c = command[i]
+        if c == "'" and not in_double:
+            in_single = not in_single
+            current.append(c)
+        elif c == '"' and not in_single:
+            in_double = not in_double
+            current.append(c)
+        elif not in_single and not in_double:
+            if command[i : i + 2] == "&&":
+                seg = "".join(current).strip()
+                if seg:
+                    segments.append(seg)
+                current = []
+                i += 2
+                continue
+            elif c == ";":
+                seg = "".join(current).strip()
+                if seg:
+                    segments.append(seg)
+                current = []
+                i += 1
+                continue
+            else:
+                current.append(c)
+        else:
+            current.append(c)
+        i += 1
+    seg = "".join(current).strip()
+    if seg:
+        segments.append(seg)
+    return segments if segments else [command]
 
 
 def is_denied(command: str, patterns: list[str]) -> bool:

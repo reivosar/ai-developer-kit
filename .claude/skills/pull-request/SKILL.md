@@ -14,13 +14,12 @@ Read `.claude/rule-library/git-workflow.md` before proceeding.
 ## Step 1: Verify branch state
 
 ```bash
-git branch --show-current
 git status
 git log main...HEAD --oneline
 ```
 
 Guards:
-- If on `main` — stop. Tell the user to create a feature branch first.
+- If `git status` shows `On branch main` — stop. Tell the user to create a feature branch first.
 - If there are unstaged changes — run the `commit` skill first, then return here.
 - If there are no commits ahead of `main` — stop. Nothing to PR.
 
