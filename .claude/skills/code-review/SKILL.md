@@ -10,10 +10,10 @@ Review the changes on the current branch and produce a structured report.
 ## Setup
 
 Read the following rule files before proceeding:
-- `.claude/rule-library/code-style.md`
-- `.claude/rule-library/git-workflow.md`
-- `.claude/rule-library/testing.md`
-- `.claude/rule-library/security.md`
+- `.claude/docs/code-style.md`
+- `.claude/docs/git-workflow.md`
+- `.claude/docs/testing.md`
+- `.claude/docs/security.md`
 
 ## Arguments
 
@@ -62,7 +62,7 @@ Good code quality means the next developer can understand and modify the code sa
 
 ### Conventions
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
-- Code style matches the rules in `.claude/rule-library/code-style.md`
+- Code style matches the rules in `.claude/docs/code-style.md`
 
 ## Report format
 

@@ -9,7 +9,7 @@ Create an isolated git worktree so parallel work doesn't interfere with the main
 
 ## Setup
 
-Read `.claude/rule-library/git-workflow.md` before proceeding.
+Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Arguments
 

@@ -21,6 +21,7 @@
       "Bash(git checkout -b refactor/*)",
       "Bash(git checkout -b test/*)",
       "Bash(git checkout -b perf/*)",
+      "Bash(git checkout main)",
       "Bash(git switch feat/*)",
       "Bash(git switch fix/*)",
       "Bash(git switch docs/*)",

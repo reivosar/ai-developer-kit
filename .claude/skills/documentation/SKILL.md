@@ -8,8 +8,8 @@ description: Generate or update documentation. Use this skill when the user want
 ## Setup
 
 Read before proceeding:
-- `.claude/rule-library/documentation.md`
-- `.claude/rule-library/code-style.md`
+- `.claude/docs/documentation.md`
+- `.claude/docs/code-style.md`
 
 ## Steps
 

@@ -10,9 +10,9 @@ Start from broken behavior with unknown cause. Diagnose first — do not write a
 ## Setup
 
 Read the following rule files before proceeding:
-- `.claude/rule-library/code-style.md`
-- `.claude/rule-library/testing.md`
-- `.claude/rule-library/security.md`
+- `.claude/docs/code-style.md`
+- `.claude/docs/testing.md`
+- `.claude/docs/security.md`
 
 ## Arguments
 

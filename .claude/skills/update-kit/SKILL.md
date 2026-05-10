@@ -1,6 +1,6 @@
 ---
 name: update-kit
-description: Update this project's rule-library and skills from the latest version of reivosar/ai-developer-kit. Use this skill when the user says "update the kit", "pull the latest rules", "sync the kit", or "get the latest skills."
+description: Update this project's docs and skills from the latest version of reivosar/ai-developer-kit. Use this skill when the user says "update the kit", "pull the latest rules", "sync the kit", or "get the latest skills."
 ---
 
 # Update Kit
@@ -35,16 +35,16 @@ gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=
 
 If the clone fails because the directory already exists, proceed using the existing files.
 
-## Step 3: Sync rule-library, rules, and skills
+## Step 3: Sync docs, rules, and skills
 
-Target directories: `.claude/rule-library`, `.claude/rules`, `.claude/skills`.
+Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`.
 
 ### 3a. Overwrite changed or new files
 
 Enumerate every file in the upstream clone (run each separately):
 
 ```bash
-cd /tmp/ai-developer-kit-update && find . -path './.claude/rule-library/*' -type f
+cd /tmp/ai-developer-kit-update && find . -path './.claude/docs/*' -type f
 cd /tmp/ai-developer-kit-update && find . -path './.claude/rules/*' -type f
 cd /tmp/ai-developer-kit-update && find . -path './.claude/skills/*' -type f
 ```
@@ -65,7 +65,7 @@ For each upstream file:
 Find local files absent from upstream and trash them one at a time:
 
 ```bash
-find . -path './.claude/rule-library/*' -type f
+find . -path './.claude/docs/*' -type f
 find . -path './.claude/rules/*' -type f
 find . -path './.claude/skills/*' -type f
 ```
@@ -85,6 +85,6 @@ If not found upstream, trash it:
 ## Step 4: Report
 
 ```bash
-git diff --stat .claude/rule-library/ .claude/rules/ .claude/skills/
+git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
 git status
 ```

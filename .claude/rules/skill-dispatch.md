@@ -13,9 +13,9 @@ Always invoke the corresponding skill — never handle these tasks inline:
 - Worktree operations → `/worktree`
 - Documentation (README, ADR, OpenAPI spec) → `/documentation`
 - Filing a rule/skill gap or improvement insight → `/feedback`
-- Updating rule-library and skills from the upstream kit → `/update-kit`
+- Updating docs and skills from the upstream kit → `/update-kit`
 - Editing kit configuration (settings.json, hooks, permissions) → `/edit-kit`
 
 When to use `/coding` vs. a design skill: use a design skill when the structure or boundaries are undecided; use `/coding` once the design is settled and the task is implementation.
 
-`.claude/rule-library/` is not auto-loaded — each skill reads only the rule files it needs. Once a rule file has been read in a session, never read it again — treat it as cached.
+`.claude/docs/` is not auto-loaded — each skill reads only the rule files it needs. Once a rule file has been read in a session, never read it again — treat it as cached.

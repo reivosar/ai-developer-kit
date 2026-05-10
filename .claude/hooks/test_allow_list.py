@@ -172,7 +172,7 @@ cases = [
     ("git checkout HEAD~3 -- .",     True),   # old revision restore
     ("git checkout -- README.md",    True),   # single file restore
     ('git commit -m "git checkout -- file"', False),  # message content must not trigger check
-    ("git checkout main",            True),   # switch existing branch — denied
+    ("git checkout main",            False),  # switch to main — allowed
     # create new branch — allowed for all valid prefixes
     ("git checkout -b feat/foo",     False),
     ("git checkout -b fix/bar",      False),
@@ -304,7 +304,7 @@ cases = [
     ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     # blocked: find on /tmp paths not in allow list
     ("find /tmp/ai-developer-kit-update/.claude/rules -type f",        True),
-    ("find /tmp/ai-developer-kit-update/.claude/rule-library -type f", True),
+    ("find /tmp/ai-developer-kit-update/.claude/docs -type f", True),
     ("find /tmp/ai-developer-kit-update/.claude/skills -type f",       True),
     ("find /tmp/ai-developer-kit-update -type f",                      True),
     ("find /tmp/malicious -type f",                                    True),
