@@ -184,8 +184,9 @@ cases = [
     ("git restore README.md",        True),
     ("git reset",                    True),
     ("git reset HEAD file.txt",      True),
-    # allow: exact push patterns only
-    ("git push",                          False),
+    # deny: bare git push could push to main if on main branch
+    ("git push",                          True),
+    # allow: explicit origin HEAD push only
     ("git push -u origin HEAD",           False),
     ("git push origin HEAD",              False),
     # deny: push to main via various forms

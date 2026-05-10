@@ -19,7 +19,6 @@
       "Bash(git switch *)",
       "Bash(git add*)",
       "Bash(git commit*)",
-      "Bash(git push)",
       "Bash(git push -u origin HEAD)",
       "Bash(git push origin HEAD)",
       "Bash(git worktree add*)",
