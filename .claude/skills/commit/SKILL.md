@@ -9,7 +9,7 @@ Create a Conventional Commits message for what is staged and commit it.
 
 ## Setup
 
-Read `.claude/rule-library/git-workflow.md` before proceeding.
+Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Step 1: Verify branch
 

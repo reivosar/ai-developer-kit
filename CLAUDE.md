@@ -33,7 +33,7 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 ### Rule library (on-demand)
 
-`.claude/rule-library/*.md` — topic-specific rules (backend, security, testing, etc.). Not auto-loaded. Each skill reads only the files it needs. Once read in a session, treat as cached.
+`.claude/docs/*.md` — topic-specific rules (backend, security, testing, etc.). Not auto-loaded. Each skill reads only the files it needs. Once read in a session, treat as cached.
 
 ### Skills
 

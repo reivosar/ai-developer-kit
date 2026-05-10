@@ -21,6 +21,7 @@
       "Bash(git checkout -b refactor/*)",
       "Bash(git checkout -b test/*)",
       "Bash(git checkout -b perf/*)",
+      "Bash(git checkout main)",
       "Bash(git switch feat/*)",
       "Bash(git switch fix/*)",
       "Bash(git switch docs/*)",
@@ -79,7 +80,8 @@
       "Bash(chmod +x .claude/hooks/*)"
     ],
     "deny": [
-      "Bash(git switch --detach*)"
+      "Bash(git switch --detach*)",
+      "Bash(gh label create *--repo*)"
     ],
     "defaultMode": "acceptEdits"
   },

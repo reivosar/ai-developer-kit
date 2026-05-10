@@ -9,7 +9,7 @@ Create a pull request from the current branch to main.
 
 ## Setup
 
-Read `.claude/rule-library/git-workflow.md` before proceeding.
+Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Step 1: Verify branch state
 

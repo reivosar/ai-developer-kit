@@ -44,13 +44,15 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
-    # is_denied — only git switch --detach* is in deny now
+    # is_denied — deny list: git switch --detach*, gh label create *--repo*
     for cmd, expect in [
-        ('git switch --detach HEAD', True),
-        ('git switch main',          False),
-        ('git switch -c feat/foo',   False),
-        ('python3 --version',        False),  # not in deny (blocked by allowlist instead)
-        ('node --version',           False),
+        ('git switch --detach HEAD',              True),
+        ('git switch main',                       False),
+        ('git switch -c feat/foo',                False),
+        ('python3 --version',                     False),  # not in deny (blocked by allowlist instead)
+        ('node --version',                        False),
+        ('gh label create rule-gap --repo foo',   True),   # cross-repo label creation denied
+        ('gh label create bug --color e11d48',    False),  # same-repo label creation allowed
     ]:
         ok = mod.is_denied(cmd, deny_pats) == expect
         print(f"[{'PASS' if ok else 'FAIL'}] is_denied({cmd!r}) == {expect}")
@@ -172,7 +174,7 @@ cases = [
     ("git checkout HEAD~3 -- .",     True),   # old revision restore
     ("git checkout -- README.md",    True),   # single file restore
     ('git commit -m "git checkout -- file"', False),  # message content must not trigger check
-    ("git checkout main",            True),   # switch existing branch — denied
+    ("git checkout main",            False),  # switch to main — allowed
     # create new branch — allowed for all valid prefixes
     ("git checkout -b feat/foo",     False),
     ("git checkout -b fix/bar",      False),
@@ -304,7 +306,7 @@ cases = [
     ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     # blocked: find on /tmp paths not in allow list
     ("find /tmp/ai-developer-kit-update/.claude/rules -type f",        True),
-    ("find /tmp/ai-developer-kit-update/.claude/rule-library -type f", True),
+    ("find /tmp/ai-developer-kit-update/.claude/docs -type f", True),
     ("find /tmp/ai-developer-kit-update/.claude/skills -type f",       True),
     ("find /tmp/ai-developer-kit-update -type f",                      True),
     ("find /tmp/malicious -type f",                                    True),

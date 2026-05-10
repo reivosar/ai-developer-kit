@@ -8,11 +8,11 @@ description: Design and implement frontend features. Use this skill when the use
 ## Setup
 
 Read before proceeding:
-- `.claude/rule-library/frontend.md`
-- `.claude/rule-library/coding.md`
-- `.claude/rule-library/code-style.md`
-- `.claude/rule-library/security.md`
-- `.claude/rule-library/design-system.md`
+- `.claude/docs/frontend.md`
+- `.claude/docs/coding.md`
+- `.claude/docs/code-style.md`
+- `.claude/docs/security.md`
+- `.claude/docs/design-system.md`
 
 ## Steps
 

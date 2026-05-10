@@ -10,16 +10,16 @@ Implement code for any domain — frontend, backend, scripts, CLI, full-stack, o
 ## Setup
 
 Always read (applies to every implementation):
-- `.claude/rule-library/code-style.md`
-- `.claude/rule-library/coding.md`
-- `.claude/rule-library/testing.md`
+- `.claude/docs/code-style.md`
+- `.claude/docs/coding.md`
+- `.claude/docs/testing.md`
 
 Read when the task involves:
-- Input validation, auth, or external data → `.claude/rule-library/security.md`
-- Error handling or failure paths → `.claude/rule-library/errors.md`
-- Log statements → `.claude/rule-library/logging.md`
-- Frontend (UI, components, browser code) → `.claude/rule-library/frontend.md`
-- Backend (APIs, services, DB, server-side) → `.claude/rule-library/backend.md`, `.claude/rule-library/database.md`, `.claude/rule-library/configuration.md`
+- Input validation, auth, or external data → `.claude/docs/security.md`
+- Error handling or failure paths → `.claude/docs/errors.md`
+- Log statements → `.claude/docs/logging.md`
+- Frontend (UI, components, browser code) → `.claude/docs/frontend.md`
+- Backend (APIs, services, DB, server-side) → `.claude/docs/backend.md`, `.claude/docs/database.md`, `.claude/docs/configuration.md`
 
 ## Arguments
 
