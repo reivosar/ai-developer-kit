@@ -44,13 +44,15 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
-    # is_denied — only git switch --detach* is in deny now
+    # is_denied — deny list: git switch --detach*, gh label create *--repo*
     for cmd, expect in [
-        ('git switch --detach HEAD', True),
-        ('git switch main',          False),
-        ('git switch -c feat/foo',   False),
-        ('python3 --version',        False),  # not in deny (blocked by allowlist instead)
-        ('node --version',           False),
+        ('git switch --detach HEAD',              True),
+        ('git switch main',                       False),
+        ('git switch -c feat/foo',                False),
+        ('python3 --version',                     False),  # not in deny (blocked by allowlist instead)
+        ('node --version',                        False),
+        ('gh label create rule-gap --repo foo',   True),   # cross-repo label creation denied
+        ('gh label create bug --color e11d48',    False),  # same-repo label creation allowed
     ]:
         ok = mod.is_denied(cmd, deny_pats) == expect
         print(f"[{'PASS' if ok else 'FAIL'}] is_denied({cmd!r}) == {expect}")
