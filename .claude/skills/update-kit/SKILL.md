@@ -41,9 +41,7 @@ If the clone fails because the directory already exists, proceed using the exist
 .claude/hooks/trash.sh .claude/rule-library
 .claude/hooks/trash.sh .claude/rules
 .claude/hooks/trash.sh .claude/skills
-cp -r /tmp/ai-developer-kit-update/.claude/rule-library .claude/rule-library
-cp -r /tmp/ai-developer-kit-update/.claude/rules .claude/rules
-cp -r /tmp/ai-developer-kit-update/.claude/skills .claude/skills
+git --git-dir=/tmp/ai-developer-kit-update/.git --work-tree=. checkout HEAD -- .claude/rule-library .claude/rules .claude/skills
 ```
 
 ## Step 4: Report
