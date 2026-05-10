@@ -48,7 +48,9 @@ def run_unit_tests():
     for cmd, expect in [
         ('python3 -c "import os; os.remove(\'x\')"', True),
         ('python3 -c "import shutil; shutil.rmtree(\'d\')"', True),
+        ('python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"', True),
         ('node -e "require(\'fs\').unlinkSync(\'x\')"', True),
+        ('node -e "require(\'fs\').cpSync(\'a\',\'b\')"', True),
         ('python3 --version', False),
         ('node --version', False),
     ]:
@@ -153,8 +155,11 @@ cases = [
     ("cp -r src/ dst/",                                        True),
     ("open /tmp/foo.html",                                     True),
     ("claude --worktree mywork",                               True),
+    # denied: bulk-copy APIs
+    ("python3 -c \"import shutil; shutil.copytree('a','b')\"", True),
+    ('node -e "require(\'fs\').cpSync(\'a\',\'b\',{recursive:true})"', True),
+    ('node -e "require(\'fs\').readFile(\'x\',()=>{})"', True),
     # allowed: replacement commands used in skills
-    ("python3 -c \"import shutil; shutil.copytree('a','b')\"", False),
     ("python3 -c \"import webbrowser; webbrowser.open('x')\"", False),
     ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
 ]

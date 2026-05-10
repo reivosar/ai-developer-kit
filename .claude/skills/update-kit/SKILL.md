@@ -35,37 +35,16 @@ gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=
 
 If the clone fails because the directory already exists, proceed using the existing files.
 
-## Step 3: Replace rule-library entirely
+## Step 3: Replace rule-library, rules, and skills entirely
 
 ```bash
 .claude/hooks/trash.sh .claude/rule-library
-```
-
-Then for each `.md` file in `/tmp/ai-developer-kit-update/.claude/rule-library/`:
-- Read the upstream file
-- Write it to `.claude/rule-library/<file>.md`
-
-## Step 4: Replace rules entirely
-
-```bash
 .claude/hooks/trash.sh .claude/rules
-```
-
-Then for each `.md` file in `/tmp/ai-developer-kit-update/.claude/rules/`:
-- Read the upstream file
-- Write it to `.claude/rules/<file>.md`
-
-## Step 5: Replace skills entirely
-
-```bash
 .claude/hooks/trash.sh .claude/skills
+git --git-dir=/tmp/ai-developer-kit-update/.git --work-tree=. checkout HEAD -- .claude/rule-library .claude/rules .claude/skills
 ```
 
-Then for each skill directory in `/tmp/ai-developer-kit-update/.claude/skills/`:
-- Read `/tmp/ai-developer-kit-update/.claude/skills/<name>/SKILL.md`
-- Write it to `.claude/skills/<name>/SKILL.md`
-
-## Step 6: Report
+## Step 4: Report
 
 ```bash
 git diff --stat .claude/rule-library/ .claude/rules/ .claude/skills/

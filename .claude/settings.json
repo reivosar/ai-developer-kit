@@ -77,7 +77,9 @@
       "Bash(ruby*FileUtils.rm*)",
       "Bash(ruby*FileUtils.move*)",
       "Bash(perl*unlink*)",
-      "Bash(perl*rmdir*)"
+      "Bash(perl*rmdir*)",
+      "Bash(python*shutil.copytree*)",
+      "Bash(node*'fs'*)"
     ],
     "defaultMode": "acceptEdits"
   },
