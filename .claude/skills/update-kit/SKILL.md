@@ -5,19 +5,19 @@ description: Update this project's rule-library and skills from the latest versi
 
 # Update Kit
 
-Fetch the latest rule-library and skills from `reivosar/ai-developer-kit` and apply them to this project.
+Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply them to this project.
 
-## What gets updated
+## What gets replaced (total replacement)
 
-- `.claude/rule-library/*.md` — all rule files (overwritten)
-- `.claude/skills/*/SKILL.md` — each skill's definition (overwritten)
+- `.claude/rule-library/` — completely replaced with upstream (local-only files are deleted)
+- `.claude/rules/` — completely replaced with upstream (local-only files are deleted)
+- `.claude/skills/` — completely replaced with upstream (local-only skills are deleted)
 
 ## What is never touched
 
 - `CLAUDE.md` — project-specific behavior
 - `.claude/settings.json` — project-specific permissions and hooks
 - `.claude/hooks/` — project-specific hook scripts
-- Any file not present in the kit (project-added files are preserved)
 
 ## Step 1: Check prerequisites
 
@@ -29,50 +29,45 @@ If not authenticated, stop and ask the user to run `gh auth login`.
 
 ## Step 2: Clone the kit to a fixed temp path
 
-Clone fresh (trash.sh cannot remove /tmp paths — skip cleanup):
-
 ```bash
 gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=1 --quiet
 ```
 
 If the clone fails because the directory already exists, proceed using the existing files.
 
-## Step 3: Update rule-library
-
-List upstream rule files:
+## Step 3: Replace rule-library entirely
 
 ```bash
-ls /tmp/ai-developer-kit-update/.claude/rule-library/
+.claude/hooks/trash.sh .claude/rule-library
 ```
 
-For each `.md` file listed:
-- Read `/tmp/ai-developer-kit-update/.claude/rule-library/<file>.md` to get upstream content
-- If `.claude/rule-library/<file>.md` exists locally → **Edit** (replace full content)
-- If it does not exist → **Write** (create new file)
+Then for each `.md` file in `/tmp/ai-developer-kit-update/.claude/rule-library/`:
+- Read the upstream file
+- Write it to `.claude/rule-library/<file>.md`
 
-## Step 4: Update skills
-
-List upstream skill directories:
+## Step 4: Replace rules entirely
 
 ```bash
-ls /tmp/ai-developer-kit-update/.claude/skills/
+.claude/hooks/trash.sh .claude/rules
 ```
 
-For each skill directory listed:
-- Read `/tmp/ai-developer-kit-update/.claude/skills/<name>/SKILL.md` to get upstream content
-- If `.claude/skills/<name>/SKILL.md` exists locally → **Edit** (replace full content)
-- If it does not exist → **Write** (create new file; Write creates parent directories automatically)
+Then for each `.md` file in `/tmp/ai-developer-kit-update/.claude/rules/`:
+- Read the upstream file
+- Write it to `.claude/rules/<file>.md`
 
-## Step 5: Report
-
-Show what changed:
+## Step 5: Replace skills entirely
 
 ```bash
-git diff --stat .claude/rule-library/ .claude/skills/
+.claude/hooks/trash.sh .claude/skills
 ```
 
-List any new files added (skills or rules not previously in the project):
+Then for each skill directory in `/tmp/ai-developer-kit-update/.claude/skills/`:
+- Read `/tmp/ai-developer-kit-update/.claude/skills/<name>/SKILL.md`
+- Write it to `.claude/skills/<name>/SKILL.md`
+
+## Step 6: Report
 
 ```bash
+git diff --stat .claude/rule-library/ .claude/rules/ .claude/skills/
 git status
 ```
