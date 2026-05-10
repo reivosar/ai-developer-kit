@@ -19,27 +19,20 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 - `.claude/settings.json` — project-specific permissions and hooks
 - `.claude/hooks/` — project-specific hook scripts
 
-## Step 1: Check prerequisites
-
-```bash
-gh auth status
-```
-
-If not authenticated, stop and ask the user to run `gh auth login`.
-
-## Step 2: Clone the kit to a fixed temp path
+## Step 1: Clone the kit to a fixed temp path
 
 ```bash
 gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=1 --quiet
 ```
 
 If the clone fails because the directory already exists, proceed using the existing files.
+If the clone fails due to authentication, stop and ask the user to run `gh auth login`.
 
-## Step 3: Sync docs, rules, and skills
+## Step 2: Sync docs, rules, and skills
 
 Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`.
 
-### 3a. Overwrite changed or new files
+### 2a. Overwrite changed or new files
 
 Enumerate every file in the upstream clone — issue all three as separate Bash tool calls in one message (parallel):
 
@@ -64,7 +57,7 @@ For each upstream file:
 3. If the local file does not exist, or size/mtime differ: read the upstream file content and write it to the local path using the Write tool.
 4. If size and mtime are identical: skip the file.
 
-### 3b. Trash local-only files
+### 2b. Trash local-only files
 
 Find local files absent from upstream — issue all three as separate Bash tool calls in one message (parallel):
 
@@ -90,7 +83,7 @@ If not found upstream, trash it:
 .claude/hooks/trash.sh <local_file>
 ```
 
-## Step 4: Report
+## Step 3: Report
 
 ```bash
 git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
