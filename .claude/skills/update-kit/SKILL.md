@@ -37,12 +37,21 @@ If the clone fails because the directory already exists, proceed using the exist
 
 ## Step 3: Replace rule-library, rules, and skills entirely
 
+Trash the local directories first:
+
 ```bash
 .claude/hooks/trash.sh .claude/rule-library
 .claude/hooks/trash.sh .claude/rules
 .claude/hooks/trash.sh .claude/skills
-git --git-dir=/tmp/ai-developer-kit-update/.git --work-tree=. checkout HEAD -- .claude/rule-library .claude/rules .claude/skills
 ```
+
+Then enumerate every file in each upstream directory:
+
+```bash
+find /tmp/ai-developer-kit-update/.claude/rule-library /tmp/ai-developer-kit-update/.claude/rules /tmp/ai-developer-kit-update/.claude/skills -type f
+```
+
+For each file returned, read its content from `/tmp/ai-developer-kit-update/` and write it to the corresponding local path using the Write tool. Process files one at a time.
 
 ## Step 4: Report
 
