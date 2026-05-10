@@ -9,10 +9,14 @@ Produce a concrete implementation plan without modifying any files.
 
 ## Setup
 
-Read the following rule files before proceeding:
+Always read:
 - `.claude/docs/code-style.md`
-- `.claude/docs/testing.md`
-- `.claude/docs/security.md`
+
+Read only when the task involves:
+- Behavior or logic that will need tests → `.claude/docs/testing.md`
+- Auth, input validation, external APIs, or data boundaries → `.claude/docs/security.md`
+
+Do not read a conditional file before Phase 1 confirms the task touches that domain.
 
 ## Arguments
 
@@ -27,7 +31,7 @@ Read before reasoning. Do not modify anything.
 - Understand the interfaces at the boundaries: what data flows in, what flows out, what invariants are assumed
 - Check the test setup: how are similar things tested, and what fixtures or helpers already exist
 
-When exploring a large codebase, use subagents in parallel to cover more ground faster. Assign each subagent a specific area (e.g., one reads the auth module, another reads the test patterns).
+When exploring, spawn 2-3 Explore subagents in a single parallel batch — each assigned a non-overlapping area. Example: one searches for the relevant entry point and existing utilities, another reads the test patterns and fixture setup. Never explore sequentially when parallel agents can cover the same ground faster. Use targeted grep/find before reading full files.
 
 ## Phase 2: Write the plan
 

@@ -7,12 +7,16 @@ description: Design and implement frontend features. Use this skill when the use
 
 ## Setup
 
-Read before proceeding:
+Always read:
 - `.claude/docs/frontend.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/code-style.md`
-- `.claude/docs/security.md`
-- `.claude/docs/design-system.md`
+
+Read only when the task explicitly involves:
+- Auth, form validation, or external data handling → `.claude/docs/security.md`
+- A design system, token library, or shared component library → `.claude/docs/design-system.md`
+
+Do not read a conditional file unless the task description or codebase investigation confirms it applies.
 
 ## Steps
 

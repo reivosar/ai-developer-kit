@@ -11,6 +11,10 @@ Investigate and summarize without making any changes.
 
 The target to explore is `$ARGUMENTS`. If omitted, give an overview of the whole project.
 
+## Parallelization
+
+For large or unfamiliar codebases, spawn 2-3 Explore subagents in a single parallel batch — each assigned a distinct area. Example: one reads `src/auth/` and `src/middleware/`, another reads `src/api/` and entry points, a third reads tests and build config. Read entry points, index files, and README first; skip test fixtures and generated files unless specifically relevant.
+
 ## What to investigate
 
 Start broad, then drill into what's interesting or relevant to the user's work.

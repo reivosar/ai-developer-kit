@@ -9,10 +9,14 @@ Start from broken behavior with unknown cause. Diagnose first — do not write a
 
 ## Setup
 
-Read the following rule files before proceeding:
+Read before proceeding:
 - `.claude/docs/code-style.md`
-- `.claude/docs/testing.md`
-- `.claude/docs/security.md`
+
+Read only after investigation confirms the domain:
+- Bug is in test code or test setup → `.claude/docs/testing.md`
+- Bug involves auth, input handling, or a security boundary → `.claude/docs/security.md`
+
+Do not read testing.md or security.md speculatively before you know the bug's domain.
 
 ## Arguments
 
@@ -26,7 +30,7 @@ Before touching anything, understand the system:
 
 - Search for the error string or failing symbol: `grep -r "ErrorMessage" src/`
 - Trace the call path from the entry point to where the error occurs
-- Check git history to find when the behavior changed: `git log -p --all -S "symptom"` — this often reveals the commit that introduced the bug
+- Check git history to find when the behavior changed: `git log --oneline -S "symptom"` — then `git show <hash>` on specific commits; never use `git log -p` which dumps full file diffs for every match
 
 Resist the urge to fix immediately. The first obvious explanation is often wrong.
 
