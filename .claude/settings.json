@@ -55,7 +55,7 @@
       "Bash(npm run build*)",
       "Bash(npm run lint*)",
       "Bash(npm run typecheck*)",
-      "Bash(python3 .claude/hooks/test_*.py)",
+      "Bash(python3 *test*.py)",
       "Bash(gh auth*)",
       "Bash(gh issue create*)",
       "Bash(gh issue list*)",

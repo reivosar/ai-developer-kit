@@ -280,12 +280,16 @@ cases = [
     ('node -e "require(\'fs\').readFile(\'x\',()=>{})"', True),
     # blocked: python/node/npx/make/npm install no longer in allow list
     ("python3 -c \"import webbrowser; webbrowser.open('x')\"", True),
-    # allowed: hook test runner only
-    ("python3 .claude/hooks/test_allow_list.py", False),
+    # allowed: any test file (pattern: *test*.py)
+    ("python3 .claude/hooks/test_allow_list.py",    False),
     ("python3 .claude/hooks/test_pre_edit_check.py", False),
-    # blocked: other python usage
-    ("python3 main.py", True),
-    ("python3 -m pytest", True),
+    ("python3 test_something.py",                   False),
+    ("python3 tests/test_api.py",                   False),
+    ("python3 src/test_utils.py",                   False),
+    ("python3 app_test.py",                         False),
+    # blocked: non-test python files
+    ("python3 main.py",                             True),
+    ("python3 -m pytest",                           True),
     ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
     # deny: gh destructive subcommands not in allow list
     ("gh pr merge feat/foo",          True),
