@@ -14,10 +14,10 @@ Read `.claude/rule-library/git-workflow.md` before proceeding.
 ## Step 1: Verify branch
 
 ```bash
-git branch --show-current
+git status
 ```
 
-If on `main` — stop. Do not commit to main directly. Tell the user to create a feature branch:
+If the first line shows `On branch main` — stop. Do not commit to main directly. Tell the user to create a feature branch:
 
 ```bash
 git checkout -b feat/<short-description>

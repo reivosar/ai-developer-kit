@@ -25,22 +25,13 @@ Choose one label based on the insight:
 | `new-pattern` | A repeating pattern not yet captured as a rule or skill |
 | `enhancement` | An existing rule or skill works but could be clearer or stronger |
 
-## Step 2: Ensure labels exist
-
-```bash
-gh label create rule-gap --repo reivosar/ai-developer-kit --color 0075ca --description "Missing or incomplete rule coverage" --force
-gh label create skill-gap --repo reivosar/ai-developer-kit --color e4e669 --description "Missing or incomplete skill coverage" --force
-gh label create new-pattern --repo reivosar/ai-developer-kit --color d93f0b --description "Repeating pattern not yet in the kit" --force
-gh label create enhancement --repo reivosar/ai-developer-kit --color a2eeef --description "Improvement to existing rule or skill" --force
-```
-
-## Step 3: Derive the issue title
+## Step 2: Derive the issue title
 
 - Imperative, under 72 characters
 - Include the affected area: `rule(security):`, `skill(coding):`, `rule(logging):`, etc.
 - Example: `rule(errors): add guidance for retrying non-idempotent operations`
 
-## Step 4: Create the issue
+## Step 3: Create the issue
 
 ```bash
 gh issue create \
@@ -64,6 +55,6 @@ EOF
 )"
 ```
 
-## Step 5: Report
+## Step 4: Report
 
 Output the issue URL.
