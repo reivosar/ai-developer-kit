@@ -5,6 +5,7 @@
       "Bash(git log*)",
       "Bash(git diff*)",
       "Bash(git fetch*)",
+      "Bash(git pull origin main)",
       "Bash(git branch)",
       "Bash(git branch -a*)",
       "Bash(git branch -l*)",

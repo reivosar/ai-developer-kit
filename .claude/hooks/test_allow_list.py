@@ -213,7 +213,7 @@ cases = [
     ("git switch -c my-branch",      True),
     ("git switch --detach HEAD",     True),   # denied explicitly
     ("git pull",                     True),
-    ("git pull origin main",         True),
+    ("git pull origin main",         False),
     ("git merge feature/foo",        True),
     ("git restore .",                True),
     ("git restore README.md",        True),
