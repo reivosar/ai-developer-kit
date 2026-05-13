@@ -12,6 +12,7 @@
       "Bash(git branch -r*)",
       "Bash(git branch -v*)",
       "Bash(git branch --list*)",
+      "Bash(git branch --show-current)",
       "Bash(git branch -d *)",
       "Bash(git stash list*)",
       "Bash(git stash show*)",
