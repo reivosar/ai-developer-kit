@@ -16,7 +16,7 @@ If neither is yes, do not read the file.
 
 ### Graduated reading order
 
-1. Read `$ARGUMENTS` and the user's message (always free)
+1. Read the task description and the user's message (always free)
 2. Run grep/find to locate specific files, symbols, or patterns in scope
 3. Read only the files grep/find surfaced
 4. Read a doc only after step 2 confirms the domain applies
