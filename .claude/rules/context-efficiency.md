@@ -16,10 +16,12 @@ If neither is yes, do not read the file.
 
 ### Graduated reading order
 
+This order governs investigation-driven reads. A skill's explicit "Always read" Setup items are structural prerequisites — read those first, then follow this order for any additional reads.
+
 1. Read the task description and the user's message (always free)
 2. Read `.claude/docs/investigation-tools.md` once per session; use the active tool per category to locate files and symbols
 3. Read only the files the tools surfaced
-4. Read a doc only after step 3 confirms the domain applies
+4. Read a domain doc only after step 3 confirms the domain applies
 
 Never read a doc to discover whether it applies — investigate first.
 

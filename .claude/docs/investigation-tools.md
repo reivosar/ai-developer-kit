@@ -46,14 +46,10 @@ active: git_log
 ---
 
 ### static_analysis
-Run language-native checks to surface type errors, undefined references, and lint violations without reading source files.
+Run language-native checks to surface type errors, undefined references, and lint violations without reading source files. Select the tool that matches the project's language. Run before reading any source file when diagnosing errors or verifying a change.
 
-active: auto
-
-Use the tool that matches the project's language. Run before reading any source file when diagnosing errors or verifying a change.
-
-- **tsc**: `tsc --noEmit` (TypeScript — reports type errors and missing references)
-- **go_vet**: `go vet ./...` (Go — reports suspicious constructs)
-- **pylint**: `pylint {{target}}` (Python — reports errors and code issues)
-- **flake8**: `flake8 {{target}}` (Python — PEP 8 and error checking)
-- **javac**: `javac -cp {{classpath}} {{target}}` (Java — compile-time errors)
+- **tsc**: `tsc --noEmit` (TypeScript)
+- **go_vet**: `go vet ./...` (Go)
+- **pylint**: `pylint {{target}}` (Python — errors and code issues)
+- **flake8**: `flake8 {{target}}` (Python — PEP 8 and errors)
+- **javac**: `javac -cp {{classpath}} {{target}}` (Java)
