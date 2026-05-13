@@ -12,9 +12,9 @@ Implement code for any domain — frontend, backend, scripts, CLI, full-stack, o
 Always read (applies to every implementation):
 - `.claude/docs/code-style.md`
 - `.claude/docs/coding.md`
-- `.claude/docs/testing.md`
 
 Read `$ARGUMENTS` first, then decide which conditional docs apply:
+- Task involves logic with testable behavior → `.claude/docs/testing.md`
 - Input validation, auth, or external data → `.claude/docs/security.md`
 - Error handling or failure paths → `.claude/docs/errors.md`
 - Log statements → `.claude/docs/logging.md`
