@@ -269,7 +269,7 @@ cases = [
     ("cd frontend && git reset --hard HEAD",   True),
     ("cd frontend && rm -rf /tmp",             True),
     # blocked: commands not in allow list (skills use replacements instead)
-    ("git branch --show-current",                              True),
+    ("git branch --show-current",                              False),
     ("gh label create rule-gap --repo foo",                    True),
     ("nohup python generate_review.py",                        True),
     ("kill 1234",                                              True),
