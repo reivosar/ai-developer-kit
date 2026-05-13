@@ -11,6 +11,7 @@ Always read:
 - `.claude/docs/backend.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/code-style.md`
+- `.claude/docs/investigation-tools.md`
 
 Read only when the task explicitly involves:
 - Task involves implementation with testable logic → `.claude/docs/testing.md`
@@ -27,8 +28,8 @@ Do not read a conditional file unless the task description or codebase investiga
 ### 1. Investigate
 
 Understand the existing codebase before touching anything:
-- Identify the language, framework, and directory structure
-- Find handlers, services, or models adjacent to the target area
+- Identify the language, framework, and directory structure using `file_locate` from `.claude/docs/investigation-tools.md`
+- Find handlers, services, or models adjacent to the target area using `symbol_search` or `reference_search`
 - Note the API conventions, error handling patterns, and validation approach in use
 
 ### 2. Design

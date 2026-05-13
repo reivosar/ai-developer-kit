@@ -11,14 +11,16 @@ Explain the target clearly to someone who hasn't seen it before.
 
 The target is `$ARGUMENTS` — a file path, function name, concept, or pasted code.
 
+## Setup
+
+Read before proceeding:
+- `.claude/docs/investigation-tools.md`
+
 ## Before explaining
 
 If the target is a file path or symbol name, read the code before saying anything. A confident-sounding wrong explanation is worse than saying "let me look at this first."
 
-```bash
-# Find the definition if the path isn't given
-grep -rn "functionName" src/ --include="*.ts"
-```
+Use `symbol_search` from `.claude/docs/investigation-tools.md` to locate the definition if the path is not given.
 
 ## Structure
 

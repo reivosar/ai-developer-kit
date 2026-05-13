@@ -11,6 +11,7 @@ Always read:
 - `.claude/docs/frontend.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/code-style.md`
+- `.claude/docs/investigation-tools.md`
 
 Read only when the task explicitly involves:
 - Auth, form validation, or external data handling → `.claude/docs/security.md`
@@ -23,8 +24,8 @@ Do not read a conditional file unless the task description or codebase investiga
 ### 1. Investigate
 
 Understand the existing codebase before touching anything:
-- Identify the framework, tooling, and directory structure
-- Find components or pages adjacent to the target area
+- Identify the framework, tooling, and directory structure using `file_locate` from `.claude/docs/investigation-tools.md`
+- Find components or pages adjacent to the target area using `symbol_search` or `reference_search`
 - Note the styling approach, naming conventions, and state management patterns in use
 
 ### 2. Design
