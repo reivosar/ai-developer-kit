@@ -31,7 +31,7 @@ Every task must go through a skill — never handle any task inline.
 
 ### Kit and configuration
 
-- Editing kit configuration (settings.json, hooks, permissions, env vars) → `/edit-kit`
+- Editing kit configuration (settings.json, hooks, permissions, env vars) → `/edit-kit` (alias: `/update-config`)
 - Updating docs and skills from the upstream kit → `/update-kit`
 - Reducing permission prompts by allowlisting safe commands → `/fewer-permission-prompts`
 - Customizing keyboard shortcuts or keybindings → `/keybindings-help`

@@ -7,6 +7,11 @@ description: Review code changes on the current branch for bugs, security issues
 
 Review the changes on the current branch and produce a structured report.
 
+## Read first
+
+Before any other step:
+- `.claude/docs/investigation-tools.md`
+
 ## Arguments
 
 `$ARGUMENTS` is optional. If a PR number is passed (e.g. `42`), review that PR. Otherwise review the current branch.
@@ -34,7 +39,6 @@ Read after examining the diff:
 Always read:
 - `.claude/docs/code-style.md`
 - `.claude/docs/git-workflow.md`
-- `.claude/docs/investigation-tools.md`
 
 Read only after confirming the domain applies from the diff:
 - Diff contains auth, validation, or external API changes → `.claude/docs/security.md`
