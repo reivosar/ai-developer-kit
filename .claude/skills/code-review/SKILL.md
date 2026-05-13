@@ -7,14 +7,6 @@ description: Review code changes on the current branch for bugs, security issues
 
 Review the changes on the current branch and produce a structured report.
 
-## Setup
-
-Read the following rule files before proceeding:
-- `.claude/docs/code-style.md`
-- `.claude/docs/git-workflow.md`
-- `.claude/docs/testing.md`
-- `.claude/docs/security.md`
-
 ## Arguments
 
 `$ARGUMENTS` is optional. If a PR number is passed (e.g. `42`), review that PR. Otherwise review the current branch.
@@ -34,6 +26,18 @@ gh pr diff $ARGUMENTS
 ```
 
 Use grep to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
+
+## Setup
+
+Read after examining the diff:
+
+Always read:
+- `.claude/docs/code-style.md`
+- `.claude/docs/git-workflow.md`
+
+Read only after confirming the domain applies from the diff:
+- Diff contains auth, validation, or external API changes → `.claude/docs/security.md`
+- Diff modifies test files or adds testable logic paths → `.claude/docs/testing.md`
 
 ## Review areas
 

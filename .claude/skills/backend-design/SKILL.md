@@ -11,9 +11,9 @@ Always read:
 - `.claude/docs/backend.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/code-style.md`
-- `.claude/docs/testing.md`
 
 Read only when the task explicitly involves:
+- Task involves implementation with testable logic → `.claude/docs/testing.md`
 - Auth, input validation, or external API calls → `.claude/docs/security.md`
 - Database tables, schemas, or queries → `.claude/docs/database.md`
 - Error handling or failure paths → `.claude/docs/errors.md`
