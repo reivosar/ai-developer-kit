@@ -13,7 +13,6 @@ Always read (applies to every implementation):
 - `.claude/docs/code-style.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/testing.md`
-- `.claude/docs/investigation-tools.md`
 
 Read `$ARGUMENTS` first, then decide which conditional docs apply:
 - Input validation, auth, or external data → `.claude/docs/security.md`
@@ -37,7 +36,7 @@ Follow Red-Green-Refactor strictly. Tests come before implementation.
 Before writing anything:
 
 - Identify the language, toolchain, and conventions in use
-- Locate the relevant entry point or file — use `symbol_search` or `file_locate` from `.claude/docs/investigation-tools.md`; do not read files speculatively
+- Read `.claude/docs/investigation-tools.md`, then use `symbol_search` or `file_locate` to locate the relevant entry point or file; do not read files speculatively
 - Clarify ambiguous requirements before writing code
 
 ### 2. Plan the change

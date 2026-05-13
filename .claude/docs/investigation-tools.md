@@ -42,3 +42,18 @@ Find commits that introduced or modified a symbol or string.
 active: git_log
 
 - **git_log**: `git log --oneline -S "{{symbol}}"`
+
+---
+
+### static_analysis
+Run language-native checks to surface type errors, undefined references, and lint violations without reading source files.
+
+active: auto
+
+Use the tool that matches the project's language. Run before reading any source file when diagnosing errors or verifying a change.
+
+- **tsc**: `tsc --noEmit` (TypeScript — reports type errors and missing references)
+- **go_vet**: `go vet ./...` (Go — reports suspicious constructs)
+- **pylint**: `pylint {{target}}` (Python — reports errors and code issues)
+- **flake8**: `flake8 {{target}}` (Python — PEP 8 and error checking)
+- **javac**: `javac -cp {{classpath}} {{target}}` (Java — compile-time errors)

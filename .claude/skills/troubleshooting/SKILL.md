@@ -11,7 +11,6 @@ Start from broken behavior with unknown cause. Diagnose first — do not write a
 
 Read before proceeding:
 - `.claude/docs/code-style.md`
-- `.claude/docs/investigation-tools.md`
 
 Read only after investigation confirms the domain:
 - Bug is in test code or test setup → `.claude/docs/testing.md`
@@ -29,7 +28,7 @@ The problem description or error message is passed as `$ARGUMENTS`. If the user 
 
 Before touching anything, understand the system:
 
-- Search for the error string or failing symbol using `symbol_search` from `.claude/docs/investigation-tools.md`
+- Read `.claude/docs/investigation-tools.md`, then use `symbol_search` to search for the error string or failing symbol
 - Trace the call path from the entry point to where the error occurs
 - Check git history using `history_search` to find when the behavior changed — then `git show <hash>` on specific commits; never use `git log -p` which dumps full file diffs for every match
 
