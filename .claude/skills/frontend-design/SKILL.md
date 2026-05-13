@@ -23,8 +23,8 @@ Do not read a conditional file unless the task description or codebase investiga
 ### 1. Investigate
 
 Understand the existing codebase before touching anything:
-- Identify the framework, tooling, and directory structure
-- Find components or pages adjacent to the target area
+- Read `.claude/docs/investigation-tools.md`, then use `file_locate` to identify the framework, tooling, and directory structure
+- Use `symbol_search` or `reference_search` to find components or pages adjacent to the target area
 - Note the styling approach, naming conventions, and state management patterns in use
 
 ### 2. Design

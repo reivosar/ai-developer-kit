@@ -7,6 +7,11 @@ description: Investigate an unfamiliar codebase, module, or concept and produce 
 
 Investigate and summarize without making any changes.
 
+## Setup
+
+Read before proceeding:
+- `.claude/docs/investigation-tools.md`
+
 ## Arguments
 
 The target to explore is `$ARGUMENTS`. If omitted, give an overview of the whole project.

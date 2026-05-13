@@ -16,8 +16,10 @@ Read before proceeding:
 ### 1. Investigate
 
 Before writing anything:
-- Read what documentation already exists — do not duplicate or contradict it
-- Read the actual source code for the area being documented; never invent behavior
+
+Read `.claude/docs/investigation-tools.md`, then:
+- Use `file_locate` to find existing documentation files — do not duplicate or contradict them
+- Use `symbol_search` to locate the source code for the area being documented; never invent behavior
 - Identify the output type needed: README, ADR, OpenAPI spec, or inline comments
 
 ### 2. Write

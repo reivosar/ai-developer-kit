@@ -31,7 +31,7 @@ Read before reasoning. Do not modify anything.
 - Understand the interfaces at the boundaries: what data flows in, what flows out, what invariants are assumed
 - Check the test setup: how are similar things tested, and what fixtures or helpers already exist
 
-When exploring, spawn 2-3 Explore subagents in a single parallel batch — each assigned a non-overlapping area. Example: one searches for the relevant entry point and existing utilities, another reads the test patterns and fixture setup. Never explore sequentially when parallel agents can cover the same ground faster. Use targeted grep/find before reading full files.
+When exploring, spawn 2-3 Explore subagents in a single parallel batch — each assigned a non-overlapping area. Example: one searches for the relevant entry point and existing utilities, another reads the test patterns and fixture setup. Never explore sequentially when parallel agents can cover the same ground faster. Read `.claude/docs/investigation-tools.md` first, then use `symbol_search` and `file_locate` before reading full files.
 
 ## Phase 2: Write the plan
 

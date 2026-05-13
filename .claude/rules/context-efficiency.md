@@ -17,9 +17,9 @@ If neither is yes, do not read the file.
 ### Graduated reading order
 
 1. Read the task description and the user's message (always free)
-2. Run grep/find to locate specific files, symbols, or patterns in scope
-3. Read only the files grep/find surfaced
-4. Read a doc only after step 2 confirms the domain applies
+2. Read `.claude/docs/investigation-tools.md` once per session; use the active tool per category to locate files and symbols
+3. Read only the files the tools surfaced
+4. Read a doc only after step 3 confirms the domain applies
 
 Never read a doc to discover whether it applies — investigate first.
 

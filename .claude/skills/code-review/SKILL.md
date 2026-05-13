@@ -25,7 +25,7 @@ gh pr view $ARGUMENTS
 gh pr diff $ARGUMENTS
 ```
 
-Use grep to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
+Use `symbol_search` from `.claude/docs/investigation-tools.md` to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
 
 ## Setup
 
@@ -34,6 +34,7 @@ Read after examining the diff:
 Always read:
 - `.claude/docs/code-style.md`
 - `.claude/docs/git-workflow.md`
+- `.claude/docs/investigation-tools.md`
 
 Read only after confirming the domain applies from the diff:
 - Diff contains auth, validation, or external API changes → `.claude/docs/security.md`

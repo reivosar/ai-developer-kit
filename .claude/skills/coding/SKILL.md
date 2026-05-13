@@ -36,7 +36,7 @@ Follow Red-Green-Refactor strictly. Tests come before implementation.
 Before writing anything:
 
 - Identify the language, toolchain, and conventions in use
-- Locate the relevant entry point or file — search by symbol or filename, don't read speculatively
+- Read `.claude/docs/investigation-tools.md`, then use `symbol_search` or `file_locate` to locate the relevant entry point or file; do not read files speculatively
 - Clarify ambiguous requirements before writing code
 
 ### 2. Plan the change
