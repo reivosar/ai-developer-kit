@@ -78,6 +78,7 @@
       "Bash(gh label list*)",
       "Bash(gh repo view*)",
       "Bash(gh repo clone*)",
+      "Bash(cp *)",
       "Bash(.claude/hooks/trash.sh*)",
       "Bash(chmod +x .claude/hooks/*)"
     ],

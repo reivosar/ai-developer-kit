@@ -124,12 +124,47 @@ def check_commit_on_main(command):
               "&& git checkout -b <type>/<description>")
 
 
+def check_cp_destination(command):
+    """For recursive cp, move an existing destination directory to trash before copying."""
+    import shlex
+    for seg in split_segments(command):
+        seg = seg.strip()
+        if not re.match(r'cp\s', seg):
+            continue
+        try:
+            args = shlex.split(seg)
+        except ValueError:
+            continue
+        has_recursive = any(
+            re.match(r'^-[a-zA-Z]*[rRa][a-zA-Z]*$', a)
+            for a in args[1:]
+            if a.startswith('-') and not a.startswith('--')
+        )
+        if not has_recursive:
+            continue
+        positional = [a for a in args[1:] if not a.startswith('-')]
+        if len(positional) < 2:
+            continue
+        dst = positional[-1].rstrip('/')
+        if not dst or dst in ('.', '..'):
+            continue
+        dst_path = os.path.expanduser(dst)
+        if os.path.isdir(dst_path):
+            trash_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trash.sh')
+            result = subprocess.run(['bash', trash_script, dst_path], capture_output=True)
+            if result.returncode != 0:
+                block(f"could not trash existing destination '{dst_path}' before copy — "
+                      f"{result.stderr.decode().strip()}")
+            print(f"INFO: moved existing '{dst_path}' to trash before copy", file=sys.stderr)
+
+
 def run_blocklist_checks(command):
     check_stash_destructive(command)
     check_checkout_discard(command)
     check_branch_force_delete(command)
     check_redirect_overwrite(command)
     check_commit_on_main(command)
+    check_cp_destination(command)
 
 
 def main():

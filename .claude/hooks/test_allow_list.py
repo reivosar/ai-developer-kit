@@ -91,6 +91,26 @@ def run_unit_tests():
             if ok: unit_passed += 1
             else: unit_failed += 1
 
+    # check_cp_destination: non-cp and non-recursive must not block
+    if not hasattr(mod, "check_cp_destination"):
+        print("[FAIL] check_cp_destination not found in module")
+        unit_failed += 1
+    else:
+        for cmd, expect_block in [
+            ("git status",           False),
+            ("cp file.txt .",        False),
+            ("cp README.md docs/",   False),
+        ]:
+            try:
+                mod.check_cp_destination(cmd)
+                blocked = False
+            except SystemExit:
+                blocked = True
+            ok = blocked == expect_block
+            print(f"[{'PASS' if ok else 'FAIL'}] check_cp_destination({cmd!r}) blocked=={expect_block}")
+            if ok: unit_passed += 1
+            else: unit_failed += 1
+
     # check_commit_on_main
     if not hasattr(mod, "check_commit_on_main"):
         print("[FAIL] check_commit_on_main not found in module")
@@ -271,12 +291,15 @@ cases = [
     # deny: compound command where one segment is denied
     ("cd frontend && git reset --hard HEAD",   True),
     ("cd frontend && rm -rf /tmp",             True),
+    # cp: allowed with auto-trash of existing destination
+    ("cp -r src/ dst/",          False),
+    ("cp README.md docs/",       False),
+    ("cp -rp src/ dst/",         False),
     # blocked: commands not in allow list (skills use replacements instead)
     ("git branch --show-current",                              False),
     ("gh label create rule-gap --repo foo",                    True),
     ("nohup python generate_review.py",                        True),
     ("kill 1234",                                              True),
-    ("cp -r src/ dst/",                                        True),
     ("open /tmp/foo.html",                                     True),
     ("claude --worktree mywork",                               True),
     # denied: bulk-copy APIs
