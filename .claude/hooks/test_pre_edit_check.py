@@ -76,6 +76,26 @@ def check(label, got, expected):
 
 mod = _load_module()
 
+# Unit tests: is_blocked_env_file
+for path, expect in [
+    (".env",              True),
+    (".env.local",        True),
+    (".env.production",   True),
+    (".env.test",         True),
+    (".env.sample",       False),
+    (".env.example",      False),
+    ("src/app.py",        False),
+    (".envrc",            False),
+]:
+    ok = mod.is_blocked_env_file(path) == expect
+    print(f"[{'PASS' if ok else 'FAIL'}] is_blocked_env_file({path!r}) == {expect}")
+    if ok:
+        passed += 1
+    else:
+        failed += 1
+
+print()
+
 # Unit tests: is_impl_file
 for path, expect in [
     ("src/app.py",              True),
@@ -199,6 +219,41 @@ tmpdir = make_git_repo()
 try:
     stage_file(tmpdir, "tests/test_calc.py", "def test_calc():\n    calc()\n")
     check("TC-ED-10 Write tool content key", run_hook(tmpdir, "Write", "src/app.py", "content", "def calc():\n    pass\n"), 0)
+finally:
+    cleanup(tmpdir)
+
+# TC-ENV-01: Edit .env → blocked (exit 2)
+tmpdir = make_git_repo()
+try:
+    check("TC-ENV-01 Edit .env blocked", run_hook(tmpdir, "Edit", ".env", "old_string", "SECRET=abc"), 2)
+finally:
+    cleanup(tmpdir)
+
+# TC-ENV-02: Edit .env.local → blocked (exit 2)
+tmpdir = make_git_repo()
+try:
+    check("TC-ENV-02 Edit .env.local blocked", run_hook(tmpdir, "Edit", ".env.local", "old_string", "KEY=val"), 2)
+finally:
+    cleanup(tmpdir)
+
+# TC-ENV-03: Edit .env.sample → allowed (exit 0)
+tmpdir = make_git_repo()
+try:
+    check("TC-ENV-03 Edit .env.sample allowed", run_hook(tmpdir, "Edit", ".env.sample", "old_string", "KEY=val"), 0)
+finally:
+    cleanup(tmpdir)
+
+# TC-ENV-04: Write .env → blocked (exit 2)
+tmpdir = make_git_repo()
+try:
+    check("TC-ENV-04 Write .env blocked", run_hook(tmpdir, "Write", ".env", "content", "SECRET=abc"), 2)
+finally:
+    cleanup(tmpdir)
+
+# TC-ENV-05: Write .env.example → allowed (exit 0)
+tmpdir = make_git_repo()
+try:
+    check("TC-ENV-05 Write .env.example allowed", run_hook(tmpdir, "Write", ".env.example", "content", "KEY=val"), 0)
 finally:
     cleanup(tmpdir)
 

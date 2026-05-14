@@ -58,6 +58,18 @@ def read_input():
     return data.get('tool_name', ''), data.get('tool_input', {})
 
 
+ALLOWED_ENV_FILES = {'.env.sample', '.env.example'}
+
+
+def is_blocked_env_file(path):
+    basename = os.path.basename(path)
+    if basename == '.env':
+        return True
+    if basename.startswith('.env.'):
+        return basename not in ALLOWED_ENV_FILES
+    return False
+
+
 def is_impl_file(path):
     basename = os.path.basename(path)
     if basename in SKIP_BASENAMES:
@@ -129,7 +141,12 @@ def main():
     tool_name, tool_input = read_input()
     file_path = tool_input.get('file_path', '')
 
-    if not file_path or not is_impl_file(file_path):
+    if not file_path:
+        sys.exit(0)
+    if is_blocked_env_file(file_path):
+        print(f"BLOCKED: '{os.path.basename(file_path)}' must not be written. Use .env.sample or .env.example instead.", file=sys.stderr)
+        sys.exit(2)
+    if not is_impl_file(file_path):
         sys.exit(0)
 
     code = (tool_input.get('old_string') or '') if tool_name == 'Edit' else tool_input.get('content', '')

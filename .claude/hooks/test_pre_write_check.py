@@ -3,6 +3,7 @@
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -77,6 +78,24 @@ else:
 
 print()
 
+# Unit tests: is_blocked_env_file
+for path, expect in [
+    (".env",            True),
+    (".env.local",      True),
+    (".env.production", True),
+    (".env.sample",     False),
+    (".env.example",    False),
+    ("src/app.py",      False),
+]:
+    ok = mod.is_blocked_env_file(path) == expect
+    print(f"[{'PASS' if ok else 'FAIL'}] is_blocked_env_file({path!r}) == {expect}")
+    if ok:
+        passed += 1
+    else:
+        failed += 1
+
+print()
+
 # Blackbox tests: TC-WR-*
 # TC-WR-01: nonexistent path → allowed
 check("TC-WR-01 nonexistent file allowed", run_hook("/nonexistent/path/xyz.py"), 0)
@@ -101,6 +120,23 @@ try:
     check("TC-WR-05 existing directory blocked", run_hook(tmpdir), 2)
 finally:
     os.rmdir(tmpdir)
+
+# TC-ENV-PW-01: Write .env → blocked
+check("TC-ENV-PW-01 Write .env blocked", run_hook(".env"), 2)
+
+# TC-ENV-PW-02: Write .env.local → blocked
+check("TC-ENV-PW-02 Write .env.local blocked", run_hook(".env.local"), 2)
+
+# TC-ENV-PW-03: Write .env.sample → allowed (new file, not blocked by env check)
+check("TC-ENV-PW-03 Write .env.sample allowed", run_hook(".env.sample"), 0)
+
+# TC-ENV-PW-04: Write .env.example → allowed (use nonexistent absolute path)
+_tmpdir_env = tempfile.mkdtemp()
+try:
+    check("TC-ENV-PW-04 Write .env.example allowed",
+          run_hook(os.path.join(_tmpdir_env, ".env.example")), 0)
+finally:
+    shutil.rmtree(_tmpdir_env, ignore_errors=True)
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(0 if failed == 0 else 1)
