@@ -8,7 +8,7 @@ import sys
 import json
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from env_file_guard import ALLOWED_ENV_FILES, is_blocked_env_file  # noqa: E402
+from env_file_guard import is_blocked_env_file  # noqa: E402
 
 
 def read_file_path():

@@ -2,7 +2,7 @@
 
 Tool definitions for codebase investigation. To switch an implementation, change the `active:` value to another entry in that section's tool list.
 
-Template variables filled at use time: `{{symbol}}` (function, class, or variable name), `{{dir}}` (search root, default `.`), `{{ext}}` (file extension without dot, e.g. `ts`, `py`; omit the flag if searching all types), `{{pattern}}` (filename glob).
+Template variables filled at use time: `{{symbol}}` (function, class, or variable name), `{{dir}}` (search root, default `.`), `{{ext}}` (file extension without dot, e.g. `ts`, `py`), `{{pattern}}` (filename glob).
 
 ---
 
@@ -13,7 +13,8 @@ active: grep
 
 - **grep** (with extension filter): `grep -rn "{{symbol}}" {{dir}} --include="*.{{ext}}"`
 - **grep** (all file types): `grep -rn "{{symbol}}" {{dir}}`
-- **rg**: `rg -n "{{symbol}}" {{dir}} -t {{ext}}`
+- **rg** (with extension filter): `rg -n "{{symbol}}" {{dir}} -t {{ext}}`
+- **rg** (all file types): `rg -n "{{symbol}}" {{dir}}`
 
 ---
 
