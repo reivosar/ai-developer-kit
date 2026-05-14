@@ -9,6 +9,8 @@ import json
 import re
 import subprocess
 import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from env_file_guard import is_blocked_env_file  # noqa: E402
 
 IMPL_EXTS = {
     '.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs',
@@ -51,9 +53,6 @@ for _e in ('.c', '.h', '.cpp', '.cc', '.cxx', '.hpp'):
 KEYWORD_SKIP = {'if', 'for', 'while', 'return', 'new', 'switch', 'catch', 'try',
                 'else', 'do', 'case', 'break', 'continue', 'throw', 'import',
                 'class', 'interface', 'enum', 'struct', 'type', 'const', 'let', 'var'}
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from env_file_guard import ALLOWED_ENV_FILES, is_blocked_env_file  # noqa: E402
 
 
 def read_input():
