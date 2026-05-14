@@ -14,7 +14,9 @@ Write tests for existing code. Follow Red-Green-Refactor.
 Always read:
 - `.claude/docs/code-style.md`
 - `.claude/docs/testing.md`
-- `.claude/docs/coding.md`
+
+Read only after confirming the domain applies:
+- Implementation conventions needed (new code alongside tests) → `.claude/docs/coding.md`
 
 ## Arguments
 

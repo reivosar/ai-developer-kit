@@ -82,10 +82,11 @@ for path, expect in [
     (".env.local",        True),
     (".env.production",   True),
     (".env.test",         True),
-    (".env.sample",       False),
-    (".env.example",      False),
-    ("src/app.py",        False),
-    (".envrc",            False),
+    (".env.sample",        False),
+    (".env.example",       False),
+    (".env.local.backup",  True),
+    ("src/app.py",         False),
+    (".envrc",             False),
 ]:
     ok = mod.is_blocked_env_file(path) == expect
     print(f"[{'PASS' if ok else 'FAIL'}] is_blocked_env_file({path!r}) == {expect}")

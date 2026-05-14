@@ -44,7 +44,7 @@ fi
 # --- 4. .env file protection ---
 while IFS= read -r f; do
   base=$(basename "$f")
-  if ([[ "$base" == ".env" ]] || [[ "$base" == .env.* ]]) && [[ "$base" != ".env.sample" ]] && [[ "$base" != ".env.example" ]]; then
+  if { [[ "$base" == ".env" ]] || [[ "$base" == .env.* ]]; } && [[ "$base" != ".env.sample" ]] && [[ "$base" != ".env.example" ]]; then
     ERRORS+=("'.env' files must not be committed ($f). Use .env.sample or .env.example instead.")
   fi
 done <<< "$STAGED"

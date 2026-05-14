@@ -52,13 +52,12 @@ KEYWORD_SKIP = {'if', 'for', 'while', 'return', 'new', 'switch', 'catch', 'try',
                 'else', 'do', 'case', 'break', 'continue', 'throw', 'import',
                 'class', 'interface', 'enum', 'struct', 'type', 'const', 'let', 'var'}
 
+ALLOWED_ENV_FILES = {'.env.sample', '.env.example'}
+
 
 def read_input():
     data = json.load(sys.stdin)
     return data.get('tool_name', ''), data.get('tool_input', {})
-
-
-ALLOWED_ENV_FILES = {'.env.sample', '.env.example'}
 
 
 def is_blocked_env_file(path):
