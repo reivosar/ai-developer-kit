@@ -27,7 +27,7 @@ def load_patterns(settings_path, key):
 
 
 def split_segments(command: str) -> list[str]:
-    """Split on && and ; that are outside of single or double quotes."""
+    """Split on &&, ;, and | that are outside of single or double quotes."""
     segments: list[str] = []
     current: list[str] = []
     in_single = in_double = False
@@ -48,7 +48,7 @@ def split_segments(command: str) -> list[str]:
                 current = []
                 i += 2
                 continue
-            elif c == ";":
+            elif c in (";", "|"):
                 seg = "".join(current).strip()
                 if seg:
                     segments.append(seg)
