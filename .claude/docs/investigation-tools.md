@@ -11,7 +11,8 @@ Locate where a symbol is defined or used.
 
 active: grep
 
-- **grep**: `grep -rn "{{symbol}}" {{dir}} --include="*.{{ext}}"`
+- **grep** (with extension filter): `grep -rn "{{symbol}}" {{dir}} --include="*.{{ext}}"`
+- **grep** (all file types): `grep -rn "{{symbol}}" {{dir}}`
 - **rg**: `rg -n "{{symbol}}" {{dir}} -t {{ext}}`
 
 ---

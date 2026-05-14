@@ -55,5 +55,3 @@ Never respond inline — if genuinely no skill fits, invoke `/feedback` to file 
 ### Notes
 
 When to use `/coding` vs. a design skill: use a design skill when the structure or boundaries are undecided; use `/coding` once the design is settled and the task is implementation.
-
-`.claude/docs/` is not auto-loaded — each skill reads only the rule files it needs. Once a rule file has been read in a session, never read it again — treat it as cached.

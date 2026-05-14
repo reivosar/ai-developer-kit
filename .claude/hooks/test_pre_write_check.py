@@ -3,11 +3,39 @@
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
 
 HOOK = os.path.join(os.path.dirname(__file__), "pre-write-check.py")
+PRE_COMMIT_HOOK = os.path.join(os.path.dirname(__file__), "pre-commit.sh")
+
+
+def make_git_repo_for_commit():
+    tmpdir = tempfile.mkdtemp(prefix="hook_test_commit_")
+    subprocess.run(["git", "init", tmpdir], check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=tmpdir, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=tmpdir, check=True, capture_output=True)
+    init = os.path.join(tmpdir, "init.txt")
+    with open(init, "w") as f:
+        f.write("init\n")
+    subprocess.run(["git", "add", "init.txt"], cwd=tmpdir, check=True, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "chore: init"], cwd=tmpdir, check=True, capture_output=True)
+    return tmpdir
+
+
+def run_precommit_hook(tmpdir, filename):
+    filepath = os.path.join(tmpdir, filename)
+    with open(filepath, "w") as f:
+        f.write("key=value\n")
+    subprocess.run(["git", "add", filename], cwd=tmpdir, check=True, capture_output=True)
+    payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": "git commit -m test"}})
+    result = subprocess.run(
+        ["bash", PRE_COMMIT_HOOK],
+        input=payload, capture_output=True, text=True, cwd=tmpdir,
+    )
+    return result.returncode
 
 
 def _load_module():
@@ -77,6 +105,25 @@ else:
 
 print()
 
+# Unit tests: is_blocked_env_file
+for path, expect in [
+    (".env",            True),
+    (".env.local",      True),
+    (".env.production", True),
+    (".env.sample",     False),
+    (".env.example",    False),
+    (".envrc",          False),
+    ("src/app.py",      False),
+]:
+    ok = mod.is_blocked_env_file(path) == expect
+    print(f"[{'PASS' if ok else 'FAIL'}] is_blocked_env_file({path!r}) == {expect}")
+    if ok:
+        passed += 1
+    else:
+        failed += 1
+
+print()
+
 # Blackbox tests: TC-WR-*
 # TC-WR-01: nonexistent path → allowed
 check("TC-WR-01 nonexistent file allowed", run_hook("/nonexistent/path/xyz.py"), 0)
@@ -101,6 +148,52 @@ try:
     check("TC-WR-05 existing directory blocked", run_hook(tmpdir), 2)
 finally:
     os.rmdir(tmpdir)
+
+# TC-ENV-PW-01: Write .env → blocked (isolated tmpdir avoids false-positive from existing .env)
+_env1 = tempfile.mkdtemp()
+try:
+    check("TC-ENV-PW-01 Write .env blocked", run_hook(os.path.join(_env1, ".env")), 2)
+finally:
+    shutil.rmtree(_env1, ignore_errors=True)
+
+# TC-ENV-PW-02: Write .env.local → blocked (isolated tmpdir)
+_env2 = tempfile.mkdtemp()
+try:
+    check("TC-ENV-PW-02 Write .env.local blocked", run_hook(os.path.join(_env2, ".env.local")), 2)
+finally:
+    shutil.rmtree(_env2, ignore_errors=True)
+
+# TC-ENV-PW-03: Write .env.sample → allowed (new file, not blocked by env check)
+check("TC-ENV-PW-03 Write .env.sample allowed", run_hook(".env.sample"), 0)
+
+# TC-ENV-PW-04: Write .env.example → allowed (use nonexistent absolute path)
+_tmpdir_env = tempfile.mkdtemp()
+try:
+    check("TC-ENV-PW-04 Write .env.example allowed",
+          run_hook(os.path.join(_tmpdir_env, ".env.example")), 0)
+finally:
+    shutil.rmtree(_tmpdir_env, ignore_errors=True)
+
+# TC-COMMIT-ENV-01: staging .env is blocked
+_repo1 = make_git_repo_for_commit()
+try:
+    check("TC-COMMIT-ENV-01 commit .env blocked", run_precommit_hook(_repo1, ".env"), 2)
+finally:
+    shutil.rmtree(_repo1, ignore_errors=True)
+
+# TC-COMMIT-ENV-02: staging .env.sample is allowed
+_repo2 = make_git_repo_for_commit()
+try:
+    check("TC-COMMIT-ENV-02 commit .env.sample allowed", run_precommit_hook(_repo2, ".env.sample"), 0)
+finally:
+    shutil.rmtree(_repo2, ignore_errors=True)
+
+# TC-COMMIT-ENV-03: staging .env.local is blocked
+_repo3 = make_git_repo_for_commit()
+try:
+    check("TC-COMMIT-ENV-03 commit .env.local blocked", run_precommit_hook(_repo3, ".env.local"), 2)
+finally:
+    shutil.rmtree(_repo3, ignore_errors=True)
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(0 if failed == 0 else 1)
