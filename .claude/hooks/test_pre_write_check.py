@@ -149,11 +149,19 @@ try:
 finally:
     os.rmdir(tmpdir)
 
-# TC-ENV-PW-01: Write .env → blocked
-check("TC-ENV-PW-01 Write .env blocked", run_hook(".env"), 2)
+# TC-ENV-PW-01: Write .env → blocked (isolated tmpdir avoids false-positive from existing .env)
+_env1 = tempfile.mkdtemp()
+try:
+    check("TC-ENV-PW-01 Write .env blocked", run_hook(os.path.join(_env1, ".env")), 2)
+finally:
+    shutil.rmtree(_env1, ignore_errors=True)
 
-# TC-ENV-PW-02: Write .env.local → blocked
-check("TC-ENV-PW-02 Write .env.local blocked", run_hook(".env.local"), 2)
+# TC-ENV-PW-02: Write .env.local → blocked (isolated tmpdir)
+_env2 = tempfile.mkdtemp()
+try:
+    check("TC-ENV-PW-02 Write .env.local blocked", run_hook(os.path.join(_env2, ".env.local")), 2)
+finally:
+    shutil.rmtree(_env2, ignore_errors=True)
 
 # TC-ENV-PW-03: Write .env.sample → allowed (new file, not blocked by env check)
 check("TC-ENV-PW-03 Write .env.sample allowed", run_hook(".env.sample"), 0)

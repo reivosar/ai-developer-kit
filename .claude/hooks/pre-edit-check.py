@@ -52,21 +52,13 @@ KEYWORD_SKIP = {'if', 'for', 'while', 'return', 'new', 'switch', 'catch', 'try',
                 'else', 'do', 'case', 'break', 'continue', 'throw', 'import',
                 'class', 'interface', 'enum', 'struct', 'type', 'const', 'let', 'var'}
 
-ALLOWED_ENV_FILES = {'.env.sample', '.env.example'}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from env_file_guard import ALLOWED_ENV_FILES, is_blocked_env_file  # noqa: E402
 
 
 def read_input():
     data = json.load(sys.stdin)
     return data.get('tool_name', ''), data.get('tool_input', {})
-
-
-def is_blocked_env_file(path):
-    basename = os.path.basename(path)
-    if basename == '.env':
-        return True
-    if basename.startswith('.env.'):
-        return basename not in ALLOWED_ENV_FILES
-    return False
 
 
 def is_impl_file(path):

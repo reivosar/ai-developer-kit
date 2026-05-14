@@ -7,8 +7,8 @@ Blocks Write to .env* files except .env.sample and .env.example.
 import sys
 import json
 import os
-
-ALLOWED_ENV_FILES = {'.env.sample', '.env.example'}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from env_file_guard import ALLOWED_ENV_FILES, is_blocked_env_file  # noqa: E402
 
 
 def read_file_path():
@@ -17,15 +17,6 @@ def read_file_path():
         return data.get("tool_input", {}).get("file_path", "")
     except Exception:
         return None
-
-
-def is_blocked_env_file(path):
-    basename = os.path.basename(path)
-    if basename == '.env':
-        return True
-    if basename.startswith('.env.'):
-        return basename not in ALLOWED_ENV_FILES
-    return False
 
 
 def check_file_exists(file_path):

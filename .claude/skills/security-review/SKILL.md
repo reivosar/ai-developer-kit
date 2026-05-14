@@ -13,6 +13,7 @@ Audit the target for security issues and produce a prioritized findings report.
 
 Before any other step:
 - `.claude/docs/security.md`
+- `.claude/docs/investigation-tools.md`
 
 ## Arguments
 
