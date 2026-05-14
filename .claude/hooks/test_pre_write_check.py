@@ -163,8 +163,12 @@ try:
 finally:
     shutil.rmtree(_env2, ignore_errors=True)
 
-# TC-ENV-PW-03: Write .env.sample → allowed (new file, not blocked by env check)
-check("TC-ENV-PW-03 Write .env.sample allowed", run_hook(".env.sample"), 0)
+# TC-ENV-PW-03: Write .env.sample → allowed (isolated tmpdir avoids false-positive if .env.sample exists at root)
+_env3 = tempfile.mkdtemp()
+try:
+    check("TC-ENV-PW-03 Write .env.sample allowed", run_hook(os.path.join(_env3, ".env.sample")), 0)
+finally:
+    shutil.rmtree(_env3, ignore_errors=True)
 
 # TC-ENV-PW-04: Write .env.example → allowed (use nonexistent absolute path)
 _tmpdir_env = tempfile.mkdtemp()

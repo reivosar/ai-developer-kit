@@ -34,7 +34,7 @@ Find all usages of a symbol across the tracked codebase.
 active: git_grep
 
 - **git_grep**: `git grep -n "{{symbol}}"`
-- **rg**: `rg -n "{{symbol}}"`
+- **rg** (all file types): `rg -n "{{symbol}}"`
 
 ---
 
