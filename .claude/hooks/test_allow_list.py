@@ -32,11 +32,14 @@ def run_unit_tests():
         if ok: unit_passed += 1
         else: unit_failed += 1
 
-    # split_segments: must not split on ; or && inside quotes
+    # split_segments: must not split on ; or && inside quotes; must split on |
     for cmd, expect in [
         ('python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"', ['python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"']),
-        ("cd a && cd b",  ["cd a", "cd b"]),
-        ("echo 'a;b'",    ["echo 'a;b'"]),
+        ("cd a && cd b",        ["cd a", "cd b"]),
+        ("echo 'a;b'",          ["echo 'a;b'"]),
+        ("git log | grep feat", ["git log", "grep feat"]),
+        ("cat f | xargs cp -r", ["cat f", "xargs cp -r"]),
+        ("echo 'a|b'",          ["echo 'a|b'"]),
     ]:
         result = mod.split_segments(cmd)
         ok = result == expect
@@ -310,6 +313,11 @@ cases = [
     ("find /tmp/ai-developer-kit-update/.claude/skills -type f",       True),
     ("find /tmp/ai-developer-kit-update -type f",                      True),
     ("find /tmp/malicious -type f",                                    True),
+    # pipe bypass: right-hand side of pipe must be individually checked
+    ("find . -name '*.py' | xargs cp -r /dst",  True),
+    ("cat file | xargs rm -rf /tmp",             True),
+    ("grep foo src/ | xargs cp -r",             True),
+    ("git log --oneline | xargs cp -r /dst",    True),
 ]
 
 passed = failed = 0
