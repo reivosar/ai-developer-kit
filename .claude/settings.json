@@ -114,6 +114,10 @@
           {
             "type": "command",
             "command": ".claude/hooks/pre-edit.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-worktree-check.py"
           }
         ]
       },
@@ -123,6 +127,10 @@
           {
             "type": "command",
             "command": ".claude/hooks/pre-edit.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-worktree-check.py"
           }
         ]
       }
