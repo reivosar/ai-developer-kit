@@ -1,11 +1,11 @@
 ---
 name: worktree
-description: Create and manage git worktrees for parallel isolated work. Use this skill when the user wants to work on two things at once without losing progress, says "I need to switch context but don't want to stash", "can we work on this in parallel", or asks Claude to work on something in the background while they continue on the main branch.
+description: Create an isolated git worktree before starting any task that modifies files. Use this skill as the first step of every implementation task, and also when the user wants parallel work, says "I need to switch context", "can we work on this in parallel", or asks Claude to work on something in the background.
 ---
 
 # Worktree
 
-Create an isolated git worktree so parallel work doesn't interfere with the main branch.
+Create an isolated git worktree. This is the **mandatory first step** for any task that modifies files — all implementation work must happen inside a worktree, never in the main working directory.
 
 ## Setup
 
@@ -13,19 +13,23 @@ Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Arguments
 
-Worktree name is `$ARGUMENTS`. If omitted, Claude Code generates a random name automatically.
+`$ARGUMENTS` is the branch name in `<type>/<description>` format (e.g. `feat/user-auth`, `fix/login-bug`).
+If omitted, ask the user: "What branch name should I use? (e.g. feat/..., fix/..., refactor/...)"
+
+The worktree directory name (`<name>`) is derived from the description part of the branch name.
 
 ## Create the worktree
 
 ```bash
 git fetch origin
-git worktree add .claude/worktrees/<name> -b worktree-<name> origin/HEAD
+git worktree add .claude/worktrees/<name> -b <type>/<description> origin/main
 ```
 
-This creates `.claude/worktrees/<name>/` on a new branch `worktree-<name>`, forked from `origin/HEAD`.
+This creates `.claude/worktrees/<name>/` on a new branch `<type>/<description>`, forked from `origin/main`.
 
 ## When to use worktrees
 
+- **Standard implementation**: the first step of every task that writes or modifies files — before any other work begins
 - **Bug fix during a feature**: you're mid-feature but a critical bug needs fixing now — open a worktree for the fix, keep the feature branch clean
 - **Parallel review**: one session writes code, another reviews it with a fresh context (no anchoring bias from having written it)
 - **Risky experiment**: try a big refactor in a worktree; discard it cleanly if it doesn't work out

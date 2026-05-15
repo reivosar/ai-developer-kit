@@ -13,6 +13,7 @@ unless the user approves.
 ## Setup
 
 Always read:
+- `.claude/docs/git-workflow.md`
 - `.claude/docs/code-style.md`
 
 Read only after examining the code:
@@ -24,6 +25,11 @@ Read only after examining the code:
 If empty, ask the user what to review.
 
 ## Process
+
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
 
 ### 1. Read the target
 
@@ -55,3 +61,7 @@ Group by severity:
 End with a count: "N issues found (X must, Y should, Z consider)."
 
 Ask before implementing: "Implement all / must-fix only / specific items?"
+
+### 4. Commit
+
+Once the user approves and changes are applied, invoke /commit.

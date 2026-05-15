@@ -8,6 +8,7 @@ description: Design and implement frontend features. Use this skill when the use
 ## Setup
 
 Always read:
+- `.claude/docs/git-workflow.md`
 - `.claude/docs/frontend.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/code-style.md`
@@ -19,6 +20,11 @@ Read only when the task explicitly involves:
 Do not read a conditional file unless the task description or codebase investigation confirms it applies.
 
 ## Steps
+
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
 
 ### 1. Investigate
 
@@ -46,3 +52,7 @@ Write the code following the conventions from the rule files. Match the existing
 - Check for type errors if TypeScript is in use
 - Run existing tests; add a test for the changed path if none exist
 - Confirm the main flow and at least one edge case work correctly
+
+### 5. Commit
+
+Invoke /commit.

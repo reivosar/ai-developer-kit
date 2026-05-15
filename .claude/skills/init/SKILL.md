@@ -9,11 +9,20 @@ description: Create a CLAUDE.md file for the current project. Use when the user
 
 Create a CLAUDE.md that gives Claude accurate, project-specific guidance.
 
+## Setup
+
+Read `.claude/docs/git-workflow.md` before proceeding.
+
 ## Arguments
 
 `$ARGUMENTS` is optional context (e.g. "this is a Go API server").
 
 ## Process
+
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
 
 ### 1. Explore the project
 
@@ -69,3 +78,7 @@ Do not write the file until the user approves.
 ### 4. Write
 
 Write to `CLAUDE.md` in the project root using the Write tool.
+
+### 5. Commit
+
+Invoke /commit.

@@ -7,6 +7,10 @@ description: Use this skill to configure the Claude Code harness via settings.js
 
 Modify Claude Code configuration by updating settings.json files.
 
+## Setup
+
+Read `.claude/docs/git-workflow.md` before proceeding.
+
 ## When Hooks Are Required (Not Memory)
 
 If the user wants something to happen automatically in response to an EVENT, they need a **hook** configured in settings.json. Memory/preferences cannot trigger automated actions.
@@ -45,6 +49,11 @@ When the user's request is ambiguous, use AskUserQuestion to clarify:
 
 ## Workflow
 
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
+
 ### 1. Clarify intent
 
 Ask if the request is ambiguous (which file, what scope).
@@ -81,6 +90,10 @@ Then implement:
 ### 4. Confirm
 
 Tell the user what was changed and in which file.
+
+### 5. Commit
+
+Invoke /commit.
 
 ## Settings File Locations
 

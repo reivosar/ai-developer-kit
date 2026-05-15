@@ -10,6 +10,7 @@ Implement code for any domain — frontend, backend, scripts, CLI, full-stack, o
 ## Setup
 
 Always read (applies to every implementation):
+- `.claude/docs/git-workflow.md`
 - `.claude/docs/code-style.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/testing.md`
@@ -30,6 +31,11 @@ The task description is passed as `$ARGUMENTS`. If files are mentioned, read the
 ## Process
 
 Follow Red-Green-Refactor strictly. Tests come before implementation.
+
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
 
 ### 1. Understand the context
 
@@ -75,3 +81,7 @@ When done:
 - **What changed**: files/functions affected
 - **Why**: the design decision behind the implementation
 - **Caveats**: anything the caller should know about edge cases or follow-up work
+
+### 6. Commit
+
+Invoke /commit.
