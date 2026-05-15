@@ -334,6 +334,7 @@ cases = [
     ("git worktree prune",            False),
     ("git worktree prune --dry-run",  False),
     (".claude/hooks/cleanup-merged-worktrees.sh", False),
+    (".claude/hooks/setup-branch-protection.sh", False),
     # allowed: update-kit sync commands
     ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
