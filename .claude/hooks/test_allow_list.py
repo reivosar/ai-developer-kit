@@ -318,14 +318,18 @@ cases = [
     # blocked: non-test python files
     ("python3 main.py",                             True),
     ("python3 -m pytest",                           True),
-    ("git worktree add .claude/worktrees/x -b worktree-x origin/HEAD", False),
+    ("git worktree add .claude/worktrees/user-auth -b feat/user-auth origin/main", False),
     # deny: gh destructive subcommands not in allow list
     ("gh pr merge feat/foo",          True),
     ("gh pr close 123",               True),
     ("gh issue delete 123",           True),
     ("gh repo delete foo/bar",        True),
-    # deny: worktree destructive subcommands not in allow list
+    # allow: worktree remove scoped to .claude/worktrees/ only
+    ("git worktree remove .claude/worktrees/user-auth",   False),
+    ("git worktree remove .claude/worktrees/fix-login",   False),
+    # deny: worktree remove outside .claude/worktrees/ is destructive
     ("git worktree remove mywork",    True),
+    ("git worktree remove /tmp/evil", True),
     ("git worktree prune",            True),
     # allowed: update-kit sync commands
     ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
