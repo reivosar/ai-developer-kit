@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Move files to the session trash instead of deleting permanently
 
+source "$(dirname "${BASH_SOURCE[0]}")/hook-lib.sh"
 SESSION_FILE="/tmp/claude-session-trash-dir"
-PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+PROJECT_ROOT="$REPO_ROOT"
 
 if [ -f "$SESSION_FILE" ]; then
   TRASH_DIR="$(cat "$SESSION_FILE")"

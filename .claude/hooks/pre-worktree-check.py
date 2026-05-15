@@ -3,6 +3,9 @@
 import json
 import os
 import sys
+from pathlib import Path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from hook_lib import WORKTREES_DIR  # noqa: E402
 
 IMPL_EXTS = {
     ".ts", ".tsx", ".js", ".jsx", ".mts", ".mjs",
@@ -22,14 +25,12 @@ def is_impl_file(path: str) -> bool:
 def is_kit_config(path: str) -> bool:
     if os.path.basename(path) in KIT_BASENAMES:
         return True
-    rel = path if not os.path.isabs(path) else os.path.relpath(path)
-    return rel.startswith(".claude/") or rel.startswith(".claude" + os.sep)
+    return ".claude" in Path(path).parts
 
 
 def is_in_worktree(path: str) -> bool:
-    abs_path = os.path.abspath(path)
-    worktrees_abs = os.path.abspath(".claude/worktrees")
-    return abs_path.startswith(worktrees_abs + os.sep)
+    abs_path = Path(path).resolve()
+    return str(abs_path).startswith(str(WORKTREES_DIR) + os.sep)
 
 
 def main() -> None:

@@ -237,6 +237,7 @@ cases = [
     ("git switch --detach HEAD",     True),   # denied explicitly
     ("git pull",                     True),
     ("git pull origin main",         False),
+    ("git merge origin/main",        False),   # allowed: fixed string, merge only from main
     ("git merge feature/foo",        True),
     ("git restore .",                True),
     ("git restore README.md",        True),

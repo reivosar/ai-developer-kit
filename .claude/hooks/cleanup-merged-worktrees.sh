@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+source "$(dirname "${BASH_SOURCE[0]}")/hook-lib.sh"
 WORKTREES_DIR="$REPO_ROOT/.claude/worktrees"
 
 if [[ ! -d "$WORKTREES_DIR" ]]; then
