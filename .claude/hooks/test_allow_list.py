@@ -330,7 +330,9 @@ cases = [
     # deny: worktree remove outside .claude/worktrees/ is destructive
     ("git worktree remove mywork",    True),
     ("git worktree remove /tmp/evil", True),
-    ("git worktree prune",            True),
+    ("git worktree prune",            False),
+    ("git worktree prune --dry-run",  False),
+    (".claude/hooks/cleanup-merged-worktrees.sh", False),
     # allowed: update-kit sync commands
     ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
