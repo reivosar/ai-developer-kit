@@ -61,10 +61,11 @@ def read_input():
 
 
 def is_impl_file(path):
+    from pathlib import Path
     basename = os.path.basename(path)
     if basename in SKIP_BASENAMES:
         return False
-    if path.startswith('.claude/') or path.startswith('CLAUDE'):
+    if '.claude' in Path(path).parts or path.startswith('CLAUDE'):
         return False
     _, ext = os.path.splitext(path)
     if ext.lower() in SKIP_EXT:

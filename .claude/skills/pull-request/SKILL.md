@@ -99,11 +99,4 @@ Output the PR URL so the user can share or open it.
 
 ## Step 6: Post-merge cleanup
 
-After the PR is merged on GitHub, remove the worktree and delete the local branch:
-
-```bash
-git worktree remove .claude/worktrees/<name>
-git branch -d <type>/<description>
-```
-
-`<name>` is the description part of the branch name (e.g. for `feat/user-auth`, `<name>` is `user-auth`).
+After the PR is merged on GitHub, the Stop hook (`cleanup-merged-worktrees.sh`) automatically removes the worktree and deletes the local branch. No manual cleanup is needed.

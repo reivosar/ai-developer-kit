@@ -110,6 +110,9 @@ for path, expect in [
     ("README.md",               False),
     ("config.json",             False),
     (".claude/hooks/foo.sh",    False),
+    (".claude/hooks/hook_lib.py",  False),  # kit config python file (relative)
+    ("/repo/.claude/hooks/hook_lib.py",  False),  # kit config python file (absolute)
+    ("/repo/.claude/worktrees/feat/.claude/hooks/foo.py", False),  # worktree kit config (absolute)
     (".env",                    False),
 ]:
     ok = mod.is_impl_file(path) == expect

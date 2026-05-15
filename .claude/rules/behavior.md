@@ -8,3 +8,4 @@
 - Never use emojis anywhere — not in files, not in responses, not in commit messages; use plain text ("Good:" / "Bad:") instead
 - When the next step is unambiguous, commit without asking for confirmation; reserve confirmation for destructive or irreversible actions only
 - Before any task that involves changes: invoke /worktree to create an isolated workspace on a `<type>/<desc>` branch; all implementation work must happen inside the worktree; never commit to main or to an unrelated branch
+- All Bash commands that reference repository paths must use absolute paths derived from `git rev-parse --show-toplevel` or `$REPO_ROOT`; never rely on an implicit working directory
