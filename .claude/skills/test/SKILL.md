@@ -12,6 +12,7 @@ Write tests for existing code. Follow Red-Green-Refactor.
 ## Setup
 
 Always read:
+- `.claude/docs/git-workflow.md`
 - `.claude/docs/code-style.md`
 - `.claude/docs/testing.md`
 
@@ -23,6 +24,11 @@ Read only after confirming the domain applies:
 `$ARGUMENTS` is the target file, function, or module to test. If empty, ask.
 
 ## Process
+
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
 
 ### 1. Understand the code
 
@@ -53,3 +59,7 @@ and which are newly covered. Do not declare success for tests that pass triviall
 
 - Tests added: file paths and what each covers
 - Cases still untested: what would require refactoring or mocking to reach
+
+### 4. Commit
+
+Invoke /commit.

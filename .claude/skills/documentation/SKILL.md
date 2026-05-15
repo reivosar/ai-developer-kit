@@ -8,10 +8,16 @@ description: Generate or update documentation. Use this skill when the user want
 ## Setup
 
 Read before proceeding:
+- `.claude/docs/git-workflow.md`
 - `.claude/docs/documentation.md`
 - `.claude/docs/code-style.md`
 
 ## Steps
+
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
 
 ### 1. Investigate
 
@@ -39,3 +45,7 @@ Match the format required by `documentation.md`:
 - Every shell command in the docs runs successfully in the current environment
 - Every claim about behavior matches what the code actually does — no aspirational docs
 - ADR status is set correctly (Proposed, Accepted, etc.)
+
+### 4. Commit
+
+Invoke /commit.

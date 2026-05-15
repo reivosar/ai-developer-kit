@@ -7,6 +7,10 @@ description: Update this project's docs and skills from the latest version of re
 
 Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply them to this project.
 
+## Setup
+
+Read `.claude/docs/git-workflow.md` before proceeding.
+
 ## Sync behaviour
 
 - Files whose size or mtime differ from upstream are overwritten.
@@ -18,6 +22,11 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 - `CLAUDE.md` — project-specific behavior
 - `.claude/settings.json` — project-specific permissions and hooks
 - `.claude/hooks/` — project-specific hook scripts
+
+## Step 0: Worktree setup
+
+If not already inside a worktree, invoke /worktree with branch name `chore/update-kit`.
+All sync work must happen inside the worktree — never in the main working directory.
 
 ## Step 1: Clone the kit to a fixed temp path
 
@@ -89,3 +98,7 @@ If not found upstream, trash it:
 git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
 git status
 ```
+
+## Step 4: Commit
+
+Invoke /commit.

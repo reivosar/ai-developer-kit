@@ -10,6 +10,7 @@ Start from broken behavior with unknown cause. Diagnose first — do not write a
 ## Setup
 
 Read before proceeding:
+- `.claude/docs/git-workflow.md`
 - `.claude/docs/code-style.md`
 
 Read only after investigation confirms the domain:
@@ -23,6 +24,11 @@ Do not read testing.md or security.md speculatively before you know the bug's do
 The problem description or error message is passed as `$ARGUMENTS`. If the user pasted it inline, use that. If they mentioned a file, read it first.
 
 ## Process
+
+### 0. Worktree setup
+
+If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
+All implementation work must happen inside the worktree — never in the main working directory.
 
 ### 1. Investigate (read only)
 
@@ -56,3 +62,7 @@ When done:
 - **Root cause**: what was actually wrong and why
 - **Fix**: what changed and the reasoning
 - **Other occurrences**: whether the same bug pattern exists elsewhere, and if so, where
+
+### 5. Commit
+
+If a fix was applied, invoke /commit. Skip if the task was investigation only and no files were changed.
