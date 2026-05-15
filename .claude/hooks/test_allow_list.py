@@ -237,6 +237,7 @@ cases = [
     ("git switch --detach HEAD",     True),   # denied explicitly
     ("git pull",                     True),
     ("git pull origin main",         False),
+    ("git merge origin/main",        False),   # allowed: fixed string, merge only from main
     ("git merge feature/foo",        True),
     ("git restore .",                True),
     ("git restore README.md",        True),
@@ -330,7 +331,9 @@ cases = [
     # deny: worktree remove outside .claude/worktrees/ is destructive
     ("git worktree remove mywork",    True),
     ("git worktree remove /tmp/evil", True),
-    ("git worktree prune",            True),
+    ("git worktree prune",            False),
+    ("git worktree prune --dry-run",  False),
+    (".claude/hooks/cleanup-merged-worktrees.sh", False),
     # allowed: update-kit sync commands
     ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
