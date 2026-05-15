@@ -96,3 +96,14 @@ EOF
 ## Step 5: Report
 
 Output the PR URL so the user can share or open it.
+
+## Step 6: Post-merge cleanup
+
+After the PR is merged on GitHub, remove the worktree and delete the local branch:
+
+```bash
+git worktree remove .claude/worktrees/<name>
+git branch -d <type>/<description>
+```
+
+`<name>` is the description part of the branch name (e.g. for `feat/user-auth`, `<name>` is `user-auth`).

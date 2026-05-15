@@ -47,8 +47,9 @@ config/local.json
 
 ## Cleanup behavior
 
-| Situation | Result |
+| Situation | When |
 |---|---|
+| PR merged | Remove worktree and delete local branch — see pull-request skill Step 6 |
 | Worktree closed with no changes | Branch and directory deleted automatically |
 | Worktree closed with changes | Prompt to keep or delete |
 | Subagent worktree, no changes | Deleted automatically |
@@ -58,6 +59,7 @@ config/local.json
 ```bash
 git worktree list
 git worktree remove .claude/worktrees/<name>
+git branch -d <type>/<description>
 ```
 
 Add `.claude/worktrees/` to `.gitignore` so worktree contents don't show as untracked files in the main repo.
