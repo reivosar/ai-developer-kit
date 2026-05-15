@@ -45,5 +45,6 @@ process_worktree() {
     fi
 }
 
+git -C "$REPO_ROOT" checkout main 2>/dev/null || true
 cleanup_merged
 exit 0
