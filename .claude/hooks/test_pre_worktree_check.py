@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for pre-worktree-check.py: enforce that impl files are edited inside a worktree."""
+"""Tests for pre-worktree-check.py: enforce that ALL file edits happen inside a worktree."""
 import json
 import os
 import subprocess
@@ -37,23 +37,23 @@ def check(label: str, got: int, expected: int) -> None:
 # TC-WT-01: empty file_path → exit 0
 check("TC-WT-01 empty file_path", run_hook(""), 0)
 
-# TC-WT-02: markdown file → exit 0
-check("TC-WT-02 markdown file", run_hook("README.md"), 0)
+# TC-WT-02: markdown file outside worktree → exit 2
+check("TC-WT-02 markdown file", run_hook("README.md"), 2)
 
-# TC-WT-03: json file → exit 0
-check("TC-WT-03 json file", run_hook("config.json"), 0)
+# TC-WT-03: json file outside worktree → exit 2
+check("TC-WT-03 json file", run_hook("config.json"), 2)
 
-# TC-WT-04: shell file → exit 0
-check("TC-WT-04 shell file", run_hook("deploy.sh"), 0)
+# TC-WT-04: shell file outside worktree → exit 2
+check("TC-WT-04 shell file", run_hook("deploy.sh"), 2)
 
-# TC-WT-05: kit config path (hooks) → exit 0
-check("TC-WT-05 kit hooks path", run_hook(".claude/hooks/foo.py"), 0)
+# TC-WT-05: kit config path (hooks) outside worktree → exit 2
+check("TC-WT-05 kit hooks path", run_hook(".claude/hooks/foo.py"), 2)
 
-# TC-WT-06: kit config path (skills) → exit 0
-check("TC-WT-06 kit skills path", run_hook(".claude/skills/foo/SKILL.md"), 0)
+# TC-WT-06: kit config path (skills) outside worktree → exit 2
+check("TC-WT-06 kit skills path", run_hook(".claude/skills/foo/SKILL.md"), 2)
 
-# TC-WT-07: CLAUDE.md → exit 0
-check("TC-WT-07 CLAUDE.md", run_hook("CLAUDE.md"), 0)
+# TC-WT-07: CLAUDE.md outside worktree → exit 2
+check("TC-WT-07 CLAUDE.md", run_hook("CLAUDE.md"), 2)
 
 # TC-WT-08: impl file inside a worktree (absolute path) → exit 0
 check("TC-WT-08 impl in worktree", run_hook(WORKTREE_ABS), 0)

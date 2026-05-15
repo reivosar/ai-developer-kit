@@ -48,6 +48,7 @@
       "Bash(git worktree remove .claude/worktrees/*)",
       "Bash(git worktree prune*)",
       "Bash(.claude/hooks/cleanup-merged-worktrees.sh)",
+      "Bash(.claude/hooks/setup-branch-protection.sh)",
       "Bash(ls*)",
       "Bash(find . *)",
       "Bash(stat *)",
