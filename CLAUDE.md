@@ -8,17 +8,13 @@ Template kit for Claude Code-powered development workflows.
 
 ## Tests
 
-Run all hook test suites:
-
-```bash
-.claude/hooks/test_hooks.sh
-```
-
-Run a single suite:
+Run each test suite:
 
 ```bash
 python3 .claude/hooks/test_allow_list.py
 python3 .claude/hooks/test_pre_edit_check.py
+python3 .claude/hooks/test_pre_worktree_check.py
+python3 .claude/hooks/test_hook_lib.py
 ```
 
 When adding a new allowed or denied Bash command, write a failing test in `test_allow_list.py` first, then update `settings.json`.
