@@ -23,51 +23,61 @@ Read `.claude/docs/git-workflow.md` before proceeding.
 - `.claude/settings.json` — project-specific permissions and hooks
 - `.claude/hooks/` — project-specific hook scripts
 
-## Step 1: Clone the kit to a fixed temp path
+## Step 1: Clone the kit into the worktree
+
+Clone into `.upstream/` so all subsequent commands stay within the project tree:
 
 ```bash
-gh repo clone reivosar/ai-developer-kit /tmp/ai-developer-kit-update -- --depth=1 --quiet
+gh repo clone reivosar/ai-developer-kit .upstream -- --depth=1 --quiet
 ```
 
-If the clone fails because the directory already exists, proceed using the existing files.
+If `.upstream/` already exists, trash it first then re-clone:
+
+```bash
+.claude/hooks/trash.sh .upstream
+gh repo clone reivosar/ai-developer-kit .upstream -- --depth=1 --quiet
+```
+
 If the clone fails due to authentication, stop and ask the user to run `gh auth login`.
 
 ## Step 2: Sync docs, rules, and skills
 
 Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`.
 
-### 2a. Overwrite changed or new files
+### 2a. Enumerate upstream files
 
-Enumerate every file in the upstream clone — issue all three as separate Bash tool calls in one message (parallel):
+Issue all three as separate Bash tool calls in one message (parallel):
 
 ```bash
-cd /tmp/ai-developer-kit-update && find . -path './.claude/docs/*' -type f
+find . -path './.upstream/.claude/docs/*' -type f
 ```
 ```bash
-cd /tmp/ai-developer-kit-update && find . -path './.claude/rules/*' -type f
+find . -path './.upstream/.claude/rules/*' -type f
 ```
 ```bash
-cd /tmp/ai-developer-kit-update && find . -path './.claude/skills/*' -type f
+find . -path './.upstream/.claude/skills/*' -type f
 ```
+
+### 2b. Overwrite changed or new files
 
 For each upstream file:
 
-1. Derive the local path by stripping the `/tmp/ai-developer-kit-update/` prefix.
+1. Derive the local path by stripping the `.upstream/` prefix (e.g. `.upstream/.claude/docs/foo.md` → `.claude/docs/foo.md`).
 2. Compare size and mtime:
    ```bash
-   stat -f "%z %m" <upstream_file>
-   stat -f "%z %m" <local_file> 2>/dev/null
+   stat -f "%z %m" .upstream/.claude/docs/foo.md
+   stat -f "%z %m" .claude/docs/foo.md
    ```
 3. If the local file does not exist: write the upstream content to the local path using the Write tool.
    If the local file exists but size/mtime differ: trash it first, then write the upstream content:
    ```bash
    .claude/hooks/trash.sh <local_file>
    ```
-4. If size and mtime are identical: skip the file.
+4. If size and mtime are identical: skip.
 
-### 2b. Trash local-only files
+### 2c. Trash local-only files
 
-Find local files absent from upstream — issue all three as separate Bash tool calls in one message (parallel):
+Find local files absent from upstream — issue all three in parallel:
 
 ```bash
 find . -path './.claude/docs/*' -type f
@@ -82,22 +92,28 @@ find . -path './.claude/skills/*' -type f
 For each local file, check whether the corresponding upstream file exists:
 
 ```bash
-test -f /tmp/ai-developer-kit-update/<local_path>
+test -f .upstream/<local_path>
 ```
 
-If not found upstream, trash it:
+If absent upstream, trash it:
 
 ```bash
 .claude/hooks/trash.sh <local_file>
 ```
 
-## Step 3: Report
+## Step 3: Trash the upstream clone
+
+```bash
+.claude/hooks/trash.sh .upstream
+```
+
+## Step 4: Report
 
 ```bash
 git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
 git status
 ```
 
-## Step 4: Review and commit
+## Step 5: Commit
 
-Invoke /coding to review the synced changes and finalize with commit and PR.
+Invoke /commit.
