@@ -82,6 +82,10 @@ When done:
 - **Why**: the design decision behind the implementation
 - **Caveats**: anything the caller should know about edge cases or follow-up work
 
-### 6. Commit
+### 6. Review
+
+Invoke /code-review. If issues are found, return to Step 4 or Step 5 to fix them, then repeat this step until the review passes.
+
+### 7. Commit
 
 Invoke /commit.
