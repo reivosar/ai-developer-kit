@@ -13,10 +13,6 @@ Read before proceeding:
 
 ## Steps
 
-### 0. Worktree
-
-If not already inside a worktree, invoke /worktree.
-
 ### 1. Investigate
 
 ```bash

@@ -25,11 +25,6 @@ The problem description or error message is passed as `$ARGUMENTS`. If the user 
 
 ## Process
 
-### 0. Worktree setup
-
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
-
 ### 1. Investigate (read only)
 
 Before touching anything, understand the system:

@@ -19,11 +19,6 @@ Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Process
 
-### 0. Worktree setup
-
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
-
 ### 1. Explore the project
 
 Run in a single parallel batch:

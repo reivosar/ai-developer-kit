@@ -23,11 +23,6 @@ Read `.claude/docs/git-workflow.md` before proceeding.
 - `.claude/settings.json` — project-specific permissions and hooks
 - `.claude/hooks/` — project-specific hook scripts
 
-## Step 0: Worktree setup
-
-If not already inside a worktree, invoke /worktree with branch name `chore/update-kit`.
-All sync work must happen inside the worktree — never in the main working directory.
-
 ## Step 1: Clone the kit to a fixed temp path
 
 ```bash

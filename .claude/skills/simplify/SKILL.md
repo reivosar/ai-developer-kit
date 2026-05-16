@@ -26,11 +26,6 @@ If empty, ask the user what to review.
 
 ## Process
 
-### 0. Worktree setup
-
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
-
 ### 1. Read the target
 
 Read `.claude/docs/investigation-tools.md`, then use `symbol_search` to locate
