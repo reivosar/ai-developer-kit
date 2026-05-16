@@ -9,7 +9,7 @@ Create a Conventional Commits message for what is staged and commit it.
 
 ## Setup
 
-Read before proceeding:
+Always read:
 - `.claude/docs/git-workflow.md`
 - `.claude/docs/diff-strategy.md`
 
@@ -28,7 +28,7 @@ Read all files — do not skip any based on perceived importance.
 
 ## Step 2: Draft the message
 
-See `.claude/docs/git-workflow.md` for format, type selection, and summary rules.
+Use the format, type selection, and summary rules from `git-workflow.md` (read in Setup).
 
 ## Step 3: Propose and commit
 

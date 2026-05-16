@@ -44,7 +44,7 @@ Before gathering the diff:
 After examining the diff:
 - `.claude/docs/code-style.md`
 
-Read only after confirming the domain applies from the diff:
+Read only when:
 - Diff contains auth, validation, or external API changes → `.claude/docs/security.md`
 - Diff modifies test files or adds testable logic paths → `.claude/docs/testing.md`
 

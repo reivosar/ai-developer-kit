@@ -13,7 +13,7 @@ The target is `$ARGUMENTS` — a file path, function name, concept, or pasted co
 
 ## Setup
 
-Read before proceeding:
+Always read:
 - `.claude/docs/investigation-tools.md`
 
 ## Before explaining

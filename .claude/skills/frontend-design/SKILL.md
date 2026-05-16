@@ -10,7 +10,7 @@ description: Design and implement frontend features. Use this skill when the use
 Always read:
 - `.claude/docs/frontend.md`
 
-Read only when the task explicitly involves:
+Read only when:
 - Auth, form validation, or external data handling → `.claude/docs/security.md`
 - A design system, token library, or shared component library → `.claude/docs/design-system.md`
 

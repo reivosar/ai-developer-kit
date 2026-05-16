@@ -13,7 +13,7 @@ Always read:
 - `.claude/docs/code-style.md`
 - `.claude/docs/investigation-tools.md`
 
-Read only when the task involves:
+Read only when:
 - Behavior or logic that will need tests → `.claude/docs/testing.md`
 - Auth, input validation, external APIs, or data boundaries → `.claude/docs/security.md`
 

@@ -7,7 +7,8 @@ description: Create an isolated git worktree before starting any task that modif
 
 ## Setup
 
-Read `.claude/docs/git-workflow.md` before proceeding.
+Always read:
+- `.claude/docs/git-workflow.md`
 
 ## Arguments
 

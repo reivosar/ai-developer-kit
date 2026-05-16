@@ -9,7 +9,8 @@ Create a pull request from the current branch to main.
 
 ## Setup
 
-Read `.claude/docs/git-workflow.md` before proceeding.
+Always read:
+- `.claude/docs/git-workflow.md`
 
 ## Step 1: Check state
 
@@ -28,7 +29,7 @@ git push -u origin HEAD
 
 ## Step 3: Draft title and body
 
-Derive title from the commit log (single commit: use subject; multiple commits: summarize). See `.claude/docs/git-workflow.md` for title rules and body structure.
+Derive title from the commit log (single commit: use subject; multiple commits: summarize). Use the title rules and body structure from `git-workflow.md` (read in Setup).
 
 ```bash
 gh pr create --title "<title>" --body "$(cat <<'EOF'

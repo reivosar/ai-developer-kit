@@ -9,7 +9,7 @@ Start from broken behavior with unknown cause. Diagnose first — do not write a
 
 ## Setup
 
-Read only after investigation confirms the domain:
+Read only when:
 - Bug is in test code or test setup → `.claude/docs/testing.md`
 - Bug involves auth, input handling, or a security boundary → `.claude/docs/security.md`
 

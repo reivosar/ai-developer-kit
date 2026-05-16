@@ -9,7 +9,8 @@ Locate the code relevant to the current task. Read and search only — no file c
 
 ## Setup
 
-Read `.claude/docs/investigation-tools.md` before proceeding.
+Always read:
+- `.claude/docs/investigation-tools.md`
 
 ## Arguments
 
