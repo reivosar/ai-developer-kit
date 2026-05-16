@@ -9,8 +9,7 @@ Implement code for any domain — frontend, backend, scripts, CLI, full-stack, o
 
 ## Setup
 
-Always read (applies to every implementation):
-- `.claude/docs/git-workflow.md`
+Always read:
 - `.claude/docs/code-style.md`
 - `.claude/docs/coding.md`
 - `.claude/docs/testing.md`

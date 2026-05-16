@@ -9,9 +9,9 @@ description: Audit code or a diff for security vulnerabilities. Use when the use
 
 Audit the target for security issues and produce a prioritized findings report.
 
-## Read first
+## Setup
 
-Before any other step:
+Before gathering the diff:
 - `.claude/docs/security.md`
 - `.claude/docs/investigation-tools.md`
 - `.claude/docs/diff-strategy.md`

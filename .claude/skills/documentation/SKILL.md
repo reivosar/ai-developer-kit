@@ -7,7 +7,7 @@ description: Generate or update documentation. Use this skill when the user want
 
 ## Setup
 
-Read before proceeding:
+Always read:
 - `.claude/docs/documentation.md`
 
 ## Steps

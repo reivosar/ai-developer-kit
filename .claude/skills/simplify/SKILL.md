@@ -15,7 +15,7 @@ unless the user approves.
 Always read:
 - `.claude/docs/code-style.md`
 
-Read only after examining the code:
+Read only when:
 - Code has tests or test coverage concerns → `.claude/docs/testing.md`
 
 ## Arguments

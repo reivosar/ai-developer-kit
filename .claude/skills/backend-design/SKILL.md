@@ -10,7 +10,7 @@ description: Design and implement backend features. Use this skill when the user
 Always read:
 - `.claude/docs/backend.md`
 
-Read only when the task explicitly involves:
+Read only when:
 - Task involves implementation with testable logic → `.claude/docs/testing.md`
 - Auth, input validation, or external API calls → `.claude/docs/security.md`
 - Database tables, schemas, or queries → `.claude/docs/database.md`

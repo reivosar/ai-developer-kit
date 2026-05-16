@@ -7,12 +7,6 @@ description: Review code changes on the current branch for bugs, security issues
 
 Review the changes on the current branch and produce a structured report.
 
-## Read first
-
-Before any other step:
-- `.claude/docs/investigation-tools.md`
-- `.claude/docs/diff-strategy.md`
-
 ## Arguments
 
 `$ARGUMENTS` is optional. If a PR number is passed (e.g. `42`), review that PR. Otherwise review the current branch.
@@ -39,17 +33,18 @@ Get line count: `gh pr diff $ARGUMENTS --stat` (read the summary line).
 - Under threshold: `gh pr diff $ARGUMENTS`
 - Over threshold: `gh pr diff $ARGUMENTS -- <file>` for every file
 
-Use `symbol_search` from `.claude/docs/investigation-tools.md` to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
+Use `symbol_search` to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
 
 ## Setup
 
-Read after examining the diff:
+Before gathering the diff:
+- `.claude/docs/investigation-tools.md`
+- `.claude/docs/diff-strategy.md`
 
-Always read:
+After examining the diff:
 - `.claude/docs/code-style.md`
-- `.claude/docs/git-workflow.md`
 
-Read only after confirming the domain applies from the diff:
+Read only when:
 - Diff contains auth, validation, or external API changes → `.claude/docs/security.md`
 - Diff modifies test files or adds testable logic paths → `.claude/docs/testing.md`
 

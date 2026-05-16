@@ -9,7 +9,7 @@ Investigate and summarize without making any changes.
 
 ## Setup
 
-Read before proceeding:
+Always read:
 - `.claude/docs/investigation-tools.md`
 
 ## Arguments
