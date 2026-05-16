@@ -28,8 +28,7 @@ If empty, ask the user what to review.
 
 ### 1. Read the target
 
-Read `.claude/docs/investigation-tools.md`, then use `symbol_search` to locate
-the code. Read only the files surfaced.
+Invoke /investigate to locate the code.
 
 ### 2. Identify issues
 

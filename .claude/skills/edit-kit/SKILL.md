@@ -86,10 +86,6 @@ Then implement:
 
 Tell the user what was changed and in which file.
 
-### 5. Commit
-
-Invoke /commit.
-
 ## Settings File Locations
 
 | File | Scope | Git | Use For |

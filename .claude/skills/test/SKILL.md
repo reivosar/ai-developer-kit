@@ -27,8 +27,7 @@ Read only after confirming the domain applies:
 
 ### 1. Understand the code
 
-Read `.claude/docs/investigation-tools.md`, then use `symbol_search` to locate
-the implementation. Read only the surfaced files.
+Invoke /investigate to locate the implementation.
 
 Identify:
 - Public interface: inputs, outputs, side effects

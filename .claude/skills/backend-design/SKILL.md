@@ -27,10 +27,7 @@ Do not read a conditional file unless the task description or codebase investiga
 
 ### 1. Investigate
 
-Understand the existing codebase before touching anything:
-- Read `.claude/docs/investigation-tools.md`, then use `file_locate` to identify the language, framework, and directory structure
-- Use `symbol_search` or `reference_search` to find handlers, services, or models adjacent to the target area
-- Note the API conventions, error handling patterns, and validation approach in use
+Invoke /investigate. Note the API conventions, error handling patterns, and validation approach in use.
 
 ### 2. Design
 

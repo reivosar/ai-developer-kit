@@ -29,9 +29,9 @@ The problem description or error message is passed as `$ARGUMENTS`. If the user 
 
 Before touching anything, understand the system:
 
-- Read `.claude/docs/investigation-tools.md`, then use `symbol_search` to search for the error string or failing symbol
-- Trace the call path from the entry point to where the error occurs
-- Check git history using `history_search` to find when the behavior changed — then `git show <hash>` on specific commits; never use `git log -p` which dumps full file diffs for every match
+Invoke /investigate. Trace the call path from the entry point to where the error occurs.
+
+Check git history using `history_search` to find when the behavior changed — then `git show <hash>` on specific commits; never use `git log -p` which dumps full file diffs for every match.
 
 Resist the urge to fix immediately. The first obvious explanation is often wrong.
 

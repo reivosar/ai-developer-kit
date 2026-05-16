@@ -5,6 +5,7 @@ Every task must go through a skill — never handle any task inline.
 ### Implementation
 
 - All coding (implementation against a known design) → `/coding`
+- Locating the relevant code, entry point, or file before implementation → `/investigate`
 - Bug / error / test failure investigation → `/troubleshooting`
 - Frontend architecture/design (component design, state management, routing design) → `/frontend-design`
 - Backend architecture/design (API design, DB model, service boundaries) → `/backend-design`
@@ -35,7 +36,6 @@ Every task must go through a skill — never handle any task inline.
 - Updating docs and skills from the upstream kit → `/update-kit`
 - Reducing permission prompts by allowlisting safe commands → `/fewer-permission-prompts`
 - Customizing keyboard shortcuts or keybindings → `/keybindings-help`
-- Initializing a new CLAUDE.md for a project → `/init`
 
 ### Automation
 
