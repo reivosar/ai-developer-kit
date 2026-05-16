@@ -237,8 +237,8 @@ cases = [
     ("git switch --detach HEAD",     True),   # denied explicitly
     ("git pull",                     True),
     ("git pull origin main",         False),
-    ("git merge origin/main",        False),   # allowed: fixed string, merge only from main
-    ("git merge feature/foo",        True),
+    ("git merge origin/main",        False),   # allowed: git merge * wildcard
+    ("git merge feature/foo",        False),  # allowed: git merge * wildcard
     ("git restore .",                True),
     ("git restore README.md",        True),
     ("git reset",                    True),
@@ -349,6 +349,18 @@ cases = [
     ("cat file | xargs rm -rf /tmp",             True),
     ("grep foo src/ | xargs cp -r",             True),
     ("git log --oneline | xargs cp -r /dst",    True),
+    # redirect/pipe: blocked even for base commands that are in the allow list
+    ("git log > output.txt",                    True),
+    ("cat README.md | wc -l",                   True),
+    ("git diff > patch.txt",                    True),
+    # cp: blocked dangerous options
+    ("cp -t dest/ src/file.txt",                True),
+    ("cp -f src.txt dst.txt",                   True),
+    ("cp --force src.txt dst.txt",              True),
+    ("cp --target-directory=dest/ src.txt",     True),
+    # python3 path restriction: absolute paths and traversal blocked
+    ("python3 /tmp/test.py",                    True),
+    ("python3 ../test_something.py",            True),
 ]
 
 passed = failed = 0
