@@ -5,6 +5,7 @@ import os
 import sys
 import subprocess
 
+from pathlib import Path
 sys.path.insert(0, os.path.dirname(__file__))
 from hook_lib import REPO_ROOT, WORKTREES_DIR  # noqa: E402
 
@@ -21,6 +22,10 @@ OUTSIDE = {
     "ts":      str(REPO_ROOT / "src" / "app.ts"),
     "go":      str(REPO_ROOT / "lib" / "util.go"),
 }
+
+TRASH_FILE   = str(REPO_ROOT / ".trash" / "20240101-120000" / "app.py")
+PLAN_FILE    = str(REPO_ROOT / ".claude" / "plan" / "plan.md")
+MEMORY_FILE  = str(Path.home() / ".claude" / "projects" / "some-project" / "memory" / "user.md")
 
 passed = failed = 0
 
@@ -79,6 +84,15 @@ check("TC-WT-10 impl in main repo .ts", run_hook(OUTSIDE["ts"]), 2)
 
 # TC-WT-11: Write tool, impl file not in worktree → exit 2
 check("TC-WT-11 Write tool blocked", run_hook(OUTSIDE["go"], tool_name="Write"), 2)
+
+# TC-WT-12: .trash file → exit 0
+check("TC-WT-12 .trash file allowed", run_hook(TRASH_FILE), 0)
+
+# TC-WT-13: .claude/plan file → exit 0
+check("TC-WT-13 .claude/plan file allowed", run_hook(PLAN_FILE), 0)
+
+# TC-WT-14: memory file (outside repo) → exit 0
+check("TC-WT-14 memory file allowed", run_hook(MEMORY_FILE), 0)
 
 print(f"\n{passed} passed, {failed} failed")
 raise SystemExit(0 if failed == 0 else 1)
