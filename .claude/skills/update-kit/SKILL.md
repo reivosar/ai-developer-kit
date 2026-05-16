@@ -13,7 +13,7 @@ Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Sync behaviour
 
-- Files whose size or mtime differ from upstream are overwritten.
+- Files whose size or mtime differ from upstream are trashed then replaced.
 - Files present locally but absent in upstream are trashed.
 - Files identical to upstream are skipped.
 
@@ -58,7 +58,11 @@ For each upstream file:
    stat -f "%z %m" <upstream_file>
    stat -f "%z %m" <local_file> 2>/dev/null
    ```
-3. If the local file does not exist, or size/mtime differ: read the upstream file content and write it to the local path using the Write tool.
+3. If the local file does not exist: write the upstream content to the local path using the Write tool.
+   If the local file exists but size/mtime differ: trash it first, then write the upstream content:
+   ```bash
+   .claude/hooks/trash.sh <local_file>
+   ```
 4. If size and mtime are identical: skip the file.
 
 ### 2b. Trash local-only files
