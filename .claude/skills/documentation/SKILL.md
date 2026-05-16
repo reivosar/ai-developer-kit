@@ -19,7 +19,7 @@ Read before proceeding:
 find . -name "*.md" -not -path "*/.git/*"
 ```
 
-If documenting specific code behavior, also read `.claude/docs/investigation-tools.md` and locate the source with `symbol_search`.
+If documenting specific code behavior, invoke /investigate to locate the source.
 
 ### 2. Write
 

@@ -42,7 +42,7 @@ All implementation work must happen inside the worktree — never in the main wo
 Before writing anything:
 
 - Identify the language, toolchain, and conventions in use
-- Read `.claude/docs/investigation-tools.md`, then use `symbol_search` or `file_locate` to locate the relevant entry point or file; do not read files speculatively
+- Invoke /investigate to locate the relevant entry point or file
 - Clarify ambiguous requirements before writing code
 
 ### 2. Plan the change

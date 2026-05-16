@@ -11,9 +11,4 @@
 - Before any task that involves changes: invoke /worktree to create an isolated workspace on a `<type>/<desc>` branch; all implementation work must happen inside the worktree; never commit to main or to an unrelated branch
 - All Bash commands that reference repository paths must use absolute paths derived from `git rev-parse --show-toplevel` or `$REPO_ROOT`; never rely on an implicit working directory
 - Only issue Bash commands that are listed in `permissions.allow` in `.claude/settings.json`; any command outside that list is rejected by the pre-bash hook and wastes time — check the allow list before running any command
-- Every task must be handled by invoking one of the following skills; never handle any task inline:
-  `/coding`, `/troubleshooting`, `/frontend-design`, `/backend-design`, `/plan`, `/test`, `/simplify`,
-  `/explain`, `/explore`, `/commit`, `/pull-request`, `/code-review`, `/worktree`, `/documentation`,
-  `/security-review`, `/edit-kit`, `/update-kit`, `/fewer-permission-prompts`, `/keybindings-help`,
-  `/init`, `/loop`, `/schedule`, `/feedback`, `/claude-api`
-  If no skill clearly fits, invoke `/feedback` to file a skill-gap issue.
+- Every task must be handled by a skill; never handle any task inline. See `skill-dispatch.md` for the full list. If no skill clearly fits, invoke `/feedback`.
