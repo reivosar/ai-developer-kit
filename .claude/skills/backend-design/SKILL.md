@@ -8,10 +8,7 @@ description: Design and implement backend features. Use this skill when the user
 ## Setup
 
 Always read:
-- `.claude/docs/git-workflow.md`
 - `.claude/docs/backend.md`
-- `.claude/docs/coding.md`
-- `.claude/docs/code-style.md`
 
 Read only when the task explicitly involves:
 - Task involves implementation with testable logic → `.claude/docs/testing.md`

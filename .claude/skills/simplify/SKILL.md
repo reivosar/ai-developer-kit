@@ -13,7 +13,6 @@ unless the user approves.
 ## Setup
 
 Always read:
-- `.claude/docs/git-workflow.md`
 - `.claude/docs/code-style.md`
 
 Read only after examining the code:

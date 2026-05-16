@@ -8,10 +8,7 @@ description: Design and implement frontend features. Use this skill when the use
 ## Setup
 
 Always read:
-- `.claude/docs/git-workflow.md`
 - `.claude/docs/frontend.md`
-- `.claude/docs/coding.md`
-- `.claude/docs/code-style.md`
 
 Read only when the task explicitly involves:
 - Auth, form validation, or external data handling → `.claude/docs/security.md`
