@@ -20,7 +20,7 @@
 
 - When the next step is unambiguous, invoke the appropriate skill immediately without asking for prior confirmation; reserve pre-action confirmation for destructive or irreversible operations only
 - Before any task that involves changes: invoke /worktree to create an isolated workspace on a `<type>/<desc>` branch; all implementation work must happen inside the worktree; never commit to main or to an unrelated branch
-- Every task must be handled by a skill; never handle any task inline. See `skill-dispatch.md` for the full list. If no skill clearly fits, invoke `/feedback`.
+- Every task must be handled by a skill; never handle any task inline. See `skill-dispatch.md` for the full list. If no skill clearly fits, invoke `/propose`.
 
 ### Bash commands
 

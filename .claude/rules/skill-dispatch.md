@@ -49,8 +49,8 @@ Every task must go through a skill — never handle any task inline.
 
 ### Catch-all
 
-If no skill above clearly matches, pick the closest one and invoke it.
-Never respond inline — if genuinely no skill fits, invoke `/feedback` to file a skill-gap issue.
+If no skill above clearly matches, invoke `/propose` — it will surface candidate skills to the user and let them choose how to proceed.
+Never respond inline and never silently fall back to `/feedback` without user input.
 
 ### Notes
 
