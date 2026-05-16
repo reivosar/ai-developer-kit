@@ -7,10 +7,6 @@ description: Use this skill to configure the Claude Code harness via settings.js
 
 Modify Claude Code configuration by updating settings.json files.
 
-## Setup
-
-Read `.claude/docs/git-workflow.md` before proceeding.
-
 ## When Hooks Are Required (Not Memory)
 
 If the user wants something to happen automatically in response to an EVENT, they need a **hook** configured in settings.json. Memory/preferences cannot trigger automated actions.

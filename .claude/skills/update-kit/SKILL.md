@@ -7,10 +7,6 @@ description: Update this project's docs and skills from the latest version of re
 
 Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply them to this project.
 
-## Setup
-
-Read `.claude/docs/git-workflow.md` before proceeding.
-
 ## Sync behaviour
 
 - Files whose size or mtime differ from upstream are trashed then replaced.

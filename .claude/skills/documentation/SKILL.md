@@ -8,7 +8,6 @@ description: Generate or update documentation. Use this skill when the user want
 ## Setup
 
 Read before proceeding:
-- `.claude/docs/git-workflow.md`
 - `.claude/docs/documentation.md`
 
 ## Steps

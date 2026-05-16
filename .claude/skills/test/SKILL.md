@@ -12,8 +12,6 @@ Write tests for existing code. Follow Red-Green-Refactor.
 ## Setup
 
 Always read:
-- `.claude/docs/git-workflow.md`
-- `.claude/docs/code-style.md`
 - `.claude/docs/testing.md`
 
 Read only after confirming the domain applies:
