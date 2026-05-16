@@ -24,9 +24,12 @@ Otherwise review the current branch or the file/module specified.
 
 **Current branch:**
 ```bash
-git diff main...HEAD
+git diff --stat main...HEAD
 git log main...HEAD --oneline
 ```
+
+If `--stat` shows more than 10 changed files, proceed with the stat output only — do not fetch the full diff.
+If 10 files or fewer, also run `git diff main...HEAD` to read the full diff.
 
 **PR number:**
 ```bash

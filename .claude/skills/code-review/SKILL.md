@@ -20,9 +20,12 @@ Before any other step:
 
 **Current branch** — run both in a single parallel batch:
 ```bash
-git diff main...HEAD
+git diff --stat main...HEAD
 git log main...HEAD --oneline
 ```
+
+If `--stat` shows more than 10 changed files, proceed with the stat output only — do not fetch the full diff.
+If 10 files or fewer, also run `git diff main...HEAD` to read the full diff.
 
 **PR number given** — run both in a single parallel batch:
 ```bash

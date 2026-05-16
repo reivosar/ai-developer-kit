@@ -15,8 +15,10 @@ Read `.claude/docs/git-workflow.md` before proceeding.
 
 ```bash
 git status
-git diff --staged
+git diff --staged --stat
 ```
+
+If drafting the commit message requires understanding specific changes beyond the stat summary, also run `git diff --staged`.
 
 ## Step 2: Draft the message
 
