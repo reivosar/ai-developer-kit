@@ -10,7 +10,6 @@ Produce a concrete implementation plan without modifying any files.
 ## Setup
 
 Always read:
-- `.claude/docs/code-style.md`
 - `.claude/docs/investigation-tools.md`
 
 Read only when:
