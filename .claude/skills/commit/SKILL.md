@@ -9,7 +9,9 @@ Create a Conventional Commits message for what is staged and commit it.
 
 ## Setup
 
-Read `.claude/docs/git-workflow.md` before proceeding.
+Read before proceeding:
+- `.claude/docs/git-workflow.md`
+- `.claude/docs/diff-strategy.md`
 
 ## Step 1: Check branch and staged changes
 
@@ -18,7 +20,11 @@ git status
 git diff --staged --stat
 ```
 
-If drafting the commit message requires understanding specific changes beyond the stat summary, also run `git diff --staged`.
+Apply the threshold from `.claude/docs/diff-strategy.md` to the stat summary line:
+- Under threshold: `git diff --staged`
+- Over threshold: `git diff --staged --name-only`, then `git diff --staged -- <file>` for every file
+
+Read all files — do not skip any based on perceived importance.
 
 ## Step 2: Draft the message
 

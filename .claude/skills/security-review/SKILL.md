@@ -14,6 +14,7 @@ Audit the target for security issues and produce a prioritized findings report.
 Before any other step:
 - `.claude/docs/security.md`
 - `.claude/docs/investigation-tools.md`
+- `.claude/docs/diff-strategy.md`
 
 ## Arguments
 
@@ -28,14 +29,19 @@ git diff --stat main...HEAD
 git log main...HEAD --oneline
 ```
 
-If `--stat` shows more than 10 changed files, proceed with the stat output only — do not fetch the full diff.
-If 10 files or fewer, also run `git diff main...HEAD` to read the full diff.
+Apply the threshold from `.claude/docs/diff-strategy.md` to the stat summary line:
+- Under threshold: `git diff main...HEAD`
+- Over threshold: `git diff --name-only main...HEAD`, then `git diff main...HEAD -- <file>` for every file
 
 **PR number:**
 ```bash
 gh pr view $ARGUMENTS
-gh pr diff $ARGUMENTS
+gh pr diff $ARGUMENTS --name-only
 ```
+
+Get line count: `gh pr diff $ARGUMENTS --stat` (read the summary line).
+- Under threshold: `gh pr diff $ARGUMENTS`
+- Over threshold: `gh pr diff $ARGUMENTS -- <file>` for every file
 
 **File or module:** read the file directly.
 

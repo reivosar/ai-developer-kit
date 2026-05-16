@@ -11,6 +11,7 @@ Review the changes on the current branch and produce a structured report.
 
 Before any other step:
 - `.claude/docs/investigation-tools.md`
+- `.claude/docs/diff-strategy.md`
 
 ## Arguments
 
@@ -18,20 +19,25 @@ Before any other step:
 
 ## Gather the diff
 
-**Current branch** — run both in a single parallel batch:
+**Current branch** — run in a single parallel batch:
 ```bash
 git diff --stat main...HEAD
 git log main...HEAD --oneline
 ```
 
-If `--stat` shows more than 10 changed files, proceed with the stat output only — do not fetch the full diff.
-If 10 files or fewer, also run `git diff main...HEAD` to read the full diff.
+Apply the threshold from `.claude/docs/diff-strategy.md` to the stat summary line:
+- Under threshold: `git diff main...HEAD`
+- Over threshold: `git diff --name-only main...HEAD`, then `git diff main...HEAD -- <file>` for every file
 
-**PR number given** — run both in a single parallel batch:
+**PR number given** — run in a single parallel batch:
 ```bash
 gh pr view $ARGUMENTS
-gh pr diff $ARGUMENTS
+gh pr diff $ARGUMENTS --name-only
 ```
+
+Get line count: `gh pr diff $ARGUMENTS --stat` (read the summary line).
+- Under threshold: `gh pr diff $ARGUMENTS`
+- Over threshold: `gh pr diff $ARGUMENTS -- <file>` for every file
 
 Use `symbol_search` from `.claude/docs/investigation-tools.md` to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
 
