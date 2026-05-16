@@ -29,7 +29,7 @@ git push -u origin HEAD
 
 ## Step 3: Draft title and body
 
-Derive title from the commit log (single commit: use subject; multiple commits: summarize). Use the title rules and body structure from `git-workflow.md` (read in Setup).
+Derive title and body using the rules in `git-workflow.md`.
 
 ```bash
 gh pr create --title "<title>" --body "$(cat <<'EOF'

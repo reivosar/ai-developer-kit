@@ -28,7 +28,7 @@ Read all files — do not skip any based on perceived importance.
 
 ## Step 2: Draft the message
 
-Use the format, type selection, and summary rules from `git-workflow.md` (read in Setup).
+Draft the message using the format and type rules in `git-workflow.md`.
 
 ## Step 3: Propose and commit
 
