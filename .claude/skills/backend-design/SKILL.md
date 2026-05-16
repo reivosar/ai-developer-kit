@@ -25,11 +25,6 @@ Do not read a conditional file unless the task description or codebase investiga
 
 ## Steps
 
-### 0. Worktree setup
-
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
-
 ### 1. Investigate
 
 Understand the existing codebase before touching anything:

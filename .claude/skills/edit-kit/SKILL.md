@@ -49,11 +49,6 @@ When the user's request is ambiguous, use AskUserQuestion to clarify:
 
 ## Workflow
 
-### 0. Worktree setup
-
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
-
 ### 1. Clarify intent
 
 Ask if the request is ambiguous (which file, what scope).

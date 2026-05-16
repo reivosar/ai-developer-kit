@@ -25,11 +25,6 @@ Read only after confirming the domain applies:
 
 ## Process
 
-### 0. Worktree setup
-
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
-
 ### 1. Understand the code
 
 Read `.claude/docs/investigation-tools.md`, then use `symbol_search` to locate
