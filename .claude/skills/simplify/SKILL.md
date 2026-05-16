@@ -62,6 +62,6 @@ End with a count: "N issues found (X must, Y should, Z consider)."
 
 Ask before implementing: "Implement all / must-fix only / specific items?"
 
-### 4. Commit
+### 4. Implement
 
-Once the user approves and changes are applied, invoke /commit.
+Once the user approves, invoke /coding with the list of approved changes. /coding handles implementation, review, commit, and PR.

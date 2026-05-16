@@ -49,14 +49,4 @@ State the design in a short summary before implementing.
 
 ### 3. Implement
 
-Write the code following the conventions from the rule files. Match the existing codebase style exactly — do not introduce new patterns without reason.
-
-### 4. Verify
-
-- Run existing tests; add an integration or unit test for the changed path if none exist
-- Confirm auth, input validation, and error responses are correct
-- Check for obvious security issues: injection, missing auth checks, data over-exposure
-
-### 5. Commit
-
-Invoke /commit.
+Invoke /coding with the design from Step 2. /coding handles implementation, review, commit, and PR.

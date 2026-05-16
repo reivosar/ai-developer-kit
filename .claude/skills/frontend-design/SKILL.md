@@ -45,14 +45,4 @@ State the design in a short summary before implementing.
 
 ### 3. Implement
 
-Write the code following the conventions from the rule files. Match the existing codebase style exactly — do not introduce new patterns without reason.
-
-### 4. Verify
-
-- Check for type errors if TypeScript is in use
-- Run existing tests; add a test for the changed path if none exist
-- Confirm the main flow and at least one edge case work correctly
-
-### 5. Commit
-
-Invoke /commit.
+Invoke /coding with the design from Step 2. /coding handles implementation, review, commit, and PR.

@@ -99,6 +99,6 @@ git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
 git status
 ```
 
-## Step 4: Commit
+## Step 4: Review and commit
 
-Invoke /commit.
+Invoke /coding to review the synced changes and finalize with commit and PR.

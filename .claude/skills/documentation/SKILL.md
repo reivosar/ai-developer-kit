@@ -27,12 +27,4 @@ If documenting specific code behavior, also read `.claude/docs/investigation-too
 
 ### 2. Write
 
-Follow format rules in `.claude/docs/documentation.md`.
-
-### 3. Verify
-
-Run every shell command in the document. Fix anything that fails.
-
-### 4. Commit
-
-Invoke /commit.
+Invoke /coding with the documentation requirements from Step 1. /coding handles writing, review, commit, and PR.
