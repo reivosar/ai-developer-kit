@@ -10,7 +10,6 @@ description: Generate or update documentation. Use this skill when the user want
 Read before proceeding:
 - `.claude/docs/git-workflow.md`
 - `.claude/docs/documentation.md`
-- `.claude/docs/code-style.md`
 
 ## Steps
 
@@ -23,9 +22,8 @@ All implementation work must happen inside the worktree — never in the main wo
 
 Before writing anything:
 
-Read `.claude/docs/investigation-tools.md`, then:
 - Use `file_locate` to find existing documentation files — do not duplicate or contradict them
-- Use `symbol_search` to locate the source code for the area being documented; never invent behavior
+- If the output requires documenting specific code behavior, read `.claude/docs/investigation-tools.md` and use `symbol_search` to locate the source; never invent behavior
 - Identify the output type needed: README, ADR, OpenAPI spec, or inline comments
 
 ### 2. Write
