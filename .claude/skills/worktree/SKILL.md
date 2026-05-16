@@ -16,6 +16,18 @@ If omitted, ask the user for a branch name.
 
 The worktree directory name (`<name>`) is the description part of the branch name.
 
+## Pre-flight: verify CWD is the project root
+
+Run `git worktree list` and note the first line — that is the main worktree path.
+
+If the current working directory is NOT the main worktree path, stop and navigate there first:
+
+```bash
+cd <main-worktree-path>
+```
+
+Never create a worktree from inside an existing worktree. Nested worktrees break git state and cause commits to land on the wrong branch.
+
 ## Create
 
 ```bash
