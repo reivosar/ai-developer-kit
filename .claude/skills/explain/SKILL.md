@@ -20,7 +20,7 @@ Always read:
 
 If the target is a file path or symbol name, read the code before saying anything. A confident-sounding wrong explanation is worse than saying "let me look at this first."
 
-Use `symbol_search` from `.claude/docs/investigation-tools.md` to locate the definition if the path is not given.
+Use `symbol_search` to locate the definition if the path is not given.
 
 ## Structure
 
