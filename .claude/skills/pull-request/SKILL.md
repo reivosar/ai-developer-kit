@@ -53,10 +53,7 @@ If the push fails due to diverged history, do not force push. Report the conflic
 - Single commit: use the commit subject line as-is
 - Multiple commits: write a one-line summary of what the set of commits achieves as a whole
 
-Title rules (same as commit summary):
-- Imperative mood
-- Under 72 characters
-- No period at the end
+Title rules: same as commit summary — see `.claude/docs/git-workflow.md`.
 
 **Body** — use this template:
 

@@ -33,31 +33,7 @@ Read the diff carefully. The commit message should reflect the *intent* of the c
 
 ## Step 2: Draft the message
 
-**Format:**
-```
-<type>(<scope>): <summary>
-
-[optional body]
-```
-
-**Type selection:**
-- `feat` — new capability the user didn't have before
-- `fix` — corrects incorrect behavior
-- `docs` — documentation only, no logic change
-- `refactor` — restructures code without changing behavior
-- `test` — adds or updates tests
-- `chore` — build config, dependencies, tooling
-- `perf` — measurable performance improvement
-
-**Summary line rules:**
-- Imperative mood: "add", "fix", "remove" — not "added", "fixes", "removed"
-- No period at the end
-- Under 72 characters
-- Specific enough that someone reading the log can understand the change without opening the diff
-
-**Body** (include when the summary alone isn't enough):
-- Explain *why* the change was made, not what it does (the diff shows what)
-- Mention tradeoffs or alternatives considered if relevant
+Format, type selection, summary rules, and body guidance: see `.claude/docs/git-workflow.md`.
 
 ## Step 3: Propose and confirm
 
