@@ -13,36 +13,25 @@ Read before proceeding:
 
 ## Steps
 
-### 0. Worktree setup
+### 0. Worktree
 
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
+If not already inside a worktree, invoke /worktree.
 
 ### 1. Investigate
 
-Before writing anything:
+```bash
+find . -name "*.md" -not -path "*/.git/*"
+```
 
-- Use `file_locate` to find existing documentation files — do not duplicate or contradict them
-- If the output requires documenting specific code behavior, read `.claude/docs/investigation-tools.md` and use `symbol_search` to locate the source; never invent behavior
-- Identify the output type needed: README, ADR, OpenAPI spec, or inline comments
+If documenting specific code behavior, also read `.claude/docs/investigation-tools.md` and locate the source with `symbol_search`.
 
 ### 2. Write
 
-Match the format required by `documentation.md`:
-
-**README** — include: Overview, Setup, Usage, Architecture decisions. Keep commands copy-pasteable and tested.
-
-**ADR** — file at `docs/adr/NNN-short-title.md`. Fill all four sections: Status, Context, Decision, Consequences.
-
-**OpenAPI spec** — document every endpoint, all request/response schemas, and all error codes. Co-locate with the service it describes.
-
-**Inline comments** — WHY only. If the comment restates what the code does, delete it.
+Follow format rules in `.claude/docs/documentation.md`.
 
 ### 3. Verify
 
-- Every shell command in the docs runs successfully in the current environment
-- Every claim about behavior matches what the code actually does — no aspirational docs
-- ADR status is set correctly (Proposed, Accepted, etc.)
+Run every shell command in the document. Fix anything that fails.
 
 ### 4. Commit
 

@@ -5,61 +5,28 @@ description: Create an isolated git worktree before starting any task that modif
 
 # Worktree
 
-Create an isolated git worktree. This is the **mandatory first step** for any task that modifies files — all implementation work must happen inside a worktree, never in the main working directory.
-
 ## Setup
 
 Read `.claude/docs/git-workflow.md` before proceeding.
 
 ## Arguments
 
-`$ARGUMENTS` is the branch name in `<type>/<description>` format (e.g. `feat/user-auth`, `fix/login-bug`).
-If omitted, ask the user: "What branch name should I use? (e.g. feat/..., fix/..., refactor/...)"
+`$ARGUMENTS` is the branch name in `<type>/<description>` format.
+If omitted, ask the user for a branch name.
 
-The worktree directory name (`<name>`) is derived from the description part of the branch name.
+The worktree directory name (`<name>`) is the description part of the branch name.
 
-## Create the worktree
+## Create
 
 ```bash
 git fetch origin
 git worktree add .claude/worktrees/<name> -b <type>/<description> origin/main
 ```
 
-This creates `.claude/worktrees/<name>/` on a new branch `<type>/<description>`, forked from `origin/main`.
-
-## When to use worktrees
-
-- **Standard implementation**: the first step of every task that writes or modifies files — before any other work begins
-- **Bug fix during a feature**: you're mid-feature but a critical bug needs fixing now — open a worktree for the fix, keep the feature branch clean
-- **Parallel review**: one session writes code, another reviews it with a fresh context (no anchoring bias from having written it)
-- **Risky experiment**: try a big refactor in a worktree; discard it cleanly if it doesn't work out
-- **Subagent isolation**: give subagents their own working copy so they don't step on each other (set `isolation: worktree` in agent frontmatter)
-
-## Copy gitignored files
-
-New worktrees are clean checkouts — `.env` and similar files won't be there. To copy them automatically, add a `.worktreeinclude` at the project root:
-
-```
-.env
-.env.local
-config/local.json
-```
-
-## Cleanup behavior
-
-| Situation | When |
-|---|---|
-| PR merged | Remove worktree and delete local branch — see pull-request skill Step 6 |
-| Worktree closed with no changes | Branch and directory deleted automatically |
-| Worktree closed with changes | Prompt to keep or delete |
-| Subagent worktree, no changes | Deleted automatically |
-
-## Manual management
+## Manage
 
 ```bash
 git worktree list
 git worktree remove .claude/worktrees/<name>
 git branch -d <type>/<description>
 ```
-
-Add `.claude/worktrees/` to `.gitignore` so worktree contents don't show as untracked files in the main repo.
