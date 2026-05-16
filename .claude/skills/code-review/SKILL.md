@@ -7,12 +7,6 @@ description: Review code changes on the current branch for bugs, security issues
 
 Review the changes on the current branch and produce a structured report.
 
-## Read first
-
-Before any other step:
-- `.claude/docs/investigation-tools.md`
-- `.claude/docs/diff-strategy.md`
-
 ## Arguments
 
 `$ARGUMENTS` is optional. If a PR number is passed (e.g. `42`), review that PR. Otherwise review the current branch.
@@ -43,9 +37,11 @@ Use `symbol_search` from `.claude/docs/investigation-tools.md` to locate specifi
 
 ## Setup
 
-Read after examining the diff:
+Before gathering the diff:
+- `.claude/docs/investigation-tools.md`
+- `.claude/docs/diff-strategy.md`
 
-Always read:
+After examining the diff:
 - `.claude/docs/code-style.md`
 
 Read only after confirming the domain applies from the diff:
