@@ -47,7 +47,6 @@ Read after examining the diff:
 
 Always read:
 - `.claude/docs/code-style.md`
-- `.claude/docs/git-workflow.md`
 
 Read only after confirming the domain applies from the diff:
 - Diff contains auth, validation, or external API changes → `.claude/docs/security.md`
