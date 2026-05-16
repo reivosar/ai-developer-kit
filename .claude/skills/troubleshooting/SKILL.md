@@ -44,25 +44,12 @@ Resist the urge to fix immediately. The first obvious explanation is often wrong
 
 State the root cause in one sentence before writing any code. If there are multiple plausible causes, rank them and check the most likely one first.
 
-### 3. Fix
-
-- Change only what is necessary to fix the root cause
-- Do not refactor, rename, or clean up adjacent code — that belongs in a separate commit
-- If suppressing the error (try/catch, null check) is tempting, that's a sign the root cause is still wrong — fix the actual problem
-
-### 4. Verify
-
-- Run existing tests: if they pass before and fail after (or vice versa), you've confirmed the fix
-- If no tests exist, write a minimal failing test first, then make it pass — this proves the fix actually works
-- Use `symbol_search` to check for the same pattern elsewhere — bugs often exist in multiple places
-
 ## Report
 
-When done:
-- **Root cause**: what was actually wrong and why
-- **Fix**: what changed and the reasoning
-- **Other occurrences**: whether the same bug pattern exists elsewhere, and if so, where
+State the root cause, the required fix, and any other occurrences of the same pattern found during investigation.
 
-### 5. Commit
+### 3. Fix
 
-If a fix was applied, invoke /commit. Skip if the task was investigation only and no files were changed.
+Invoke /coding with the root cause statement and fix description. /coding handles implementation, review, commit, and PR.
+
+If the task was investigation only and no files need to change, stop here.

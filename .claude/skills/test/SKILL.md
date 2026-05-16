@@ -41,25 +41,10 @@ Identify:
 - Error / edge cases not yet covered
 - Existing test patterns in the same repo
 
-### 2. Red — write failing tests
-
-Write tests that:
-- Cover the happy path, each error case, and boundary values
-- Fail now (implementation already exists, so tests that pass immediately test nothing new)
-- Follow the naming and structure of existing tests
-
-Run the test suite and confirm new tests fail or add new coverage.
-
-### 3. Verify green
-
-If all new tests pass without changes: report which cases were already covered
-and which are newly covered. Do not declare success for tests that pass trivially.
-
 ## Report
 
-- Tests added: file paths and what each covers
-- Cases still untested: what would require refactoring or mocking to reach
+List: cases to cover (happy path, error paths, boundary values), existing test patterns to follow, and cases that would require refactoring or mocking to reach.
 
-### 4. Commit
+### 2. Implement
 
-Invoke /commit.
+Invoke /coding with the test requirements from Step 1 and the Report above. /coding handles writing the tests, review, commit, and PR.
