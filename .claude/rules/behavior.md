@@ -24,5 +24,5 @@
 
 ### Bash commands
 
-- All Bash commands that reference repository paths must use absolute paths derived from `git rev-parse --show-toplevel` or `$REPO_ROOT`; never rely on an implicit working directory
+- All Bash commands that reference repository paths must use absolute paths derived from `git rev-parse --show-toplevel` or `$REPO_ROOT`; never rely on an implicit working directory. Exception: `find` must be invoked as `find . <pattern>` from the repo root — the allow list only covers this relative-path form; absolute paths are blocked.
 - Only issue Bash commands that are listed in `permissions.allow` in `.claude/settings.json`; any command outside that list is rejected by the pre-bash hook and wastes time — check the allow list before running any command
