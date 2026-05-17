@@ -18,7 +18,7 @@ cp -r ai-developer-kit/.claude /path/to/your-project/.claude
 Make hooks executable:
 
 ```bash
-chmod +x .claude/hooks/*.sh
+chmod +x .claude/hooks/*.sh .claude/hooks/*.py
 ```
 
 Open Claude Code in your project directory. The rules, skills, and hooks load automatically.
@@ -29,6 +29,7 @@ Invoke skills via slash commands in the Claude Code prompt:
 
 | Command | Purpose |
 |---|---|
+| `/skill-selector` | Route any task to the correct skill via `skill-dispatch.md` — invoke first for every task |
 | `/worktree` | Create an isolated git worktree before starting any task |
 | `/coding` | Implement a feature or change against a known design |
 | `/troubleshooting` | Investigate a bug, error, or failing test |
@@ -43,17 +44,13 @@ Invoke skills via slash commands in the Claude Code prompt:
 | `/edit-kit` | Modify `settings.json` — permissions, hooks, env vars |
 | `/update-kit` | Pull the latest skills and rules from upstream |
 
-Run the hook test suite to verify everything works:
-
-```bash
-.claude/hooks/test_hooks.sh
-```
-
-Run individual suites:
+Run the hook test suites to verify everything works:
 
 ```bash
 python3 .claude/hooks/test_allow_list.py
 python3 .claude/hooks/test_pre_edit_check.py
+python3 .claude/hooks/test_pre_worktree_check.py
+python3 .claude/hooks/test_hook_lib.py
 ```
 
 ## Architecture
@@ -72,11 +69,12 @@ Everything lives under `.claude/`. There is no application code in this reposito
 
 ### Rules
 
-`.claude/rules/*.md` — three files loaded automatically into every session:
+`.claude/rules/*.md` — four files loaded automatically into every session:
 
 - `behavior.md` — hard rules: no `rm`, English-only files, no emojis, worktree-first
 - `context-efficiency.md` — token discipline: parallel tools, targeted reads, no preamble
 - `skill-dispatch.md` — routing table mapping every task type to a skill
+- `completion-standards.md` — audit standards: every claim must be backed by observable evidence
 
 ### Rule library
 
@@ -92,10 +90,9 @@ Hook scripts enforce constraints the rules alone cannot:
 
 | Hook | Trigger | Purpose |
 |---|---|---|
-| `pre-bash.sh` | Before every Bash command | Enforces the allow/deny list in `settings.json` |
+| `pre-bash-check.py` | Before every Bash command | Enforces the allow/deny list in `settings.json` |
 | `pre-commit.sh` | Before `git commit` | Blocks secrets, bad branch names, trailing whitespace |
-| `pre-edit.sh` / `pre-write.sh` | Before file edits/writes | Guards file mutations |
-| `pre-edit-check.py` / `pre-write-check.py` | Before file edits/writes | Additional edit guards |
+| `pre-edit-check.py` / `pre-write-check.py` | Before file edits/writes | TDD red-phase enforcement and `.env` file protection |
 | `pre-worktree-check.py` | Before file edits/writes | Blocks edits outside a worktree |
 | `post-edit.sh` | After file edits/writes | Post-mutation side effects |
 | `notify.sh` | On notifications | Surfaces Claude Code notifications |
@@ -106,7 +103,7 @@ Hook scripts enforce constraints the rules alone cannot:
 
 `settings.json` controls two things:
 
-1. `permissions.allow` / `permissions.deny` — glob patterns checked by `pre-bash.sh` before every Bash command. When adding a new allowed command, write a failing test in `test_allow_list.py` first.
+1. `permissions.allow` / `permissions.deny` — glob patterns checked by `pre-bash-check.py` before every Bash command. When adding a new allowed command, write a failing test in `test_allow_list.py` first.
 2. `hooks` — wires hook scripts to Claude Code events (`PreToolUse`, `PostToolUse`, `Stop`, `Notification`).
 
 ## Architecture decisions
