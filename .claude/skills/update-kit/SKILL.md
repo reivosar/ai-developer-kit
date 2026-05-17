@@ -9,7 +9,7 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 
 ## Sync behaviour
 
-- Files whose size or mtime differ from upstream are trashed then replaced.
+- Files whose content differs from upstream are trashed then replaced.
 - Files present locally but absent in upstream are trashed.
 - Files identical to upstream are skipped.
 
@@ -59,17 +59,16 @@ find . -path './.upstream/.claude/skills/*' -type f
 For each upstream file:
 
 1. Derive the local path by stripping the `.upstream/` prefix (e.g. `.upstream/.claude/docs/foo.md` → `.claude/docs/foo.md`).
-2. Compare size and mtime:
+2. If the local file does not exist: write the upstream content to the local path using the Write tool and continue to the next file.
+3. Compare content:
    ```bash
-   stat -f "%z %m" .upstream/.claude/docs/foo.md
-   stat -f "%z %m" .claude/docs/foo.md
+   diff -q .upstream/.claude/docs/foo.md .claude/docs/foo.md
    ```
-3. If the local file does not exist: write the upstream content to the local path using the Write tool.
-   If the local file exists but size/mtime differ: trash it first, then write the upstream content:
+4. If `diff -q` exits 0 (identical): skip.
+   If `diff -q` exits 1 (differs): trash the local file, then write the upstream content:
    ```bash
    .claude/hooks/trash.sh <local_file>
    ```
-4. If size and mtime are identical: skip.
 
 ### 2c. Trash local-only files
 
