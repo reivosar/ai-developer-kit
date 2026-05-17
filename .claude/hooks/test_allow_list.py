@@ -257,6 +257,9 @@ cases = [
     ("npx tsc --noEmit",            True),
     # deny: npx rimraf matches npx*rimraf* deny pattern
     ("npx rimraf dist",             True),
+    # allow: gh status
+    ("gh status",                  False),
+    ("gh status --show-token",     False),
     # allow: gh auth commands
     ("gh auth status",              False),
     ("gh auth login",               False),

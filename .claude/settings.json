@@ -65,6 +65,7 @@
       "Bash(npm run dev*)",
       "Bash(npm run start*)",
       "Bash(python3 *test*.py)",
+      "Bash(gh status*)",
       "Bash(gh auth*)",
       "Bash(gh issue create*)",
       "Bash(gh issue list*)",
