@@ -1,5 +1,13 @@
 ## Context Efficiency
 
+### Step compliance over context minimization
+
+Context minimization never justifies skipping a mandated workflow step.
+Mandatory steps — /skill-selector, /simplify --auto (Refactor), /code-review, /commit —
+must execute regardless of context cost.
+If a step requires loading a file or invoking a skill, do it. Omitting it to save tokens
+is a violation, not an optimization.
+
 - Maximize output per token of context consumed
 - No preamble, trailing summaries, or narration of internal steps
 - Parallelize independent tool calls; minimize total tool calls
