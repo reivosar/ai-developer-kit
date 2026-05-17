@@ -9,6 +9,7 @@ description: Create an isolated git worktree before starting any task that modif
 
 Always read:
 - `.claude/docs/git-workflow.md`
+- `.claude/docs/commands.md`
 
 ## Arguments
 
@@ -31,10 +32,7 @@ Never create a worktree from inside an existing worktree. Nested worktrees break
 
 ## Create
 
-```bash
-git fetch origin
-git worktree add .claude/worktrees/<name> -b <type>/<description> origin/main
-```
+Use the **worktree-add** command from `commands.md`.
 
 ## Manage
 

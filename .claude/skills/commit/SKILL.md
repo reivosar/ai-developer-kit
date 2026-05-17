@@ -12,6 +12,7 @@ Create a Conventional Commits message for what is staged and commit it.
 Always read:
 - `.claude/docs/git-workflow.md`
 - `.claude/docs/diff-strategy.md`
+- `.claude/docs/commands.md`
 
 ## Step 1: Check branch and staged changes
 
@@ -32,16 +33,7 @@ Draft the message using the format and type rules in `git-workflow.md`.
 
 ## Step 3: Propose and commit
 
-Show the proposed message to the user. On confirmation:
-
-```bash
-git commit -m "$(cat <<'EOF'
-<type>(<scope>): <summary>
-
-<body if any>
-EOF
-)"
-```
+Show the proposed message to the user. On confirmation, use the **commit** command from `commands.md`.
 
 ## Step 4: Open PR
 
