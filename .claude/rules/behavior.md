@@ -10,6 +10,7 @@
 - Ask before any destructive operation — `git reset --hard`, force push
 - Fix root causes; never suppress errors or skip hooks
 - Clarify ambiguous instructions before writing code
+- Never add history-rewriting or destructive git operations (`git rebase*`, `git reset*`, `git push --force*`) to `settings.json` allow list without explicit user approval; do not bundle adjacent permissions not explicitly requested
 
 ### Language and style
 
@@ -19,7 +20,9 @@
 ### Workflow
 
 - When the next step is unambiguous, invoke the appropriate skill immediately without asking for prior confirmation; reserve pre-action confirmation for destructive or irreversible operations only
-- Before any task that involves file modifications: invoke /worktree to create an isolated workspace on a `<type>/<desc>` branch; all implementation work must happen inside the worktree; never commit to main or to an unrelated branch
+- Worktree creation is Step 0 inside `/coding` — never invoke `/worktree` as a standalone step before `/coding`; all implementation work happens inside the worktree on a `<type>/<desc>` branch; never commit to main
+- After committing on a feature branch, immediately invoke `/pull-request` — do not wait for the user to ask
+- When `/code-review` returns issues, fix them immediately and re-invoke `/code-review`; repeat until the verdict is Approved — never stop after a "Changes requested" verdict and present it to the user
 - For every task: invoke `/skill-selector` first — it reads the request, consults `skill-dispatch.md`, and dispatches to the correct skill. Never work inline.
 
 ### Bash commands
