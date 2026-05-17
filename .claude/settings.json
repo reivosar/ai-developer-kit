@@ -101,7 +101,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre-bash.sh"
+            "command": "python3 .claude/hooks/pre-bash-check.py"
           },
           {
             "type": "command",
@@ -114,11 +114,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre-write.sh"
+            "command": "python3 .claude/hooks/pre-write-check.py"
           },
           {
             "type": "command",
-            "command": ".claude/hooks/pre-edit.sh"
+            "command": "python3 .claude/hooks/pre-edit-check.py"
           },
           {
             "type": "command",
@@ -131,7 +131,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pre-edit.sh"
+            "command": "python3 .claude/hooks/pre-edit-check.py"
           },
           {
             "type": "command",
