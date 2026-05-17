@@ -61,4 +61,4 @@ git fetch origin
 git log origin/main...HEAD --oneline
 ```
 
-Run as a parallel batch. If checking for an existing PR, add `gh pr view --json state 2>/dev/null` to the batch.
+Run as a parallel batch. If checking for an existing PR, add `gh pr view --json state` to the batch.

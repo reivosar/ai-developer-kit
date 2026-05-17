@@ -15,7 +15,7 @@ Always read:
 
 ## Step 1: Check state
 
-Use the **branch-state** command from `commands.md`, plus `gh pr view --json state 2>/dev/null`.
+Use the **branch-state** command from `commands.md`, plus `gh pr view --json state`.
 
 ## Step 2: Push
 
