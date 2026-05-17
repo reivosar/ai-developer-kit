@@ -68,6 +68,23 @@ Do not mark work done while placeholders remain.
 **Superficial merge approval.** Do not approve or declare a large diff complete
 without inspecting every changed file. Visual confirmation of details is required.
 
+**Procedure compliance claim without execution.** Loading or reading a workflow document
+does not constitute compliance. You must follow the procedure, verify preconditions,
+execute required safeguards, and confirm enforcement mechanisms are active. Claiming a
+workflow was "read" is not evidence it was followed.
+
+**Reducing systemic failures to user error.** If a safeguard can be bypassed accidentally,
+investigate the enforcement failure itself. Do not attribute systemic failures to skipped
+steps or accidental misuse — determine why the invalid operation was technically possible.
+
+**Relying on non-functional safeguards.** Before relying on hooks, guards, or automation,
+verify they exist, are executable, actually ran, and that failures are blocking when
+required. Non-functional safeguards must be treated as absent safeguards.
+
+**Unverified compliance assertions.** Statements such as "the workflow was followed",
+"the skill was used", or "checks are in place" must be supported by observable
+enforcement, not intent.
+
 ### Context efficiency
 
 Use the minimum context necessary to achieve maximum correctness and verification
