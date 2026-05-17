@@ -76,8 +76,11 @@ def is_whitelisted(command: str, patterns: list[str]) -> bool:
     return all(any(fnmatch.fnmatch(seg, p) for p in patterns) for seg in segments)
 
 
-def block(reason):
-    print(f"BLOCKED: {reason}", file=sys.stderr)
+def block(reason, cmd=None):
+    msg = f"BLOCKED: {reason}"
+    if cmd:
+        msg += f"\n  Command: {cmd[:300]}"
+    print(msg, file=sys.stderr)
     sys.exit(2)
 
 
@@ -96,28 +99,28 @@ def check_raw_operators(command: str) -> None:
         elif not in_single and not in_double:
             if ch == '>':
                 block("shell redirect operator '>' is not permitted. "
-                      "Use explicit file-writing tools instead.")
+                      "Use explicit file-writing tools instead.", command)
             elif ch == '|':
                 block("pipe operator '|' is not permitted. "
-                      "Run each command separately.")
+                      "Run each command separately.", command)
 
 
 def check_stash_destructive(command):
     if any(re.match(r"git\s+stash\s+(drop|clear)", seg.strip()) for seg in split_segments(command)):
         block("'git stash drop/clear' permanently deletes stashed work. "
-              "Run 'git stash list' to review stashes before dropping.")
+              "Run 'git stash list' to review stashes before dropping.", command)
 
 
 def check_checkout_discard(command):
     if any(re.match(r"git\s+checkout\s+--", seg.strip()) for seg in split_segments(command)):
         block("'git checkout --' discards uncommitted changes permanently. "
-              "Use 'git diff' to review changes first, or 'git stash' to save them.")
+              "Use 'git diff' to review changes first, or 'git stash' to save them.", command)
 
 
 def check_branch_force_delete(command):
     if any(re.match(r"git\s+branch\s+-D\b", seg.strip()) for seg in split_segments(command)):
         block("'git branch -D' force-deletes a branch. "
-              "Use 'git branch -d' (safe delete) — it refuses to delete unmerged branches.")
+              "Use 'git branch -d' (safe delete) — it refuses to delete unmerged branches.", command)
 
 
 def check_redirect_overwrite(command):
@@ -126,7 +129,8 @@ def check_redirect_overwrite(command):
         target = os.path.expanduser(match.group(1))
         if os.path.exists(target):
             block(f"shell redirect '>' would overwrite existing file '{target}'. "
-                  f"Use '>>' to append, or remove the file first if overwriting is intended.")
+                  f"Use '>>' to append, or remove the file first if overwriting is intended.",
+                  command)
 
 
 def check_commit_on_main(command):
@@ -142,7 +146,8 @@ def check_commit_on_main(command):
     if branch == "main":
         block("Cannot commit directly to main. "
               "Run: git checkout main && git pull "
-              "&& git checkout -b <type>/<description>")
+              "&& git checkout -b <type>/<description>",
+              command)
 
 
 def check_cp_destination(command):
@@ -175,7 +180,7 @@ def check_cp_destination(command):
             result = subprocess.run(['bash', trash_script, dst_path], capture_output=True)
             if result.returncode != 0:
                 block(f"could not trash existing destination '{dst_path}' before copy — "
-                      f"{result.stderr.decode().strip()}")
+                      f"{result.stderr.decode().strip()}", command)
             print(f"INFO: moved existing '{dst_path}' to trash before copy", file=sys.stderr)
 
 
@@ -193,9 +198,9 @@ def check_cp_options(command: str) -> None:
             continue
         for arg in args[1:]:
             if arg in _BLOCKED:
-                block(f"cp option '{arg}' is not permitted.")
+                block(f"cp option '{arg}' is not permitted.", command)
             if arg.startswith('--target-directory='):
-                block(f"cp option '{arg}' is not permitted.")
+                block(f"cp option '{arg}' is not permitted.", command)
 
 
 def check_python3_path(command: str) -> None:
@@ -215,9 +220,9 @@ def check_python3_path(command: str) -> None:
             if arg.endswith('.py'):
                 if arg.startswith('/'):
                     block(f"python3: absolute path '{arg}' is not permitted. "
-                          "Use a relative path within the project.")
+                          "Use a relative path within the project.", command)
                 if '../' in arg:
-                    block(f"python3: path traversal '{arg}' is not permitted.")
+                    block(f"python3: path traversal '{arg}' is not permitted.", command)
                 break
 
 
