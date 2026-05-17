@@ -3,8 +3,8 @@
 - Maximize output per token of context consumed
 - No preamble, trailing summaries, or narration of internal steps
 - Parallelize independent tool calls; minimize total tool calls
-- Spawn subagents to isolate large tool outputs from the main context
-- Prefer targeted grep/find over broad file reads
+- Spawn subagents only when expected output exceeds ~50 lines or requires 3+ independent tool calls; for smaller outputs, use tools directly
+- Prefer targeted grep/find over broad file reads; `find` must be invoked as `find . <pattern>` from the repo root — absolute paths are not in the allow list
 
 ### Pre-read protocol (mandatory before any file read)
 

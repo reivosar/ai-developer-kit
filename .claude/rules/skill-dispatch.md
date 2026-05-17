@@ -54,3 +54,5 @@ Never respond inline and never silently fall back to `/feedback` without user in
 ### Notes
 
 When to use `/coding` vs. a design skill: use a design skill when the structure or boundaries are undecided; use `/coding` once the design is settled and the task is implementation.
+
+`/investigate` is for pre-implementation code location only (read-only). For bug investigation, use `/troubleshooting` — it internally calls `/investigate` as its first step. Never call `/investigate` standalone for debugging.
