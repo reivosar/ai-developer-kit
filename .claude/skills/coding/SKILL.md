@@ -66,13 +66,12 @@ Write the minimum code required to make the failing tests pass:
 - Do not add logic not required by a currently failing test
 - Run the test suite and confirm all tests pass
 
-### 5. Refactor — clean up without changing behavior
+### 5. Refactor
 
-With tests green, improve the implementation:
-- Remove duplication
-- Improve naming
-- Extract if a function has grown beyond a single responsibility
-- Run the test suite again — all tests must still pass after refactoring
+Invoke `/simplify --auto` on the files changed in Step 4.
+`/simplify --auto` identifies and implements all must-fix and should-fix items without asking for confirmation.
+Run the test suite after `/simplify` completes — all tests must still pass.
+If any test fails, return to Step 4.
 
 ## Report
 
