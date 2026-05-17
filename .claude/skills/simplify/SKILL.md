@@ -23,6 +23,9 @@ Read only when:
 `$ARGUMENTS` is the target: a file path, function name, or inline description.
 If empty, ask the user what to review.
 
+If `--auto` is included in arguments (e.g. `/simplify --auto src/foo.py`): skip Step 3's user confirmation.
+Implement all must-fix and should-fix items directly, then return. Do not invoke /coding.
+
 ## Process
 
 ### 1. Read the target
@@ -53,8 +56,11 @@ Group by severity:
 
 End with a count: "N issues found (X must, Y should, Z consider)."
 
-Ask before implementing: "Implement all / must-fix only / specific items?"
+If `--auto` was passed: skip the confirmation below and proceed directly to Step 4.
+Otherwise ask: "Implement all / must-fix only / specific items?"
 
 ### 4. Implement
 
-Once the user approves, invoke /coding with the list of approved changes. /coding handles implementation, review, commit, and PR.
+**Without `--auto`**: invoke /coding with the approved changes. /coding handles implementation, review, commit, and PR.
+
+**With `--auto`**: implement all must-fix and should-fix items directly without invoking /coding. Return when done.
