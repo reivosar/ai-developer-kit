@@ -5,6 +5,8 @@
 - No trailing whitespace; single blank line at end of file
 - Comments explain *why*, not *what* — the code speaks for itself
 - No commented-out code — delete it; git history preserves it
+- Max function / method body: 20 lines (blank lines and comments excluded); if exceeded, extract until each function fits
+- Max file length: 200 lines; if exceeded, split by distinct responsibility
 
 ## Naming Conventions
 
@@ -19,9 +21,18 @@
 
 Names must be self-documenting — if a reader needs a comment to understand a name, rename it.
 
-**Method / function names** — use verb + noun that state the purpose precisely:
-- Good: `calculateInvoiceTotal`, `sendPasswordResetEmail`, `validateShippingAddress`
-- Bad: `process`, `handle`, `manage`, `execute`, `run`, `doStuff` — too vague to understand without reading the body
+**Method / function names** — use verb + target + trigger/condition:
+
+| Part | Purpose | Examples |
+|---|---|---|
+| Verb | what the function does | `send`, `fetch`, `validate`, `calculate`, `save` |
+| Target | what it acts on | `Email`, `UserById`, `ShippingAddress`, `InvoiceTotal` |
+| Trigger/Condition | when or under what constraint | `IfPaymentFailed`, `WhenRetryLimitExceeded`, `OnDeadline` |
+
+Trigger/condition is omitted when the function always applies unconditionally.
+
+- Good: `sendEmailIfPaymentFailed`, `fetchUserById`, `validateAddressOnCheckout`, `calculateInvoiceTotal`
+- Bad: `process`, `handle`, `manage`, `execute`, `run`, `doStuff` — verb alone carries no information about target or condition
 
 **Class / module names** — include the domain concept, not just the role:
 - Good: `InvoiceCalculator`, `PasswordResetMailer`, `ShippingAddressValidator`
