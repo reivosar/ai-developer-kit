@@ -175,6 +175,16 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "chmod +x .claude/hooks/*.sh .claude/hooks/*.py"
+          }
+        ]
+      }
     ]
   }
 }
