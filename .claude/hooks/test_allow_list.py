@@ -151,7 +151,7 @@ def run_order_tests():
     # git switch --detach HEAD: in allow (git switch *) AND in deny (git switch --detach*)
     # must be blocked regardless of evaluation order, but deny message should appear
     payload = json.dumps({"tool_input": {"command": "git switch --detach HEAD"}})
-    result = subprocess.run(["python3", HOOK, SETTINGS], input=payload, capture_output=True, text=True)
+    result = subprocess.run(["python3", HOOK], input=payload, capture_output=True, text=True)
     ok = result.returncode == 2
     print(f"[{'PASS' if ok else 'FAIL'}] main(): allow+deny command is blocked")
     if ok: passed += 1
@@ -367,7 +367,7 @@ passed = failed = 0
 for cmd, expect_blocked in cases:
     payload = json.dumps({"tool_input": {"command": cmd}})
     result = subprocess.run(
-        ["python3", HOOK, SETTINGS],
+        ["python3", HOOK],
         input=payload, capture_output=True, text=True
     )
     blocked = result.returncode == 2
@@ -398,7 +398,7 @@ for cmd, expect_blocked, branch in branch_cases:
     payload = json.dumps({"tool_input": {"command": cmd}})
     env = {**os.environ, "MOCK_BRANCH": branch}
     result = subprocess.run(
-        ["python3", HOOK, SETTINGS],
+        ["python3", HOOK],
         input=payload, capture_output=True, text=True, env=env
     )
     blocked = result.returncode == 2

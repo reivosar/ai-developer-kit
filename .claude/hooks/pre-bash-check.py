@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Allow-list check for pre-bash.sh.
+Allow-list check for Bash commands.
 Exit 0 = allowed, Exit 2 = blocked.
 """
 import sys
@@ -9,6 +9,7 @@ import fnmatch
 import os
 import re
 import subprocess
+from pathlib import Path
 
 
 def read_command():
@@ -238,7 +239,7 @@ def run_blocklist_checks(command):
 
 
 def main():
-    settings_path = sys.argv[1]
+    settings_path = str(Path(__file__).resolve().parent.parent / 'settings.json')
 
     command = read_command()
     if not command:
