@@ -11,42 +11,19 @@ Create a pull request from the current branch to main.
 
 Always read:
 - `.claude/docs/git-workflow.md`
+- `.claude/docs/commands.md`
 
 ## Step 1: Check state
 
-```bash
-git status
-git fetch origin
-git log origin/main...HEAD --oneline
-gh pr view --json state
-```
+Use the **branch-state** command from `commands.md`, plus `gh pr view --json state 2>/dev/null`.
 
 ## Step 2: Push
 
-```bash
-git push -u origin HEAD
-```
+Use the **push** command from `commands.md`.
 
 ## Step 3: Draft title and body
 
-Derive title and body using the rules in `git-workflow.md`.
-
-```bash
-gh pr create --title "<title>" --body "$(cat <<'EOF'
-## What
-
-<bullets>
-
-## Why
-
-<motivation>
-
-## How to test
-
-<steps>
-EOF
-)"
-```
+Derive title and body using the rules in `git-workflow.md`. Use the **pr-create** command from `commands.md`.
 
 ## Step 4: Report
 
