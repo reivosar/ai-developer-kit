@@ -1,11 +1,12 @@
 ---
 name: skill-selector
-description: Mandatory entry point for every task. Reads the user's request, matches it against skill-dispatch.md, and invokes the correct skill. Never performs work directly.
+description: Optional auxiliary skill for ambiguous dispatch. Use when the correct skill from skill-dispatch.md is unclear. For unambiguous tasks, consult skill-dispatch.md directly and invoke the matching skill without this step.
 ---
 
 # Skill Selector
 
-Entry point for every task. Dispatch to the correct skill — never perform any work inline.
+Auxiliary skill for dispatch when the correct skill is unclear. If the task maps clearly
+to a skill in `skill-dispatch.md`, invoke that skill directly — do not use this.
 
 ## Setup
 
@@ -32,4 +33,3 @@ If no skill clearly matches, invoke `/propose`.
 
 - Never perform any work in this skill — always delegate
 - Never ask for confirmation before invoking the matched skill
-- Never skip this skill and go inline
