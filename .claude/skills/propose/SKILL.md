@@ -9,7 +9,7 @@ Engage the user when no other skill clearly fits the request.
 
 ## When to invoke
 
-- The request does not map cleanly to any skill in `skill-dispatch.md`
+- The request does not map cleanly to any skill after applying the skill-selector classifiers
 - The intent is ambiguous across two or more skills
 - The user's phrasing suggests a novel workflow not yet covered by any skill
 
@@ -19,7 +19,7 @@ In one sentence, restate what you understood the user to be asking. This confirm
 
 ## Step 2: Identify candidate skills
 
-List up to three skills from `skill-dispatch.md` that partially match the request. For each, state in one clause what it covers and what it would miss for this request.
+List up to three skills that partially match the request. For each, state in one clause what it covers and what it would miss for this request.
 
 ## Step 3: Ask the user to choose
 
@@ -35,4 +35,4 @@ Wait for the user's response before taking any action.
 
 Once the user selects an option or clarifies:
 - If they pick a skill: invoke it immediately
-- If they describe a new need: check `skill-dispatch.md` once more; if still no match, invoke `/feedback` to file a skill-gap issue before proceeding
+- If they describe a new need and still no skill matches, invoke `/feedback` to file a skill-gap issue before proceeding
