@@ -325,8 +325,9 @@ cases = [
     # blocked: python/node/npx/make/npm install no longer in allow list
     ("python3 -c \"import webbrowser; webbrowser.open('x')\"", True),
     # allowed: any test file (pattern: *test*.py)
-    ("python3 .claude/hooks/test_allow_list.py",    False),
-    ("python3 .claude/hooks/test_pre_edit_check.py", False),
+    ("python3 .claude/hooks/test_allow_list.py",         False),
+    ("python3 .claude/hooks/test_pre_edit_check.py",    False),
+    ("python3 .claude/hooks/test_dispatch_enforcement.py", False),
     ("python3 test_something.py",                   False),
     ("python3 tests/test_api.py",                   False),
     ("python3 src/test_utils.py",                   False),
