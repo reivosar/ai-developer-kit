@@ -245,8 +245,10 @@ cases = [
     ("git switch --detach HEAD",     True),   # denied explicitly
     ("git pull",                     False),
     ("git pull origin main",         False),
-    ("git merge origin/main",        False),   # allowed: git merge * wildcard
-    ("git merge feature/foo",        False),  # allowed: git merge * wildcard
+    ("git merge",                    False),   # allowed: bare git merge (no args)
+    ("git merge origin/main",        False),   # allowed: git merge with arg
+    ("git merge feature/foo",        False),  # allowed: git merge with arg
+    ("git mergetool",                True),    # blocked: not in allow list
     ("git restore .",                True),
     ("git restore README.md",        True),
     ("git reset",                    True),
@@ -402,6 +404,9 @@ branch_cases = [
     ("git commit -m 'test'",    False, "fix/some-bug"),
     ("git status",              False, "main"),
     ("git log --oneline",       False, "main"),
+    # compound commands must not bypass the main-branch commit check
+    ("cd /repo && git commit -m 'test'", True,  "main"),
+    ("cd /repo && git commit -m 'test'", False, "feat/x"),
 ]
 
 b_passed = b_failed = 0

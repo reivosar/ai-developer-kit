@@ -190,5 +190,24 @@ try:
 finally:
     cleanup(tmpdir)
 
+# TC-CM-16: compound command with invalid branch → branch check must still trigger (blocked)
+tmpdir = make_git_repo()
+try:
+    make_branch(tmpdir, "my-feature")
+    stage_file(tmpdir, "app.py", "x = 1\n")
+    compound = f"cd {tmpdir} && git commit -m 'x'"
+    check("TC-CM-16 compound command on invalid branch blocked", run_hook(tmpdir, compound), 2)
+finally:
+    cleanup(tmpdir)
+
+# TC-CM-17: compound command on valid feature branch → allowed
+tmpdir = make_git_repo()
+try:
+    stage_file(tmpdir, "app.py", "x = 1\n")
+    compound = f"cd {tmpdir} && git commit -m 'x'"
+    check("TC-CM-17 compound command on feat/ allowed", run_hook(tmpdir, compound), 0)
+finally:
+    cleanup(tmpdir)
+
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(0 if failed == 0 else 1)
