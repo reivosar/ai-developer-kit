@@ -179,6 +179,9 @@ cases = [
     ('ruby -e "puts \'hello\'"',                    True),   # ruby not in allow list
     ('perl -e "unlink \'x\'"',                      True),
     ('perl -e "print \'hello\'"',                   True),   # perl not in allow list
+    # allow: git status with flags
+    ("git status -s",          False),
+    ("git status --short",     False),
     ("git stash drop",        True),
     ("git stash clear",       True),
     ("git branch -D my-branch", True),
