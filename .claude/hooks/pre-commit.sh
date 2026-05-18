@@ -9,7 +9,7 @@ INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin)['tool_input']['command'])" 2>/dev/null || true)
 
 # Only run for git commit commands
-if ! echo "$COMMAND" | grep -qE '^git commit'; then
+if ! echo "$COMMAND" | grep -qE '(^|&&[[:space:]]*|;[[:space:]]*)git commit'; then
   exit 0
 fi
 

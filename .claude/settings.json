@@ -6,6 +6,7 @@
       "Bash(git diff*)",
       "Bash(git fetch*)",
       "Bash(git pull*)",
+      "Bash(git merge)",
       "Bash(git merge *)",
       "Bash(git branch)",
       "Bash(git branch -a*)",

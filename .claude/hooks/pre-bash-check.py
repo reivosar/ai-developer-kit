@@ -135,7 +135,8 @@ def check_redirect_overwrite(command):
 
 
 def check_commit_on_main(command):
-    if not re.match(r"git\s+commit\b", command.strip()):
+    if not any(re.match(r"git\s+commit\b", seg.strip())
+               for seg in split_segments(command)):
         return
     branch = os.environ.get("MOCK_BRANCH")
     if branch is None:
