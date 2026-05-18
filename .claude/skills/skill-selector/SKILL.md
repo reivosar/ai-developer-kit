@@ -7,11 +7,6 @@ description: Mandatory entry point for every task. Analyzes the request, classif
 
 Mandatory first step for every task. Classify the request and dispatch to the correct skill.
 
-## Setup
-
-Always read:
-- `.claude/rules/skill-dispatch.md`
-
 ## Process
 
 ### Step 1: Extract the core intent
