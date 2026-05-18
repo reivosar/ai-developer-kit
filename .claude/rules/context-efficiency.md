@@ -3,7 +3,7 @@
 ### Step compliance over context minimization
 
 Context minimization never justifies skipping a mandated workflow step.
-Mandatory steps — /skill-selector, /simplify --auto (Refactor), /code-review, /commit —
+Mandatory steps — /simplify --auto (Refactor), /code-review, /commit —
 must execute regardless of context cost.
 If a step requires loading a file or invoking a skill, do it. Omitting it to save tokens
 is a violation, not an optimization.

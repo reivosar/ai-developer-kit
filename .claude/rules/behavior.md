@@ -23,7 +23,12 @@
 - Worktree creation is Step 0 inside `/coding` — never invoke `/worktree` as a standalone step before `/coding`; all implementation work happens inside the worktree on a `<type>/<desc>` branch; never commit to main
 - After committing on a feature branch, immediately invoke `/pull-request` — do not wait for the user to ask
 - When `/code-review` returns issues, fix them immediately and re-invoke `/code-review`; repeat until the verdict is Approved — never stop after a "Changes requested" verdict and present it to the user
-- For every task: invoke `/skill-selector` first — it reads the request, consults `skill-dispatch.md`, and dispatches to the correct skill. Never work inline.
+
+### Verification
+
+- All completion claims must be backed by observed evidence (test output, command result)
+- Do not declare work done until tests pass — inferred success is not success
+- Reading a workflow document is not evidence it was followed; follow it, verify it
 
 ### Bash commands
 
