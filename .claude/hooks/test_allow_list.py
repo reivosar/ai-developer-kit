@@ -242,7 +242,9 @@ cases = [
     ("git switch -c main",           True),
     ("git switch -c feature/foo",    True),
     ("git switch -c my-branch",      True),
-    ("git switch --detach HEAD",     True),   # denied explicitly
+    ("git switch --detach HEAD",     True),   # denied: --detach at start
+    ("git switch feat/foo --detach", True),   # denied: --detach after branch name
+    ("git switch -c feat/bar --detach", True),  # denied: --detach after new-branch spec
     ("git pull",                     False),
     ("git pull origin main",         False),
     ("git merge",                    False),   # allowed: bare git merge (no args)
