@@ -92,7 +92,7 @@
       "Bash(chmod +x .claude/hooks/*)"
     ],
     "deny": [
-      "Bash(git switch --detach*)",
+      "Bash(git switch *--detach*)",
       "Bash(gh label create *--repo*)"
     ],
     "defaultMode": "acceptEdits"
