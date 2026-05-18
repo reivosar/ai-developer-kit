@@ -23,6 +23,10 @@ def run_unit_tests():
     # is_whitelisted
     for cmd, expect in [
         ("git status", True),
+        ("git status --short", True),
+        ("git status --porcelain", True),
+        ("git switch main", True),
+        ("git pull", True),
         ("python3 --version", False),
         ("node --version", False),
         ("rm -rf /", False),
@@ -182,6 +186,7 @@ cases = [
     # allow: git status with flags
     ("git status -s",          False),
     ("git status --short",     False),
+    ("git status --porcelain", False),
     ("git stash drop",        True),
     ("git stash clear",       True),
     ("git branch -D my-branch", True),
@@ -221,8 +226,8 @@ cases = [
     ("git switch refactor/y",        False),
     ("git switch test/z",            False),
     ("git switch perf/w",            False),
-    # switch — blocked for invalid prefix or main
-    ("git switch main",              True),
+    # switch — allowed for main; blocked for invalid prefix
+    ("git switch main",              False),
     ("git switch feature/foo",       True),
     ("git switch my-branch",         True),
     # create via switch -c — allowed for all valid prefixes
@@ -238,7 +243,7 @@ cases = [
     ("git switch -c feature/foo",    True),
     ("git switch -c my-branch",      True),
     ("git switch --detach HEAD",     True),   # denied explicitly
-    ("git pull",                     True),
+    ("git pull",                     False),
     ("git pull origin main",         False),
     ("git merge origin/main",        False),   # allowed: git merge * wildcard
     ("git merge feature/foo",        False),  # allowed: git merge * wildcard
