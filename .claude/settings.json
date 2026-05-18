@@ -89,7 +89,8 @@
       "Bash(gh repo clone*)",
       "Bash(cp *)",
       "Bash(.claude/hooks/trash.sh*)",
-      "Bash(chmod +x .claude/hooks/*)"
+      "Bash(chmod +x .claude/hooks/*)",
+      "Bash(touch .claude/.dispatched)"
     ],
     "deny": [
       "Bash(git switch *--detach*)",
@@ -194,6 +195,10 @@
           {
             "type": "command",
             "command": "chmod +x .claude/hooks/*.sh .claude/hooks/*.py"
+          },
+          {
+            "type": "command",
+            "command": "rm -f .claude/.dispatched"
           }
         ]
       }

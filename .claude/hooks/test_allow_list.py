@@ -376,6 +376,8 @@ cases = [
     # python3 path restriction: absolute paths and traversal blocked
     ("python3 /tmp/test.py",                    True),
     ("python3 ../test_something.py",            True),
+    # skill-selector dispatch marker
+    ("touch .claude/.dispatched",               False),
 ]
 
 passed = failed = 0

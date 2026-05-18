@@ -11,6 +11,7 @@ from hook_lib import REPO_ROOT, WORKTREES_DIR  # noqa: E402
 
 HOOK = os.path.join(os.path.dirname(__file__), "pre-worktree-check.py")
 IN_WORKTREE = str(WORKTREES_DIR / "some-feature" / "src" / "app.py")
+DISPATCH_MARKER = REPO_ROOT / ".claude" / ".dispatched"
 OUTSIDE = {
     "readme":  str(REPO_ROOT / "README.md"),
     "json":    str(REPO_ROOT / "config.json"),
@@ -28,6 +29,11 @@ PLAN_FILE    = str(REPO_ROOT / ".claude" / "plan" / "plan.md")
 MEMORY_FILE  = str(Path.home() / ".claude" / "projects" / "some-project" / "memory" / "user.md")
 
 passed = failed = 0
+
+# Ensure dispatch marker exists so existing tests are not affected by the new check.
+_marker_existed = DISPATCH_MARKER.exists()
+DISPATCH_MARKER.parent.mkdir(parents=True, exist_ok=True)
+DISPATCH_MARKER.touch()
 
 
 def run_hook(file_path: str, tool_name: str = "Edit") -> int:
@@ -93,6 +99,24 @@ check("TC-WT-13 .claude/plan file allowed", run_hook(PLAN_FILE), 0)
 
 # TC-WT-14: memory file (outside repo) → exit 0
 check("TC-WT-14 memory file allowed", run_hook(MEMORY_FILE), 0)
+
+# TC-WT-15: dispatch marker present, edit inside worktree → exit 0
+DISPATCH_MARKER.touch()
+check("TC-WT-15 marker present, in-worktree allowed", run_hook(IN_WORKTREE), 0)
+
+# TC-WT-16: dispatch marker absent, edit inside worktree → exit 2
+DISPATCH_MARKER.unlink(missing_ok=True)
+check("TC-WT-16 marker absent, in-worktree blocked", run_hook(IN_WORKTREE), 2)
+DISPATCH_MARKER.touch()  # restore for subsequent tests
+
+# TC-WT-17: writing the dispatch marker itself → always exit 0 (no marker needed)
+DISPATCH_MARKER.unlink(missing_ok=True)
+check("TC-WT-17 dispatch marker file always allowed", run_hook(str(DISPATCH_MARKER)), 0)
+DISPATCH_MARKER.touch()  # restore
+
+# Restore marker to its original state
+if not _marker_existed:
+    DISPATCH_MARKER.unlink(missing_ok=True)
 
 print(f"\n{passed} passed, {failed} failed")
 raise SystemExit(0 if failed == 0 else 1)

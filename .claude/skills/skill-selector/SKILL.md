@@ -9,6 +9,14 @@ Mandatory first step for every task. Classify the request and dispatch to the co
 
 ## Process
 
+### Step 0: Mark dispatch
+
+Before classifying, record that skill-selector was invoked for this session:
+
+```bash
+touch .claude/.dispatched
+```
+
 ### Step 1: Extract the core intent
 
 From the user's request, answer these three questions:
