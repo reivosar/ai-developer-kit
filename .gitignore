@@ -43,5 +43,8 @@ coverage/
 # Session trash (Claude Code)
 .trash/
 
+# Dispatch state (Claude Code)
+.claude/.dispatched
+
 # Serena MCP workspace index
 .serena/
