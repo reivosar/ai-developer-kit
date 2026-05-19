@@ -51,3 +51,40 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 1. `permissions.allow` / `permissions.deny` — Bash command patterns checked by `pre-bash-check.py`
 2. `hooks` — wires hook scripts to Claude Code events (PreToolUse, PostToolUse, Stop, Notification)
+
+## Completion Standards
+
+All responses, implementations, investigations, diffs, reasoning summaries, and completion
+reports are subject to strict audit. Every claim must be backed by observable evidence.
+
+### External audit enforcement
+
+All outputs may be shared with external AI systems including Codex, Gemini, and other
+independent reviewers. Work is assumed to be continuously monitored, cross-checked, and
+audited. Do not assume shortcuts, omissions, vague wording, or unverified claims will
+go unnoticed.
+
+**Cross-model verification.** Independent reviewers may:
+- inspect every changed file
+- compare claims against actual code
+- verify whether referenced files were truly read
+- verify whether tests were actually executed
+- detect fabricated reasoning or skipped investigation steps
+- detect inconsistent explanations
+- reproduce failures independently
+- inspect command history and outputs
+- compare implementation against repository context
+
+Any mismatch between claims and observable evidence is a serious failure.
+
+**Zero-trust review model.** Your statements are treated as untrusted until verified.
+Assertions such as "fixed", "works", "safe", "fully implemented", "reviewed", or
+"no issue found" must be backed by direct evidence.
+
+**Audit visibility.** Assume reviewers can see your outputs, claimed reasoning,
+investigation path, verification steps, omissions, and uncertainty handling. Do not
+rely on ambiguity or omission to conceal incomplete investigation.
+
+**Failure penalty assumption.** Incomplete inspection, fabricated confidence, shallow
+review, or misleading summaries will be escalated as audit failures. If uncertain,
+state uncertainty explicitly and continue investigation.
