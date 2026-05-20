@@ -48,6 +48,19 @@ Get line count: `gh pr diff $ARGUMENTS --stat` (read the summary line).
 
 Use `symbol_search` to locate specific symbols before reading full files. Read a changed file in full only when the diff alone is insufficient to understand intent.
 
+## Run static analysis
+
+Inspect the changed file extensions, then run every applicable tool from the `static_analysis` entry in `.claude/docs/investigation-tools.md` in a single parallel batch:
+
+| Changed extensions | Tool to run |
+|---|---|
+| `.ts`, `.tsx` | `tsc --noEmit` |
+| `.py` | `flake8 <changed .py files>` |
+| `.go` | `go vet ./...` |
+| `.java` | skip — classpath required; note as not run |
+
+Run all applicable tools in parallel. Capture full output. If a tool is not installed, note it and skip. Treat every line emitted on a non-zero exit as a finding.
+
 ## Review areas
 
 ### Bugs & Logic Errors
@@ -72,6 +85,13 @@ Good code quality means the next developer can understand and modify the code sa
 - Tests added or updated proportional to the change
 - Tests that verify real behavior, not just that mocks were called
 - Edge cases covered (not just the happy path)
+
+### Static Analysis
+
+Report every finding emitted by the static analysis tools run above:
+- Type errors and undefined references
+- Lint violations (PEP 8, import ordering, unused variables, etc.)
+- Note any tool that was skipped because it is not installed
 
 ### Conventions
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
