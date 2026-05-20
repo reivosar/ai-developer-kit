@@ -32,19 +32,13 @@ Every task must go through a skill — never handle any task inline.
 
 ### Kit and configuration
 
-- Editing kit configuration (settings.json, hooks, permissions, env vars) → `/edit-kit` (alias: `/update-config`)
+- Editing kit configuration (settings.json, hooks, permissions, env vars) → `/edit-kit`
 - Updating docs and skills from the upstream kit → `/update-kit`
 - Reducing permission prompts by allowlisting safe commands → `/fewer-permission-prompts`
 
-### Automation
-
-- Recurring or interval-based tasks ("run this every N minutes") → `/loop`
-- Scheduled one-off or cron-based remote tasks → `/schedule`
-
-### Feedback and API
+### Feedback
 
 - Filing a rule/skill gap or improvement insight → `/feedback`
-- Questions or implementation involving the Claude API or Anthropic SDK → `/claude-api`
 
 ### Catch-all
 
