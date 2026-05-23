@@ -140,8 +140,9 @@ def check_commit_on_main(command):
         return
     branch = os.environ.get("MOCK_BRANCH")
     if branch is None:
+        cwd = os.environ.get("HOOK_ORIG_CWD", ".")
         result = subprocess.run(
-            ["git", "branch", "--show-current"],
+            ["git", "-C", cwd, "branch", "--show-current"],
             capture_output=True, text=True
         )
         branch = result.stdout.strip()
