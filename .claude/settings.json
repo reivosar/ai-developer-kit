@@ -105,11 +105,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" python3 .claude/hooks/pre-bash-check.py'"
+            "command": "python3 .claude/hooks/pre-bash-check.py"
           },
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/pre-commit.sh'"
+            "command": ".claude/hooks/pre-commit.sh"
           }
         ]
       },
@@ -118,15 +118,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" python3 .claude/hooks/pre-write-check.py'"
+            "command": "python3 .claude/hooks/pre-write-check.py"
           },
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" python3 .claude/hooks/pre-edit-check.py'"
+            "command": "python3 .claude/hooks/pre-edit-check.py"
           },
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/pre-worktree-check.py'"
+            "command": ".claude/hooks/pre-worktree-check.py"
           }
         ]
       },
@@ -135,11 +135,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" python3 .claude/hooks/pre-edit-check.py'"
+            "command": "python3 .claude/hooks/pre-edit-check.py"
           },
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/pre-worktree-check.py'"
+            "command": ".claude/hooks/pre-worktree-check.py"
           }
         ]
       },
@@ -148,7 +148,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/block-read.sh'"
+            "command": ".claude/hooks/block-read.sh"
           }
         ]
       }
@@ -159,7 +159,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/post-edit.sh'"
+            "command": ".claude/hooks/post-edit.sh"
           }
         ]
       }
@@ -170,7 +170,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/notify.sh'"
+            "command": ".claude/hooks/notify.sh"
           }
         ]
       }
@@ -180,11 +180,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/on-stop.sh'"
+            "command": ".claude/hooks/on-stop.sh"
           },
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" .claude/hooks/cleanup-merged-worktrees.sh'"
+            "command": ".claude/hooks/cleanup-merged-worktrees.sh"
           }
         ]
       }
@@ -194,7 +194,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'O=$(pwd); R=$(D=$(git rev-parse --git-common-dir); case \"$D\" in /*) dirname \"$D\";; *) git rev-parse --show-toplevel;; esac); cd \"$R\" && HOOK_ORIG_CWD=\"$O\" chmod +x .claude/hooks/*.sh .claude/hooks/*.py'"
+            "command": "chmod +x .claude/hooks/*.sh .claude/hooks/*.py"
           }
         ]
       }
