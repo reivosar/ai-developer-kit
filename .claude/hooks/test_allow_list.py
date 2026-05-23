@@ -317,6 +317,7 @@ cases = [
     ("nohup python generate_review.py",                        True),
     ("kill 1234",                                              True),
     ("open /tmp/foo.html",                                     True),
+    ("cwd",                                                    True),
     ("claude --worktree mywork",                               True),
     # denied: bulk-copy APIs
     ("python3 -c \"import shutil; shutil.copytree('a','b')\"", True),
@@ -381,9 +382,10 @@ cases = [
 passed = failed = 0
 for cmd, expect_blocked in cases:
     payload = json.dumps({"tool_input": {"command": cmd}})
+    env = {**os.environ, "MOCK_BRANCH": "feat/test-branch"}
     result = subprocess.run(
         ["python3", HOOK],
-        input=payload, capture_output=True, text=True
+        input=payload, capture_output=True, text=True, env=env
     )
     blocked = result.returncode == 2
     ok = blocked == expect_blocked
