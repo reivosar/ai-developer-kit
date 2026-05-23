@@ -220,3 +220,11 @@ find . -name "*.md" -not -path "*/.git/*"
 ```
 
 Finds all markdown files in the project tree, excluding `.git/`.
+
+## cd-worktree-root
+
+```bash
+cd <main-worktree-path>
+```
+
+Navigate to the main worktree root. Use the path shown on the first line of **worktree-list** output.

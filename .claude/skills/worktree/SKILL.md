@@ -23,10 +23,7 @@ The worktree directory name (`<name>`) is the description part of the branch nam
 Use the **worktree-list** command from `commands.md` and note the first line — that is the main worktree path.
 
 If the current working directory is NOT the main worktree path, stop and navigate there first:
-
-```bash
-cd <main-worktree-path>
-```
+use the **cd-worktree-root** command from `commands.md`.
 
 Never create a worktree from inside an existing worktree. Nested worktrees break git state and cause commits to land on the wrong branch.
 
