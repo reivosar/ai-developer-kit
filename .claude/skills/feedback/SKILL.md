@@ -33,27 +33,7 @@ Choose one label based on the insight:
 
 ## Step 3: Create the issue
 
-```bash
-gh issue create \
-  --repo reivosar/ai-developer-kit \
-  --title "<title>" \
-  --label "<label>" \
-  --body "$(cat <<'EOF'
-## Insight
-
-<What was missing or should be improved>
-
-## Context
-
-Project: <project name or path>
-Task: <what was being worked on when this was noticed>
-
-## Suggested change
-
-<Which file to change and what to add or modify — leave blank if unknown>
-EOF
-)"
-```
+Use the **issue-create** command from `commands.md`.
 
 ## Step 4: Report
 

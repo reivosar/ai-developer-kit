@@ -16,14 +16,10 @@ Always read:
 
 ## Step 1: Check branch and staged changes
 
-```bash
-git status
-git diff --staged --stat
-```
+Use the **diff-staged** command from `commands.md`.
 
-Apply the threshold from `.claude/docs/diff-strategy.md` to the stat summary line:
-- Under threshold: `git diff --staged`
-- Over threshold: `git diff --staged --name-only`, then `git diff --staged -- <file>` for every file
+Apply the threshold from `.claude/docs/diff-strategy.md` to the stat summary:
+use the **diff-staged-files** command from `commands.md`.
 
 Read all files — do not skip any based on perceived importance.
 

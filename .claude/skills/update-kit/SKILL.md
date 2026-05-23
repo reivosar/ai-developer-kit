@@ -21,18 +21,9 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 
 ## Step 1: Clone the kit into the worktree
 
-Clone into `.upstream/` so all subsequent commands stay within the project tree:
+Use the **clone-kit** command from `commands.md`.
 
-```bash
-gh repo clone reivosar/ai-developer-kit .upstream -- --depth=1 --quiet
-```
-
-If `.upstream/` already exists, trash it first then re-clone:
-
-```bash
-.claude/hooks/trash.sh .upstream
-gh repo clone reivosar/ai-developer-kit .upstream -- --depth=1 --quiet
-```
+If `.upstream/` already exists, use the **trash** command from `commands.md` first, then re-run **clone-kit**.
 
 If the clone fails due to authentication, stop and ask the user to run `gh auth login`.
 
@@ -42,17 +33,7 @@ Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`.
 
 ### 2a. Enumerate upstream files
 
-Issue all three as separate Bash tool calls in one message (parallel):
-
-```bash
-find . -path './.upstream/.claude/docs/*' -type f
-```
-```bash
-find . -path './.upstream/.claude/rules/*' -type f
-```
-```bash
-find . -path './.upstream/.claude/skills/*' -type f
-```
+Use the **find-upstream** command from `commands.md`.
 
 ### 2b. Overwrite changed or new files
 
@@ -60,54 +41,25 @@ For each upstream file:
 
 1. Derive the local path by stripping the `.upstream/` prefix (e.g. `.upstream/.claude/docs/foo.md` → `.claude/docs/foo.md`).
 2. If the local file does not exist: write the upstream content to the local path using the Write tool and continue to the next file.
-3. Compare content:
-   ```bash
-   diff -q .upstream/.claude/docs/foo.md .claude/docs/foo.md
-   ```
-4. If `diff -q` exits 0 (identical): skip.
-   If `diff -q` exits 1 (differs): trash the local file, then write the upstream content:
-   ```bash
-   .claude/hooks/trash.sh <local_file>
-   ```
+3. Compare content: use the **diff-upstream** command from `commands.md`.
+4. If identical (exit 0): skip.
+   If differs (exit 1): use the **trash** command from `commands.md` to remove the local file, then write the upstream content.
 
 ### 2c. Trash local-only files
 
-Find local files absent from upstream — issue all three in parallel:
+Use the **find-local** command from `commands.md`.
 
-```bash
-find . -path './.claude/docs/*' -type f
-```
-```bash
-find . -path './.claude/rules/*' -type f
-```
-```bash
-find . -path './.claude/skills/*' -type f
-```
+For each local file, check whether the upstream counterpart exists: use the **upstream-exists** command from `commands.md`.
 
-For each local file, check whether the corresponding upstream file exists:
-
-```bash
-test -f .upstream/<local_path>
-```
-
-If absent upstream, trash it:
-
-```bash
-.claude/hooks/trash.sh <local_file>
-```
+If absent upstream, use the **trash** command from `commands.md`.
 
 ## Step 3: Trash the upstream clone
 
-```bash
-.claude/hooks/trash.sh .upstream
-```
+Use the **trash** command from `commands.md`.
 
 ## Step 4: Report
 
-```bash
-git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
-git status
-```
+Use the **kit-diff-stat** command from `commands.md`.
 
 ## Step 5: Commit
 

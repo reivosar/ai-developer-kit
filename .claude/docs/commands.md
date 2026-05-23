@@ -62,3 +62,161 @@ git log origin/main...HEAD --oneline
 ```
 
 Run as a parallel batch. If checking for an existing PR, add `gh pr view --json state` to the batch.
+
+## diff-branch
+
+```bash
+git diff --stat main...HEAD
+git log main...HEAD --oneline
+```
+
+Run as a parallel batch. Gives a size overview of the current branch vs main.
+
+## diff-branch-files
+
+Full branch diff. Apply the threshold from `diff-strategy.md` to the stat summary from **diff-branch**:
+- Under threshold: `git diff main...HEAD`
+- Over threshold: `git diff --name-only main...HEAD`, then `git diff main...HEAD -- <file>` for every file
+
+## diff-staged
+
+```bash
+git status
+git diff --staged --stat
+```
+
+Run as a parallel batch. Gives a size overview of what is staged.
+
+## diff-staged-files
+
+Full staged diff. Apply the threshold from `diff-strategy.md` to the stat summary from **diff-staged**:
+- Under threshold: `git diff --staged`
+- Over threshold: `git diff --staged --name-only`, then `git diff --staged -- <file>` for every file
+
+## pr-diff
+
+```bash
+gh pr view $PR
+gh pr diff $PR --name-only
+```
+
+Run as a parallel batch. Replace `$PR` with the PR number. Gives an overview of the PR and the list of changed files.
+
+## pr-diff-files
+
+Full PR diff. Apply the threshold from `diff-strategy.md`:
+- Get line count: `gh pr diff $PR --stat` (read the summary line)
+- Under threshold: `gh pr diff $PR`
+- Over threshold: `gh pr diff $PR -- <file>` for every file
+
+## clone-kit
+
+```bash
+gh repo clone reivosar/ai-developer-kit .upstream -- --depth=1 --quiet
+```
+
+Clones the upstream kit into `.upstream/` inside the project tree. Never run from inside an existing worktree.
+
+## trash
+
+```bash
+.claude/hooks/trash.sh <path>
+```
+
+Moves `<path>` to `.trash/<timestamp>/`. Always use this instead of `rm`.
+
+## find-upstream
+
+```bash
+find . -path './.upstream/.claude/docs/*' -type f
+find . -path './.upstream/.claude/rules/*' -type f
+find . -path './.upstream/.claude/skills/*' -type f
+```
+
+Issue all three as a parallel batch. Enumerates all files in the upstream clone.
+
+## find-local
+
+```bash
+find . -path './.claude/docs/*' -type f
+find . -path './.claude/rules/*' -type f
+find . -path './.claude/skills/*' -type f
+```
+
+Issue all three as a parallel batch. Enumerates all local kit files.
+
+## diff-upstream
+
+```bash
+diff -q .upstream/<path> <local_path>
+```
+
+Compares an upstream file against its local counterpart. Exit 0 = identical; exit 1 = differs.
+
+## upstream-exists
+
+```bash
+test -f .upstream/<local_path>
+```
+
+Returns exit 0 if the upstream counterpart of a local file exists; exit 1 if absent.
+
+## kit-diff-stat
+
+```bash
+git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
+git status
+```
+
+Run as a parallel batch. Shows the summary of all kit file changes before committing.
+
+## worktree-list
+
+```bash
+git worktree list
+```
+
+Lists all worktrees with their paths and current branches.
+
+## worktree-remove
+
+```bash
+git worktree remove .claude/worktrees/<name>
+git branch -d <type>/<description>
+```
+
+Removes the worktree and deletes its branch. Run sequentially.
+
+## issue-create
+
+```bash
+gh issue create \
+  --repo reivosar/ai-developer-kit \
+  --title "<title>" \
+  --label "<label>" \
+  --body "$(cat <<'EOF'
+## Insight
+
+<What was missing or should be improved>
+
+## Context
+
+Project: <project name or path>
+Task: <what was being worked on when this was noticed>
+
+## Suggested change
+
+<Which file to change and what to add or modify — leave blank if unknown>
+EOF
+)"
+```
+
+Files a GitHub issue on the kit repository. Choose a label from: `rule-gap`, `skill-gap`, `new-pattern`, `enhancement`.
+
+## find-docs
+
+```bash
+find . -name "*.md" -not -path "*/.git/*"
+```
+
+Finds all markdown files in the project tree, excluding `.git/`.

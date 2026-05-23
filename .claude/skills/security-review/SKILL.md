@@ -23,25 +23,15 @@ Otherwise review the current branch or the file/module specified.
 
 ## Gather the target
 
-**Current branch:**
-```bash
-git diff --stat main...HEAD
-git log main...HEAD --oneline
-```
+**Current branch:** use the **diff-branch** command from `commands.md`.
 
-Apply the threshold from `.claude/docs/diff-strategy.md` to the stat summary line:
-- Under threshold: `git diff main...HEAD`
-- Over threshold: `git diff --name-only main...HEAD`, then `git diff main...HEAD -- <file>` for every file
+Apply the threshold from `.claude/docs/diff-strategy.md`:
+use the **diff-branch-files** command from `commands.md`.
 
-**PR number:**
-```bash
-gh pr view $ARGUMENTS
-gh pr diff $ARGUMENTS --name-only
-```
+**PR number:** use the **pr-diff** command from `commands.md` (pass `$ARGUMENTS` as `$PR`).
 
-Get line count: `gh pr diff $ARGUMENTS --stat` (read the summary line).
-- Under threshold: `gh pr diff $ARGUMENTS`
-- Over threshold: `gh pr diff $ARGUMENTS -- <file>` for every file
+Apply the threshold from `.claude/docs/diff-strategy.md`:
+use the **pr-diff-files** command from `commands.md` (pass `$ARGUMENTS` as `$PR`).
 
 **File or module:** read the file directly.
 

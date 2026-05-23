@@ -14,9 +14,7 @@ Always read:
 
 ### 1. Investigate
 
-```bash
-find . -name "*.md" -not -path "*/.git/*"
-```
+Use the **find-docs** command from `commands.md`.
 
 If documenting specific code behavior, invoke /investigate to locate the source.
 
