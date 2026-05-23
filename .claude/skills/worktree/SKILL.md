@@ -20,13 +20,10 @@ The worktree directory name (`<name>`) is the description part of the branch nam
 
 ## Pre-flight: verify CWD is the project root
 
-Run `git worktree list` and note the first line — that is the main worktree path.
+Use the **worktree-list** command from `commands.md` and note the first line — that is the main worktree path.
 
 If the current working directory is NOT the main worktree path, stop and navigate there first:
-
-```bash
-cd <main-worktree-path>
-```
+use the **cd-worktree-root** command from `commands.md`.
 
 Never create a worktree from inside an existing worktree. Nested worktrees break git state and cause commits to land on the wrong branch.
 
@@ -36,8 +33,5 @@ Use the **worktree-add** command from `commands.md`.
 
 ## Manage
 
-```bash
-git worktree list
-git worktree remove .claude/worktrees/<name>
-git branch -d <type>/<description>
-```
+- List: use the **worktree-list** command from `commands.md`.
+- Remove: use the **worktree-remove** command from `commands.md`.
