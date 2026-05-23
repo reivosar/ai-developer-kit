@@ -8,11 +8,6 @@ description: Optional auxiliary skill for ambiguous dispatch. Use when the corre
 Auxiliary skill for dispatch when the correct skill is unclear. If the task maps clearly
 to a skill in `skill-dispatch.md`, invoke that skill directly — do not use this.
 
-## Setup
-
-Always read:
-- `.claude/rules/skill-dispatch.md`
-
 ## Process
 
 ### Step 1: Read the request
