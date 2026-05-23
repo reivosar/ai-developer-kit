@@ -25,7 +25,7 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 ### Rules (auto-loaded)
 
-`.claude/rules/*.md` — loaded into every conversation automatically. Three files: `behavior.md`, `context-efficiency.md`, `skill-dispatch.md`.
+`.claude/rules/*.md` — loaded into every conversation automatically. Two files: `behavior.md`, `context-efficiency.md`.
 
 ### Rule library (on-demand)
 
