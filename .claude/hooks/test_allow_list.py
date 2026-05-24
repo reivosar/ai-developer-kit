@@ -95,7 +95,8 @@ def run_unit_tests():
             if ok: unit_passed += 1
             else: unit_failed += 1
 
-    # check_cp_destination: non-cp and non-recursive must not block
+    # check_cp_destination: non-cp and non-recursive must not block;
+    # non-recursive cp to existing file must trash destination
     if not hasattr(mod, "check_cp_destination"):
         print("[FAIL] check_cp_destination not found in module")
         unit_failed += 1
@@ -114,6 +115,21 @@ def run_unit_tests():
             print(f"[{'PASS' if ok else 'FAIL'}] check_cp_destination({cmd!r}) blocked=={expect_block}")
             if ok: unit_passed += 1
             else: unit_failed += 1
+        # Non-recursive cp to existing file: must trash destination
+        # Use a path inside the project so trash.sh can move it
+        _tmppath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_test_cp_dest_tmp.txt')
+        with open(_tmppath, 'w'):
+            pass
+        try:
+            mod.check_cp_destination(f"cp /dev/null {_tmppath}")
+            _trashed = not os.path.exists(_tmppath)
+            ok = _trashed
+            print(f"[{'PASS' if ok else 'FAIL'}] check_cp_destination: non-recursive cp trashes existing dest")
+            if ok: unit_passed += 1
+            else: unit_failed += 1
+        finally:
+            if os.path.exists(_tmppath):
+                os.unlink(_tmppath)
 
     # check_commit_on_main
     if not hasattr(mod, "check_commit_on_main"):
@@ -311,6 +327,10 @@ cases = [
     ("cp -r src/ dst/",          False),
     ("cp README.md docs/",       False),
     ("cp -rp src/ dst/",         False),
+    # diff: allowed
+    ("diff file1.txt file2.txt",                                          False),
+    ("diff -q .upstream/.claude/rules/behavior.md .claude/rules/behavior.md", False),
+    ("diff -r dir1/ dir2/",                                               False),
     # blocked: commands not in allow list (skills use replacements instead)
     ("git branch --show-current",                              False),
     ("gh label create rule-gap --repo foo",                    True),

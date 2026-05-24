@@ -8,6 +8,7 @@ import json
 import fnmatch
 import os
 import re
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -154,8 +155,7 @@ def check_commit_on_main(command):
 
 
 def check_cp_destination(command):
-    """For recursive cp, move an existing destination directory to trash before copying."""
-    import shlex
+    """Move an existing cp destination to trash before copying."""
     for seg in split_segments(command):
         seg = seg.strip()
         if not re.match(r'cp\s', seg):
@@ -163,13 +163,6 @@ def check_cp_destination(command):
         try:
             args = shlex.split(seg)
         except ValueError:
-            continue
-        has_recursive = any(
-            re.match(r'^-[a-zA-Z]*[rRa][a-zA-Z]*$', a)
-            for a in args[1:]
-            if a.startswith('-') and not a.startswith('--')
-        )
-        if not has_recursive:
             continue
         positional = [a for a in args[1:] if not a.startswith('-')]
         if len(positional) < 2:
@@ -189,7 +182,6 @@ def check_cp_destination(command):
 
 def check_cp_options(command: str) -> None:
     """Block cp invocations with force or target-directory options."""
-    import shlex
     _BLOCKED = {'-t', '--target-directory', '-f', '--force'}
     for seg in split_segments(command):
         seg = seg.strip()
@@ -208,7 +200,6 @@ def check_cp_options(command: str) -> None:
 
 def check_python3_path(command: str) -> None:
     """Block python3 invocations referencing absolute paths or path traversal."""
-    import shlex
     for seg in split_segments(command):
         seg = seg.strip()
         if not re.match(r'python3\s', seg):
