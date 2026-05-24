@@ -4,13 +4,15 @@ TDD Red-phase enforcement hook for Write/Edit tools.
 Verifies that staged (or recently committed) test files reference
 the functions being modified before allowing implementation edits.
 """
-import sys
-import json
+import os
 import re
 import subprocess
-import os
+import sys
+from pathlib import Path
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from env_file_guard import is_blocked_env_file  # noqa: E402
+from hook_lib import read_stdin_json, block  # noqa: E402
 
 IMPL_EXTS = {
     '.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs',
@@ -55,13 +57,7 @@ KEYWORD_SKIP = {'if', 'for', 'while', 'return', 'new', 'switch', 'catch', 'try',
                 'class', 'interface', 'enum', 'struct', 'type', 'const', 'let', 'var'}
 
 
-def read_input():
-    data = json.load(sys.stdin)
-    return data.get('tool_name', ''), data.get('tool_input', {})
-
-
-def is_impl_file(path):
-    from pathlib import Path
+def is_impl_file(path: str) -> bool:
     basename = os.path.basename(path)
     if basename in SKIP_BASENAMES:
         return False
@@ -77,12 +73,12 @@ def is_impl_file(path):
     return ext.lower() in IMPL_EXTS
 
 
-def is_test_file(path):
+def is_test_file(path: str) -> bool:
     basename = os.path.basename(path)
     return bool(TEST_NAME_RE.search(basename) or TEST_DIR_RE.search(path))
 
 
-def extract_func_names(code, file_path):
+def extract_func_names(code: str, file_path: str) -> set[str]:
     _, ext = os.path.splitext(file_path)
     patterns = FUNC_PATTERNS.get(ext.lower(), [])
     names = set()
@@ -94,7 +90,7 @@ def extract_func_names(code, file_path):
     return names
 
 
-def git_files(cmd):
+def git_files(cmd: list[str]) -> list[str]:
     try:
         result = subprocess.run(cmd, capture_output=True, text=True)
         return [f for f in result.stdout.strip().split('\n') if f]
@@ -102,7 +98,7 @@ def git_files(cmd):
         return []
 
 
-def test_covers_funcs(test_paths, func_names):
+def test_covers_funcs(test_paths: list[str], func_names: set[str]) -> bool:
     for path in test_paths:
         try:
             with open(path, encoding='utf-8', errors='ignore') as f:
@@ -114,29 +110,32 @@ def test_covers_funcs(test_paths, func_names):
     return False
 
 
-def block(reason, file_path, func_names, staged_tests):
-    print(f"BLOCKED: {reason}", file=sys.stderr)
-    print(f"  File: {file_path}", file=sys.stderr)
+def _fail_tdd(reason: str, file_path: str, func_names: set[str], staged_tests: list[str]) -> None:
+    details = [f"File: {file_path}"]
     if func_names:
-        print(f"  Functions being modified: {', '.join(sorted(func_names))}", file=sys.stderr)
+        details.append(f"Functions being modified: {', '.join(sorted(func_names))}")
     if staged_tests:
-        print(f"  Staged tests: {', '.join(staged_tests)}", file=sys.stderr)
-        print(f"  None reference the modified functions.", file=sys.stderr)
+        details.append(f"Staged tests: {', '.join(staged_tests)}")
+        details.append("None reference the modified functions.")
     else:
-        print(f"  No test files staged or in the last commit.", file=sys.stderr)
-    print(f"  Write a failing test for these functions first (Red phase).", file=sys.stderr)
-    sys.exit(2)
+        details.append("No test files staged or in the last commit.")
+    details.append("Write a failing test for these functions first (Red phase).")
+    block(reason, *details)
 
 
-def main():
-    tool_name, tool_input = read_input()
+def main() -> None:
+    data = read_stdin_json()
+    tool_name = data.get('tool_name', '')
+    tool_input = data.get('tool_input', {})
     file_path = tool_input.get('file_path', '')
 
     if not file_path:
         sys.exit(0)
     if is_blocked_env_file(file_path):
-        print(f"BLOCKED: '{os.path.basename(file_path)}' must not be written. Use .env.sample or .env.example instead.", file=sys.stderr)
-        sys.exit(2)
+        block(
+            f"'{os.path.basename(file_path)}' must not be written. "
+            "Use .env.sample or .env.example instead."
+        )
     if not is_impl_file(file_path):
         sys.exit(0)
 
@@ -151,20 +150,19 @@ def main():
     all_tests = staged_tests + last_tests
 
     if not all_tests:
-        block("No test files staged.", file_path, func_names, staged_tests)
+        _fail_tdd("No test files staged.", file_path, func_names, staged_tests)
 
     if func_names:
         if not test_covers_funcs(all_tests, func_names):
-            block(
+            _fail_tdd(
                 "Staged tests do not reference the modified functions.",
                 file_path, func_names, staged_tests,
             )
     else:
-        # No function names extracted — fall back to file-stem match
         impl_stem = re.sub(r'\.\w+$', '', os.path.basename(file_path)).lower()
         matched = [t for t in all_tests if impl_stem in os.path.basename(t).lower()]
         if not matched:
-            block(
+            _fail_tdd(
                 f"No test for '{os.path.basename(file_path)}' found.",
                 file_path, func_names, staged_tests,
             )

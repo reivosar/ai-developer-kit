@@ -1,6 +1,9 @@
 """Shared hook utilities for Python hooks."""
+import json
 import subprocess
+import sys
 from pathlib import Path
+from typing import NoReturn
 
 
 def _find_repo_root() -> Path:
@@ -21,3 +24,17 @@ def _find_repo_root() -> Path:
 
 REPO_ROOT: Path = _find_repo_root()
 WORKTREES_DIR: Path = REPO_ROOT / ".claude" / "worktrees"
+
+
+def read_stdin_json() -> dict:
+    try:
+        return json.load(sys.stdin)
+    except Exception:
+        return {}
+
+
+def block(reason: str, *detail_lines: str) -> NoReturn:
+    print(f"BLOCKED: {reason}", file=sys.stderr)
+    for line in detail_lines:
+        print(f"  {line}", file=sys.stderr)
+    sys.exit(2)
