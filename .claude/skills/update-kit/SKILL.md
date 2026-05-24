@@ -17,7 +17,6 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 
 - `CLAUDE.md` — project-specific behavior
 - `.claude/settings.json` — the `hooks` section is never touched; `permissions.allow` and `permissions.deny` are synced in step 2d
-- `.claude/hooks/` — project-specific hook scripts
 
 ## Step 1: Clone the kit into the worktree
 
@@ -27,9 +26,9 @@ If `.upstream/` already exists, use the **trash** command from `commands.md` fir
 
 If the clone fails due to authentication, stop and ask the user to run `gh auth login`.
 
-## Step 2: Sync docs, rules, and skills
+## Step 2: Sync docs, rules, skills, and hooks
 
-Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`.
+Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`, `.claude/hooks`.
 
 ### 2a. Enumerate upstream files
 
