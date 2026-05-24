@@ -16,7 +16,7 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 ## What is never touched
 
 - `CLAUDE.md` — project-specific behavior
-- `.claude/settings.json` — project-specific permissions and hooks
+- `.claude/settings.json` — the `hooks` section is never touched; `permissions.allow` and `permissions.deny` are synced in step 2d
 - `.claude/hooks/` — project-specific hook scripts
 
 ## Step 1: Clone the kit into the worktree
@@ -52,6 +52,22 @@ Use the **find-local** command from `commands.md`.
 For each local file, check whether the upstream counterpart exists: use the **upstream-exists** command from `commands.md`.
 
 If absent upstream, use the **trash** command from `commands.md`.
+
+### 2d. Sync new permission patterns from upstream settings.json
+
+Compare upstream settings.json against local using the **diff-upstream** command for `.claude/settings.json`.
+
+If identical (exit 0): skip.
+
+If differs (exit 1):
+1. Read both files:
+   - `cat .upstream/.claude/settings.json`
+   - `cat .claude/settings.json`
+2. Identify every pattern in upstream `permissions.allow` that is absent from local `permissions.allow`.
+3. Identify every pattern in upstream `permissions.deny` that is absent from local `permissions.deny`.
+4. For each new `permissions.allow` pattern: use Edit to insert it immediately before `"Bash(.claude/hooks/trash.sh*)"` in local `settings.json`.
+5. For each new `permissions.deny` pattern: use Edit to append it at the end of the local `permissions.deny` array.
+6. Do NOT modify the `hooks` section.
 
 ## Step 3: Trash the upstream clone
 
