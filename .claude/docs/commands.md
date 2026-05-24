@@ -131,9 +131,10 @@ Moves `<path>` to `.trash/<timestamp>/`. Always use this instead of `rm`.
 find . -path './.upstream/.claude/docs/*' -type f
 find . -path './.upstream/.claude/rules/*' -type f
 find . -path './.upstream/.claude/skills/*' -type f
+find . -path './.upstream/.claude/hooks/*' -type f
 ```
 
-Issue all three as a parallel batch. Enumerates all files in the upstream clone.
+Issue all four as a parallel batch. Enumerates all files in the upstream clone.
 
 ## find-local
 
@@ -141,9 +142,10 @@ Issue all three as a parallel batch. Enumerates all files in the upstream clone.
 find . -path './.claude/docs/*' -type f
 find . -path './.claude/rules/*' -type f
 find . -path './.claude/skills/*' -type f
+find . -path './.claude/hooks/*' -type f
 ```
 
-Issue all three as a parallel batch. Enumerates all local kit files.
+Issue all four as a parallel batch. Enumerates all local kit files.
 
 ## diff-upstream
 
@@ -164,7 +166,7 @@ Returns exit 0 if the upstream counterpart of a local file exists; exit 1 if abs
 ## kit-diff-stat
 
 ```bash
-git diff --stat .claude/docs/ .claude/rules/ .claude/skills/
+git diff --stat .claude/docs/ .claude/rules/ .claude/skills/ .claude/hooks/
 git status
 ```
 
