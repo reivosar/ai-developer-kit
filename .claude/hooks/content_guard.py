@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Content guards: block Japanese characters and emoji in file writes."""
+"""Content guards for file writes and edits."""
 import os
 import re
 import sys
@@ -16,9 +16,9 @@ _JAPANESE_RE = re.compile(
 # Built with chr() so the source file contains no literal emoji bytes.
 _EMOJI_RE = re.compile(
     "["
-    + chr(0x1F300) + "-" + chr(0x1F9FF)
-    + chr(0x2600) + "-" + chr(0x27BF)
-    + chr(0xFE0F)
+    + chr(0x1F300) + "-" + chr(0x1F9FF)  # misc symbols, emoticons, transport, etc.
+    + chr(0x2600) + "-" + chr(0x27BF)    # misc symbols, dingbats
+    + chr(0xFE0F)                          # variation selector-16 (emoji presentation)
     + "]"
 )
 

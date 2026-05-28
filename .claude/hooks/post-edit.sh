@@ -11,32 +11,37 @@ fi
 
 EXT="${FILE##*.}"
 
+run_fmt() {
+  local label="$1"; shift
+  "$@" 2>/dev/null || echo "WARNING: $label failed on $FILE" >&2
+}
+
 case "$EXT" in
   js|jsx|ts|tsx|json|css|md)
     if command -v prettier &>/dev/null; then
-      prettier --write "$FILE" --loglevel silent 2>/dev/null
+      run_fmt prettier prettier --write "$FILE" --loglevel silent
     fi
     ;;
   py)
     if command -v black &>/dev/null; then
-      black "$FILE" -q 2>/dev/null
+      run_fmt black black "$FILE" -q
     elif command -v autopep8 &>/dev/null; then
-      autopep8 --in-place "$FILE" 2>/dev/null
+      run_fmt autopep8 autopep8 --in-place "$FILE"
     fi
     ;;
   go)
     if command -v gofmt &>/dev/null; then
-      gofmt -w "$FILE" 2>/dev/null
+      run_fmt gofmt gofmt -w "$FILE"
     fi
     ;;
   rb)
     if command -v rubocop &>/dev/null; then
-      rubocop -a "$FILE" --no-color -q 2>/dev/null
+      run_fmt rubocop rubocop -a "$FILE" --no-color -q
     fi
     ;;
   sh|bash)
     if command -v shfmt &>/dev/null; then
-      shfmt -w "$FILE" 2>/dev/null
+      run_fmt shfmt shfmt -w "$FILE"
     fi
     ;;
 esac
