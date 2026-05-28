@@ -205,6 +205,17 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/user-prompt-submit.py"
+          }
+        ]
+      }
     ]
   }
 }
