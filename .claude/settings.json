@@ -7,6 +7,7 @@
       "Bash(git fetch*)",
       "Bash(git pull)",
       "Bash(git pull origin *)",
+      "Bash(git pull --ff-only*)",
       "Bash(git merge)",
       "Bash(git merge *)",
       "Bash(git branch)",

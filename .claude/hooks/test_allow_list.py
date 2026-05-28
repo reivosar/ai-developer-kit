@@ -391,6 +391,8 @@ cases = [
     ("git add --all",                           True),
     ("git commit --amend",                      True),
     ("git commit --no-verify -m 'x'",           True),
+    ("git pull --ff-only",                      False),
+    ("git pull --ff-only origin main",          False),
     ("git pull --force",                        True),
     ("git pull --rebase",                       True),
     ("gh auth logout",                          True),
