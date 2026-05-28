@@ -81,6 +81,40 @@ install_markdownlint() {
     install_npm_package markdownlint-cli markdownlint
 }
 
+install_node() {
+    if command -v npm >/dev/null 2>&1; then
+        echo "npm already installed"
+        return
+    fi
+    case "$OS" in
+        Darwin)
+            if command -v brew >/dev/null 2>&1; then
+                echo "Installing node via Homebrew..."
+                brew install node
+            else
+                echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Node.js from https://nodejs.org/" >&2
+                return 0
+            fi
+            ;;
+        Linux)
+            if command -v apt-get >/dev/null 2>&1; then
+                echo "Installing node via apt..."
+                sudo apt-get install -y nodejs npm
+            elif command -v yum >/dev/null 2>&1; then
+                echo "Installing node via yum..."
+                sudo yum install -y nodejs npm
+            else
+                echo "SKIP: No supported package manager found. Install Node.js from https://nodejs.org/" >&2
+                return 0
+            fi
+            ;;
+        *)
+            echo "SKIP: Unsupported OS: $OS. Install Node.js from https://nodejs.org/" >&2
+            return 0
+            ;;
+    esac
+}
+
 install_go() {
     if command -v go >/dev/null 2>&1; then
         echo "go already installed"
@@ -121,9 +155,17 @@ verify_tools() {
     python3 --version      2>/dev/null || echo "python3: not available"
     flake8 --version       2>/dev/null || echo "flake8: not available"
     yamllint --version     2>/dev/null || echo "yamllint: not available"
+    node --version         2>/dev/null || echo "node: not available"
     tsc --version          2>/dev/null || echo "tsc: not available"
     markdownlint --version 2>/dev/null || echo "markdownlint: not available"
     go version             2>/dev/null || echo "go: not available"
+    echo ""
+    if ! command -v pip3 >/dev/null 2>&1; then
+        echo "WARNING: pip3 not found — flake8 and yamllint were not installed. Install Python: https://www.python.org/" >&2
+    fi
+    if ! command -v npm >/dev/null 2>&1; then
+        echo "WARNING: npm not found — tsc and markdownlint were not installed. Install Node.js: https://nodejs.org/" >&2
+    fi
 }
 
 main() {
@@ -132,6 +174,7 @@ main() {
     install_python3
     install_flake8
     install_yamllint
+    install_node
     install_tsc
     install_markdownlint
     install_go

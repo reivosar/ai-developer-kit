@@ -2,7 +2,19 @@
 # Run static analysis on changed files. Add new extensions by appending a block below.
 set -uo pipefail
 
-changed_files="${*:-$(git diff --name-only main...HEAD 2>/dev/null)}"
+if [ $# -gt 0 ]; then
+    changed_files="$*"
+elif [ "${STATIC_ANALYSIS_MODE:-}" = "staged" ]; then
+    changed_files=$(git diff --name-only --cached 2>/dev/null) || {
+        echo "ERROR: git diff --cached failed (not a git repo?)" >&2
+        exit 1
+    }
+else
+    changed_files=$(git diff --name-only main...HEAD 2>/dev/null) || {
+        echo "ERROR: git diff failed (not a git repo or branch 'main' not found)" >&2
+        exit 1
+    }
+fi
 
 if [ -z "$changed_files" ]; then
     echo "No changed files detected."
