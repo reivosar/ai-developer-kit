@@ -355,6 +355,16 @@ cases = [
     ("cp --target-directory=dest/ src.txt",     True),
     ("python3 /tmp/test.py",                    True),
     ("python3 ../test_something.py",            True),
+    # Destructive commands — must be blocked
+    ("git add .",                               True),
+    ("git add -A",                              True),
+    ("git add -A .",                            True),
+    ("git add --all",                           True),
+    ("git commit --amend",                      True),
+    ("git commit --no-verify -m 'x'",           True),
+    ("git pull --force",                        True),
+    ("git pull --rebase",                       True),
+    ("gh auth logout",                          True),
 ]
 
 passed = failed = 0
@@ -386,6 +396,8 @@ branch_cases = [
     ("git log --oneline",       False, "main"),
     ("cd /repo && git commit -m 'test'", True,  "main"),
     ("cd /repo && git commit -m 'test'", False, "feat/x"),
+    ("git commit --amend",               True,  "feat/my-feature"),
+    ("git commit --no-verify -m 'x'",   True,  "feat/my-feature"),
 ]
 
 b_passed = b_failed = 0

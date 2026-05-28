@@ -5,7 +5,8 @@
       "Bash(git log*)",
       "Bash(git diff*)",
       "Bash(git fetch*)",
-      "Bash(git pull*)",
+      "Bash(git pull)",
+      "Bash(git pull origin *)",
       "Bash(git merge)",
       "Bash(git merge *)",
       "Bash(git branch)",
@@ -62,7 +63,8 @@
       "Bash(npm run start*)",
       "Bash(python3 *test*.py)",
       "Bash(gh status*)",
-      "Bash(gh auth*)",
+      "Bash(gh auth status*)",
+      "Bash(gh auth login*)",
       "Bash(gh issue create*)",
       "Bash(gh issue list*)",
       "Bash(gh issue view*)",
@@ -89,7 +91,15 @@
     "deny": [
       "Bash(git switch *--detach*)",
       "Bash(gh label create *--repo*)",
-      "Bash(cwd)"
+      "Bash(cwd)",
+      "Bash(git add .)",
+      "Bash(git add -A*)",
+      "Bash(git add --all*)",
+      "Bash(git commit --amend*)",
+      "Bash(git commit *--no-verify*)",
+      "Bash(git pull --force*)",
+      "Bash(git pull --rebase*)",
+      "Bash(gh auth logout*)"
     ],
     "defaultMode": "acceptEdits"
   },
