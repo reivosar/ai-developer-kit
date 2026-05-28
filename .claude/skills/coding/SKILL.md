@@ -31,11 +31,6 @@ The task description is passed as `$ARGUMENTS`. If files are mentioned, read the
 
 Follow Red-Green-Refactor strictly. Tests come before implementation.
 
-### 0. Worktree setup
-
-If not already inside a worktree, invoke /worktree with a branch name in `<type>/<description>` format.
-All implementation work must happen inside the worktree — never in the main working directory.
-
 ### 1. Understand the context
 
 Before writing anything:

@@ -45,12 +45,6 @@
       "Bash(git commit*)",
       "Bash(git push -u origin HEAD)",
       "Bash(git push origin HEAD)",
-      "Bash(git worktree add*)",
-      "Bash(git worktree list*)",
-      "Bash(git worktree remove .claude/worktrees/*)",
-      "Bash(git worktree prune*)",
-      "Bash(.claude/hooks/cleanup-merged-worktrees.sh)",
-      "Bash(.claude/hooks/setup-branch-protection.sh)",
       "Bash(ls*)",
       "Bash(find . *)",
       "Bash(stat *)",
@@ -106,11 +100,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/pre-bash-check.py"
-          },
-          {
-            "type": "command",
-            "command": ".claude/hooks/pre-commit.sh"
+            "command": "python3 .claude/hooks/pre-bash.py"
           }
         ]
       },
@@ -119,15 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/pre-write-check.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 .claude/hooks/pre-edit-check.py"
-          },
-          {
-            "type": "command",
-            "command": ".claude/hooks/pre-worktree-check.py"
+            "command": "python3 .claude/hooks/pre-write.py"
           }
         ]
       },
@@ -136,11 +118,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/pre-edit-check.py"
-          },
-          {
-            "type": "command",
-            "command": ".claude/hooks/pre-worktree-check.py"
+            "command": "python3 .claude/hooks/pre-edit.py"
           }
         ]
       },
@@ -182,10 +160,6 @@
           {
             "type": "command",
             "command": ".claude/hooks/on-stop.sh"
-          },
-          {
-            "type": "command",
-            "command": ".claude/hooks/cleanup-merged-worktrees.sh"
           }
         ]
       }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for bash_guard, git_guard, cp_guard, and pre-bash-check.py integration."""
+"""Tests for bash_guard, git_guard, cp_guard, and pre-bash.py integration."""
 import importlib.util
 import json
 import os
@@ -8,7 +8,7 @@ import sys
 
 HOOKS_DIR = os.path.dirname(__file__)
 SETTINGS = os.path.join(HOOKS_DIR, "../settings.json")
-HOOK = os.path.join(HOOKS_DIR, "pre-bash-check.py")
+HOOK = os.path.join(HOOKS_DIR, "pre-bash.py")
 
 
 def _load(name: str):
@@ -315,26 +315,26 @@ cases = [
     ('node -e "require(\'fs\').readFile(\'x\',()=>{})"', True),
     ("python3 -c \"import webbrowser; webbrowser.open('x')\"", True),
     ("python3 .claude/hooks/test_allow_list.py",    False),
-    ("python3 .claude/hooks/test_pre_edit_check.py", False),
+    ("python3 .claude/hooks/test_pre_edit.py",      False),
     ("python3 test_something.py",                   False),
     ("python3 tests/test_api.py",                   False),
     ("python3 src/test_utils.py",                   False),
     ("python3 app_test.py",                         False),
     ("python3 main.py",                             True),
     ("python3 -m pytest",                           True),
-    ("git worktree add .claude/worktrees/user-auth -b feat/user-auth origin/main", False),
+    ("git worktree add .claude/worktrees/user-auth -b feat/user-auth origin/main", True),
     ("gh pr merge feat/foo",          True),
     ("gh pr close 123",               True),
     ("gh issue delete 123",           True),
     ("gh repo delete foo/bar",        True),
-    ("git worktree remove .claude/worktrees/user-auth",   False),
-    ("git worktree remove .claude/worktrees/fix-login",   False),
+    ("git worktree remove .claude/worktrees/user-auth",   True),
+    ("git worktree remove .claude/worktrees/fix-login",   True),
     ("git worktree remove mywork",    True),
     ("git worktree remove /tmp/evil", True),
-    ("git worktree prune",            False),
-    ("git worktree prune --dry-run",  False),
-    (".claude/hooks/cleanup-merged-worktrees.sh", False),
-    (".claude/hooks/setup-branch-protection.sh", False),
+    ("git worktree prune",            True),
+    ("git worktree prune --dry-run",  True),
+    (".claude/hooks/cleanup-merged-worktrees.sh", True),
+    (".claude/hooks/setup-branch-protection.sh", True),
     ("stat -f \"%z %m\" /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     ("test -f /tmp/ai-developer-kit-update/.claude/rules/behavior.md", False),
     ("find /tmp/ai-developer-kit-update/.claude/rules -type f",        True),

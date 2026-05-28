@@ -89,28 +89,6 @@ Merge requirements:
 4. Merge immediately after approval; deploy to production
 5. Back-merge `main` into any open long-running branches
 
-## Worktrees
-
-Use a git worktree when:
-
-- Starting any implementation task that modifies files
-- A critical bug needs fixing while mid-feature (keeps the feature branch clean)
-- Running parallel review (fresh context, no anchoring bias)
-- Trying a risky experiment that may be discarded
-- Giving subagents isolated working copies
-
-Cleanup behavior:
-
-| Situation | Action |
-|---|---|
-| PR merged | Remove worktree and delete local branch |
-| No changes made | Branch and directory deleted automatically |
-| Changes present | Prompt to keep or delete |
-
-Add `.claude/worktrees/` to `.gitignore` to keep worktree contents out of the main repo's untracked file list.
-
-If a worktree needs gitignored files (e.g. `.env`), list them in a `.worktreeinclude` file at the project root — they will be copied automatically on worktree creation.
-
 ## Versioning
 
 - Semantic versioning: `MAJOR.MINOR.PATCH`

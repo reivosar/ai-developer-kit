@@ -20,7 +20,6 @@
 ### Workflow
 
 - When the next step is unambiguous, invoke the appropriate skill immediately without asking for prior confirmation; reserve pre-action confirmation for destructive or irreversible operations only
-- Worktree creation is Step 0 inside `/coding` — never invoke `/worktree` as a standalone step before `/coding`; all implementation work happens inside the worktree on a `<type>/<desc>` branch; never commit to main
 - After committing on a feature branch, immediately invoke `/pull-request` — do not wait for the user to ask
 - When `/code-review` returns issues, fix them immediately and re-invoke `/code-review`; repeat until the verdict is Approved — never stop after a "Changes requested" verdict and present it to the user
 

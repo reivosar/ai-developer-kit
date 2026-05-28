@@ -33,7 +33,6 @@ Every task must go through a skill — never handle any task inline.
 - Committing → `/commit`
 - Creating a pull request → `/pull-request`
 - Reviewing a PR or branch → `/code-review`
-- Worktree operations → `/worktree`
 
 ### Documentation and security
 
