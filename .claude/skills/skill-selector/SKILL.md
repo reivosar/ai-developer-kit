@@ -43,7 +43,6 @@ Every task must go through a skill — never handle any task inline.
 
 - Editing kit configuration (settings.json, hooks, permissions, env vars) → `/edit-kit`
 - Updating docs and skills from the upstream kit → `/update-kit`
-- Reducing permission prompts by allowlisting safe commands → `/fewer-permission-prompts`
 
 ### Feedback
 
@@ -51,8 +50,7 @@ Every task must go through a skill — never handle any task inline.
 
 ### Catch-all
 
-If no skill above clearly matches, invoke `/propose` — it will surface candidate skills to the user and let them choose how to proceed.
-Never respond inline and never silently fall back to `/feedback` without user input.
+If no skill above clearly matches, respond inline without invoking a skill.
 
 ### Notes
 
@@ -74,7 +72,7 @@ Compare the request against the dispatch table above. Select the single best mat
 
 Invoke the matched skill immediately. Pass the original user request as arguments.
 
-If no skill clearly matches, invoke `/propose`.
+If no skill clearly matches, respond inline.
 
 ## Rules
 
