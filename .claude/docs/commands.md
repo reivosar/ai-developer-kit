@@ -233,14 +233,8 @@ Navigate to the main worktree root. Use the path shown on the first line of **wo
 
 ## static-analysis
 
-Run all applicable tools in parallel based on the extensions of changed files.
+```bash
+.claude/hooks/static-analysis.sh
+```
 
-| Changed extensions | Command |
-|---|---|
-| `.py` | `flake8 <changed .py files>` |
-| `.ts`, `.tsx` | `tsc --noEmit` |
-| `.go` | `go vet ./...` |
-| `.java` | skip — classpath required; note as not run |
-
-Replace `<changed .py files>` with the space-separated list of changed `.py` paths.
-If a tool is not installed, note it and skip. Treat every line emitted on a non-zero exit as a finding.
+Detects changed files from `git diff main...HEAD`, groups by extension, and runs the appropriate linter for each group. Missing tools are skipped with a SKIP message. Exits non-zero if any linter reports errors. To add support for a new file type, extend `.claude/hooks/static-analysis.sh`.

@@ -16,17 +16,26 @@ install_flake8() {
     pip3 install --quiet flake8
 }
 
-install_tsc() {
-    if command -v tsc >/dev/null 2>&1; then
-        echo "tsc already installed"
+install_npm_package() {
+    local package="$1" binary="$2"
+    if command -v "$binary" >/dev/null 2>&1; then
+        echo "$binary already installed"
         return
     fi
     if ! command -v npm >/dev/null 2>&1; then
         echo "SKIP: npm not found. Install Node.js first: https://nodejs.org/" >&2
         return 0
     fi
-    echo "Installing typescript..."
-    npm install -g typescript --quiet
+    echo "Installing $package..."
+    npm install -g "$package" --quiet
+}
+
+install_tsc() {
+    install_npm_package typescript tsc
+}
+
+install_markdownlint() {
+    install_npm_package markdownlint-cli markdownlint
 }
 
 install_go() {
@@ -66,9 +75,10 @@ install_go() {
 verify_tools() {
     echo ""
     echo "Tool versions:"
-    flake8 --version  2>/dev/null || echo "flake8: not available"
-    tsc --version     2>/dev/null || echo "tsc: not available"
-    go version        2>/dev/null || echo "go: not available"
+    flake8 --version       2>/dev/null || echo "flake8: not available"
+    tsc --version          2>/dev/null || echo "tsc: not available"
+    markdownlint --version 2>/dev/null || echo "markdownlint: not available"
+    go version             2>/dev/null || echo "go: not available"
 }
 
 main() {
@@ -76,6 +86,7 @@ main() {
     echo ""
     install_flake8
     install_tsc
+    install_markdownlint
     install_go
     verify_tools
     echo ""
