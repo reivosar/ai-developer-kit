@@ -3,6 +3,40 @@ set -euo pipefail
 
 OS="$(uname -s)"
 
+install_python3() {
+    if command -v pip3 >/dev/null 2>&1; then
+        echo "pip3 already installed"
+        return
+    fi
+    case "$OS" in
+        Darwin)
+            if command -v brew >/dev/null 2>&1; then
+                echo "Installing python3 via Homebrew..."
+                brew install python3
+            else
+                echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Python from https://www.python.org/" >&2
+                return 0
+            fi
+            ;;
+        Linux)
+            if command -v apt-get >/dev/null 2>&1; then
+                echo "Installing python3 via apt..."
+                sudo apt-get install -y python3 python3-pip
+            elif command -v yum >/dev/null 2>&1; then
+                echo "Installing python3 via yum..."
+                sudo yum install -y python3 python3-pip
+            else
+                echo "SKIP: No supported package manager found. Install Python from https://www.python.org/" >&2
+                return 0
+            fi
+            ;;
+        *)
+            echo "SKIP: Unsupported OS: $OS. Install Python from https://www.python.org/" >&2
+            return 0
+            ;;
+    esac
+}
+
 install_pip_package() {
     local package="$1" binary="${2:-$1}"
     if command -v "$binary" >/dev/null 2>&1; then
@@ -84,6 +118,7 @@ install_go() {
 verify_tools() {
     echo ""
     echo "Tool versions:"
+    python3 --version      2>/dev/null || echo "python3: not available"
     flake8 --version       2>/dev/null || echo "flake8: not available"
     yamllint --version     2>/dev/null || echo "yamllint: not available"
     tsc --version          2>/dev/null || echo "tsc: not available"
@@ -94,6 +129,7 @@ verify_tools() {
 main() {
     echo "Setting up ai-developer-kit static analysis tools (OS: $OS)"
     echo ""
+    install_python3
     install_flake8
     install_yamllint
     install_tsc
