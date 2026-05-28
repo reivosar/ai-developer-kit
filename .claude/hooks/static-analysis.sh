@@ -11,10 +11,11 @@ fi
 
 exit_code=0
 
-skip_if_missing() {
+require_tool() {
     local tool="$1"
     if ! command -v "$tool" >/dev/null 2>&1; then
-        echo "SKIP: $tool not installed"
+        echo "ERROR: $tool not installed. Run ./setup.sh to install required tools." >&2
+        exit_code=1
         return 1
     fi
     return 0
@@ -37,24 +38,24 @@ while IFS= read -r file; do
     esac
 done <<< "$changed_files"
 
-if [ ${#py_files[@]} -gt 0 ] && skip_if_missing flake8; then
+if [ ${#py_files[@]} -gt 0 ] && require_tool flake8; then
     flake8 "${py_files[@]}" || exit_code=1
 fi
 
-if [ ${#ts_files[@]} -gt 0 ] && skip_if_missing tsc; then
+if [ ${#ts_files[@]} -gt 0 ] && require_tool tsc; then
     tsc --noEmit || exit_code=1
 fi
 
-if [ "$has_go" = true ] && skip_if_missing go; then
+if [ "$has_go" = true ] && require_tool go; then
     go vet ./... || exit_code=1
 fi
 
-if [ ${#md_files[@]} -gt 0 ] && skip_if_missing markdownlint; then
+if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then
     markdownlint "${md_files[@]}" || exit_code=1
 fi
 
 if [ ${#json_files[@]} -gt 0 ]; then
-    if skip_if_missing python3; then
+    if require_tool python3; then
         for f in "${json_files[@]}"; do
             python3 -m json.tool "$f" > /dev/null || { echo "JSON error: $f"; exit_code=1; }
         done
