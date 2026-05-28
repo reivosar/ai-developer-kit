@@ -230,3 +230,17 @@ cd <main-worktree-path>
 ```
 
 Navigate to the main worktree root. Use the path shown on the first line of **worktree-list** output.
+
+## static-analysis
+
+Run all applicable tools in parallel based on the extensions of changed files.
+
+| Changed extensions | Command |
+|---|---|
+| `.py` | `flake8 <changed .py files>` |
+| `.ts`, `.tsx` | `tsc --noEmit` |
+| `.go` | `go vet ./...` |
+| `.java` | skip — classpath required; note as not run |
+
+Replace `<changed .py files>` with the space-separated list of changed `.py` paths.
+If a tool is not installed, note it and skip. Treat every line emitted on a non-zero exit as a finding.
