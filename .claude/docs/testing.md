@@ -48,6 +48,35 @@ Apply these techniques when identifying what to test:
 - **Error Guessing** — add cases drawn from experience: empty string, null, zero, negative numbers, max int, Unicode edge cases, duplicate submissions.
 - **Checklist-based** — maintain a reusable checklist of recurring concerns (auth boundaries, pagination edge cases, concurrent writes, timezone offsets); apply it to every new feature area.
 
+## Python Testing Rules
+
+All Python test files must use pytest — no exceptions, including hook test files under `.claude/hooks/`.
+
+Prohibited patterns in Python tests:
+- No custom harness scripts (global `passed`/`failed` counters)
+- No `if __name__ == "__main__"` test runner blocks — pytest discovers and runs tests
+- No `check()` or `run_test()` helper functions as a substitute for pytest assertions
+- All test functions must follow the `test_<function>_<scenario>_<expected_outcome>` naming convention
+
+Good:
+```python
+def test_is_allowed_command_with_git_status_returns_true():
+    assert is_allowed_command("git status")
+```
+
+Bad:
+```python
+passed = 0
+failed = 0
+
+def check(condition, label):
+    global passed, failed
+    if condition:
+        passed += 1
+    else:
+        failed += 1
+```
+
 ## Prohibited Patterns
 
 - No snapshot tests — they fail on irrelevant changes and create false confidence

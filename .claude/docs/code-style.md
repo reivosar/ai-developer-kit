@@ -4,6 +4,8 @@
 - Max line length: 120 characters (100 for Python)
 - No trailing whitespace; single blank line at end of file
 - Comments explain *why*, not *what* — the code speaks for itself
+- No JavaDoc (`/** */`), no multi-line comment blocks — one short inline line at most
+- Docstrings follow language conventions (see language-specific rules)
 - No commented-out code — delete it; git history preserves it
 - Max function / method body: 20 lines (blank lines and comments excluded); if exceeded, extract until each function fits
 - Max file length: 200 lines; if exceeded, split by distinct responsibility
@@ -88,6 +90,9 @@ Treat formatter output as authoritative. Never fight the formatter — change th
 ### Python
 
 - Follow PEP 8 strictly; Black enforces it automatically
+- Docstrings are required for all public functions and methods (PEP 257 + Google style)
+  - One-liner for simple functions: `"""Return the pathname of the KOS root directory."""`
+  - Multi-line for complex functions: summary line, blank line, then `Args:` / `Returns:` / `Raises:` sections
 - Use f-strings over `.format()` or `%` formatting
 - Prefer dataclasses or Pydantic models over plain dicts for structured data
 - Use `pathlib.Path` over `os.path` for filesystem operations
