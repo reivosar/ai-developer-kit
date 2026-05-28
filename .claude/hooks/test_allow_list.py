@@ -405,6 +405,16 @@ cases = [
     ("git pull --force",                        True),
     ("git pull --rebase",                       True),
     ("gh auth logout",                          True),
+    # Static analysis script
+    (".claude/hooks/static-analysis.sh",                                             False),
+    (".claude/hooks/static-analysis.sh src/foo.py src/bar.py",                       False),
+    # Static analysis tools
+    ("flake8 .claude/hooks/memory_guard.py",                                        True),
+    ("flake8 .claude/hooks/test_allow_list.py .claude/hooks/test_memory_guard.py",  True),
+    ("flake8",                                                                       True),
+    ("tsc --noEmit",                                                                 True),
+    ("tsc",                                                                          True),
+    ("go vet ./...",                                                                 True),
 ]
 
 passed = failed = 0

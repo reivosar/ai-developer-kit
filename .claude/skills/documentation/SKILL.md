@@ -20,4 +20,12 @@ If documenting specific code behavior, invoke /investigate to locate the source.
 
 ### 2. Write
 
-Invoke /coding with the documentation requirements from Step 1. /coding handles writing, review, commit, and PR.
+Invoke /coding with the documentation requirements from Step 1. Ask /coding to stop before committing — writing and review only.
+
+### 3. Humanize
+
+Invoke /humanize-ai-doc on the generated documentation files to remove AI writing patterns and improve readability.
+
+### 4. Commit and PR
+
+Invoke /commit, then /pull-request.

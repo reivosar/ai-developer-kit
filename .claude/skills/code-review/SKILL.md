@@ -40,16 +40,7 @@ Use `symbol_search` to locate specific symbols before reading full files. Read a
 
 ## Run static analysis
 
-Inspect the changed file extensions, then run every applicable tool from the `static_analysis` entry in `.claude/docs/investigation-tools.md` in a single parallel batch:
-
-| Changed extensions | Tool to run |
-|---|---|
-| `.ts`, `.tsx` | `tsc --noEmit` |
-| `.py` | `flake8 <changed .py files>` |
-| `.go` | `go vet ./...` |
-| `.java` | skip — classpath required; note as not run |
-
-Run all applicable tools in parallel. Capture full output. If a tool is not installed, note it and skip. Treat every line emitted on a non-zero exit as a finding.
+Use the **static-analysis** command from `commands.md`. Inspect the changed file extensions and run all applicable tools in a single parallel batch. Capture full output. Treat every line emitted on a non-zero exit as a finding.
 
 ## Review areas
 

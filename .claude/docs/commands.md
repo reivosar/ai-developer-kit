@@ -230,3 +230,11 @@ cd <main-worktree-path>
 ```
 
 Navigate to the main worktree root. Use the path shown on the first line of **worktree-list** output.
+
+## static-analysis
+
+```bash
+.claude/hooks/static-analysis.sh
+```
+
+Detects changed files from `git diff main...HEAD` (or staged files when `STATIC_ANALYSIS_MODE=staged`), groups by extension, and runs the appropriate linter for each group. Missing tools are reported as ERROR and cause non-zero exit — all applicable tools run regardless so every problem is visible in one pass. To add support for a new file type, extend `.claude/hooks/static-analysis.sh`.

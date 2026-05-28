@@ -97,6 +97,7 @@
       "Bash(cp *)",
       "Bash(diff *)",
       "Bash(.claude/hooks/trash.sh*)",
+      "Bash(.claude/hooks/static-analysis.sh*)",
       "Bash(chmod +x .claude/hooks/*)",
       "Bash(wc *)",
       "Bash(head *)",
