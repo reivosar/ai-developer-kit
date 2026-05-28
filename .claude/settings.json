@@ -105,11 +105,7 @@
       "Bash(jq *)",
       "Bash(date)",
       "Bash(python3 --version)",
-      "Bash(mkdir *)",
-      "Bash(flake8)",
-      "Bash(flake8 *)",
-      "Bash(tsc --noEmit)",
-      "Bash(go vet ./...)"
+      "Bash(mkdir *)"
     ],
     "deny": [
       "Bash(git switch *--detach*)",
