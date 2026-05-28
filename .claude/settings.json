@@ -98,6 +98,7 @@
       "Bash(diff *)",
       "Bash(.claude/hooks/trash.sh*)",
       "Bash(chmod +x .claude/hooks/*)",
+      "Bash(chmod 644 .claude/hooks/*)",
       "Bash(wc *)",
       "Bash(head *)",
       "Bash(tail *)",
@@ -209,7 +210,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "chmod +x .claude/hooks/*.sh .claude/hooks/*.py"
+            "command": "chmod +x .claude/hooks/*.sh .claude/hooks/pre-bash.py .claude/hooks/pre-write.py .claude/hooks/pre-edit.py .claude/hooks/user-prompt-submit.py"
           }
         ]
       }
