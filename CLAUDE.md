@@ -12,9 +12,10 @@ Run each test suite:
 
 ```bash
 python3 .claude/hooks/test_allow_list.py
-python3 .claude/hooks/test_pre_edit_check.py
-python3 .claude/hooks/test_pre_worktree_check.py
+python3 .claude/hooks/test_pre_edit.py
+python3 .claude/hooks/test_pre_write.py
 python3 .claude/hooks/test_hook_lib.py
+python3 .claude/hooks/test_content_guard.py
 ```
 
 When adding a new allowed or denied Bash command, write a failing test in `test_allow_list.py` first, then update `settings.json`.
@@ -37,12 +38,22 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 ### Hooks
 
-`.claude/hooks/` — Python and bash scripts wired into Claude Code hook events:
+`.claude/hooks/` — one entry-point script per Claude Code tool event; logic lives in guard modules.
 
-- `pre-bash-check.py` — enforces the allow/deny list in `settings.json` before every Bash command
-- `pre-commit.sh` — blocks commits containing secrets, invalid branch names, or trailing whitespace
-- `pre-edit-check.py` / `pre-write-check.py` — guard file writes and edits
-- `post-edit.sh` — runs after file edits
+Entry points (one process spawn per event):
+- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks
+- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + TDD guard
+- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + TDD guard
+- `post-edit.sh` — PostToolUse[Write|Edit]: auto-format; prints WARNING on formatter failure
+- `block-read.sh` — PreToolUse[Read]: blocks the Read tool unconditionally
+
+Guard modules (imported by entry points):
+- `bash_guard.py`, `git_guard.py`, `cp_guard.py` — Bash safety checks
+- `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
+- `env_file_guard.py` — blocks writes to .env files
+- `content_guard.py` — blocks Japanese characters and emoji in file content
+- `tdd_guard.py` — blocks impl edits without staged tests covering modified functions
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), read_stdin_json())
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 
 ### Settings
