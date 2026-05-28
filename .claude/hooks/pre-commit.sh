@@ -41,7 +41,18 @@ if [[ -n "$TRAILING" ]]; then
   ERRORS+=("Trailing whitespace found. Run: git diff --cached --check")
 fi
 
-# --- 4. .env file protection ---
+# --- 4. Emoji detection ---
+if git diff --cached -U0 | python3 -c "
+import sys, re
+diff = sys.stdin.read()
+added = '\n'.join(l[1:] for l in diff.splitlines() if l.startswith('+') and not l.startswith('+++'))
+emoji_re = re.compile("[" + chr(0x1F300) + "-" + chr(0x1F9FF) + chr(0x2600) + "-" + chr(0x27BF) + chr(0xFE0F) + "]")
+sys.exit(0 if emoji_re.search(added) else 1)
+" 2>/dev/null; then
+  ERRORS+=("Emoji detected in staged changes. Use plain text instead (e.g. 'Good:' / 'Bad:').")
+fi
+
+# --- 5. .env file protection ---
 while IFS= read -r f; do
   base=$(basename "$f")
   if { [[ "$base" == ".env" ]] || [[ "$base" == .env.* ]]; } && [[ "$base" != ".env.sample" ]] && [[ "$base" != ".env.example" ]]; then
