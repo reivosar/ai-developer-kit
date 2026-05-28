@@ -30,14 +30,41 @@ install_python3() {
     esac
 }
 
+install_pipx() {
+    case "$OS" in
+        Darwin)
+            if command -v brew >/dev/null 2>&1; then
+                echo "Installing/upgrading pipx via Homebrew..."
+                brew upgrade pipx 2>/dev/null || brew install pipx
+            else
+                echo "SKIP: Homebrew not found. Install pipx from https://pipx.pypa.io/" >&2
+            fi
+            ;;
+        Linux)
+            if command -v apt-get >/dev/null 2>&1; then
+                echo "Installing/upgrading pipx via apt..."
+                sudo apt-get install -y pipx
+            elif command -v pip3 >/dev/null 2>&1; then
+                echo "Installing pipx via pip3..."
+                pip3 install --user --upgrade pipx
+            else
+                echo "SKIP: No supported package manager found. Install pipx from https://pipx.pypa.io/" >&2
+            fi
+            ;;
+        *)
+            echo "SKIP: Unsupported OS: $OS. Install pipx from https://pipx.pypa.io/" >&2
+            ;;
+    esac
+}
+
 install_pip_package() {
     local package="$1"
-    if ! command -v pip3 >/dev/null 2>&1; then
-        echo "SKIP: pip3 not found. Install Python 3 first: https://www.python.org/" >&2
+    if ! command -v pipx >/dev/null 2>&1; then
+        echo "SKIP: pipx not found. Run setup.sh again after pipx is installed." >&2
         return 0
     fi
     echo "Installing/upgrading $package..."
-    pip3 install --quiet --upgrade "$package"
+    pipx install "$package" 2>/dev/null || pipx upgrade "$package"
 }
 
 install_flake8() {
@@ -124,6 +151,7 @@ verify_tools() {
     echo ""
     echo "Tool versions:"
     python3 --version      2>/dev/null || echo "python3: not available"
+    pipx --version         2>/dev/null || echo "pipx: not available"
     flake8 --version       2>/dev/null || echo "flake8: not available"
     yamllint --version     2>/dev/null || echo "yamllint: not available"
     node --version         2>/dev/null || echo "node: not available"
@@ -131,8 +159,8 @@ verify_tools() {
     markdownlint --version 2>/dev/null || echo "markdownlint: not available"
     go version             2>/dev/null || echo "go: not available"
     echo ""
-    if ! command -v pip3 >/dev/null 2>&1; then
-        echo "WARNING: pip3 not found — flake8 and yamllint were not installed. Install Python: https://www.python.org/" >&2
+    if ! command -v pipx >/dev/null 2>&1; then
+        echo "WARNING: pipx not found — flake8 and yamllint were not installed. Install pipx: https://pipx.pypa.io/" >&2
     fi
     if ! command -v npm >/dev/null 2>&1; then
         echo "WARNING: npm not found — tsc and markdownlint were not installed. Install Node.js: https://nodejs.org/" >&2
@@ -143,6 +171,7 @@ main() {
     echo "Setting up ai-developer-kit static analysis tools (OS: $OS)"
     echo ""
     install_python3
+    install_pipx
     install_flake8
     install_yamllint
     install_node
