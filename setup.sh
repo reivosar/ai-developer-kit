@@ -4,51 +4,40 @@ set -euo pipefail
 OS="$(uname -s)"
 
 install_python3() {
-    if command -v pip3 >/dev/null 2>&1; then
-        echo "pip3 already installed"
-        return
-    fi
     case "$OS" in
         Darwin)
             if command -v brew >/dev/null 2>&1; then
-                echo "Installing python3 via Homebrew..."
-                brew install python3
+                echo "Installing/upgrading python3 via Homebrew..."
+                brew upgrade python3 2>/dev/null || brew install python3
             else
                 echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Python from https://www.python.org/" >&2
-                return 0
             fi
             ;;
         Linux)
             if command -v apt-get >/dev/null 2>&1; then
-                echo "Installing python3 via apt..."
+                echo "Installing/upgrading python3 via apt..."
                 sudo apt-get install -y python3 python3-pip
             elif command -v yum >/dev/null 2>&1; then
-                echo "Installing python3 via yum..."
+                echo "Installing/upgrading python3 via yum..."
                 sudo yum install -y python3 python3-pip
             else
                 echo "SKIP: No supported package manager found. Install Python from https://www.python.org/" >&2
-                return 0
             fi
             ;;
         *)
             echo "SKIP: Unsupported OS: $OS. Install Python from https://www.python.org/" >&2
-            return 0
             ;;
     esac
 }
 
 install_pip_package() {
-    local package="$1" binary="${2:-$1}"
-    if command -v "$binary" >/dev/null 2>&1; then
-        echo "$binary already installed"
-        return
-    fi
+    local package="$1"
     if ! command -v pip3 >/dev/null 2>&1; then
         echo "SKIP: pip3 not found. Install Python 3 first: https://www.python.org/" >&2
         return 0
     fi
-    echo "Installing $package..."
-    pip3 install --quiet "$package"
+    echo "Installing/upgrading $package..."
+    pip3 install --quiet --upgrade "$package"
 }
 
 install_flake8() {
@@ -60,91 +49,73 @@ install_yamllint() {
 }
 
 install_npm_package() {
-    local package="$1" binary="$2"
-    if command -v "$binary" >/dev/null 2>&1; then
-        echo "$binary already installed"
-        return
-    fi
+    local package="$1"
     if ! command -v npm >/dev/null 2>&1; then
         echo "SKIP: npm not found. Install Node.js first: https://nodejs.org/" >&2
         return 0
     fi
-    echo "Installing $package..."
-    npm install -g "$package" --quiet
+    echo "Installing/upgrading $package..."
+    npm install -g "$package"@latest --quiet
 }
 
 install_tsc() {
-    install_npm_package typescript tsc
+    install_npm_package typescript
 }
 
 install_markdownlint() {
-    install_npm_package markdownlint-cli markdownlint
+    install_npm_package markdownlint-cli
 }
 
 install_node() {
-    if command -v npm >/dev/null 2>&1; then
-        echo "npm already installed"
-        return
-    fi
     case "$OS" in
         Darwin)
             if command -v brew >/dev/null 2>&1; then
-                echo "Installing node via Homebrew..."
-                brew install node
+                echo "Installing/upgrading node via Homebrew..."
+                brew upgrade node 2>/dev/null || brew install node
             else
                 echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Node.js from https://nodejs.org/" >&2
-                return 0
             fi
             ;;
         Linux)
             if command -v apt-get >/dev/null 2>&1; then
-                echo "Installing node via apt..."
+                echo "Installing/upgrading node via apt..."
                 sudo apt-get install -y nodejs npm
             elif command -v yum >/dev/null 2>&1; then
-                echo "Installing node via yum..."
+                echo "Installing/upgrading node via yum..."
                 sudo yum install -y nodejs npm
             else
                 echo "SKIP: No supported package manager found. Install Node.js from https://nodejs.org/" >&2
-                return 0
             fi
             ;;
         *)
             echo "SKIP: Unsupported OS: $OS. Install Node.js from https://nodejs.org/" >&2
-            return 0
             ;;
     esac
 }
 
 install_go() {
-    if command -v go >/dev/null 2>&1; then
-        echo "go already installed"
-        return
-    fi
     case "$OS" in
         Darwin)
             if command -v brew >/dev/null 2>&1; then
-                echo "Installing go via Homebrew..."
-                brew install go
+                echo "Installing/upgrading go via Homebrew..."
+                brew upgrade go 2>/dev/null || brew install go
             else
                 echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Go from https://go.dev/dl/" >&2
-                return 0
             fi
             ;;
         Linux)
             if command -v apt-get >/dev/null 2>&1; then
-                echo "Installing go via apt..."
+                echo "Installing/upgrading go via apt..."
                 sudo apt-get install -y golang-go
             elif command -v yum >/dev/null 2>&1; then
-                echo "Installing go via yum..."
+                echo "Installing/upgrading go via yum..."
                 sudo yum install -y golang
             else
                 echo "SKIP: No supported package manager found. Install Go from https://go.dev/dl/" >&2
-                return 0
             fi
             ;;
         *)
             echo "SKIP: Unsupported OS: $OS. Install Go from https://go.dev/dl/" >&2
-            return 0
             ;;
     esac
 }
