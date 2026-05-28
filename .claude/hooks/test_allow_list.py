@@ -36,7 +36,7 @@ def _test_allow_deny_patterns(bash, allow_pats: list, deny_pats: list, p: list, 
     for cmd, expect in [
         ("git status", True), ("git status --short", True), ("git status --porcelain", True),
         ("git switch main", True), ("git pull", True),
-        ("python3 --version", False), ("node --version", False), ("rm -rf /", False),
+        ("python3 --version", True), ("node --version", False), ("rm -rf /", False),
     ]:
         _report(f"is_whitelisted({cmd!r})=={expect}", bash.is_whitelisted(cmd, allow_pats) == expect, p, f)
 
@@ -184,7 +184,7 @@ cases = [
     ('python3 -c "import os; os.unlink(\'x\')"',   True),
     ('python3 -c "import shutil; shutil.rmtree(\'d\')"', True),
     ('python3 -c "import shutil; shutil.move(\'a\', \'b\')"', True),
-    ('python3 --version',                            True),
+    ('python3 --version',                            False),
     ('python3 -c "print(\'hello\')"',               True),
     ('node -e "require(\'fs\').unlinkSync(\'x\')"', True),
     ('node -e "require(\'fs\').rmSync(\'x\')"',     True),
@@ -201,10 +201,10 @@ cases = [
     ("git branch -D my-branch", True),
     ("git stash list",        False),
     ("git stash show",        False),
-    ("git stash",             True),
-    ("git stash push",        True),
+    ("git stash",             False),
+    ("git stash push",        False),
     ("git stash pop",         True),
-    ("git stash apply",       True),
+    ("git stash apply",       False),
     ("git branch",            False),
     ("git branch -d my-branch", False),
     ("git branch -a",         False),
@@ -355,6 +355,29 @@ cases = [
     ("cp --target-directory=dest/ src.txt",     True),
     ("python3 /tmp/test.py",                    True),
     ("python3 ../test_something.py",            True),
+    # Efficiency additions — read-only git
+    ("git show HEAD",                           False),
+    ("git show abc123",                         False),
+    ("git remote -v",                           False),
+    ("git remote show origin",                  False),
+    ("git blame src/app.py",                    False),
+    ("git tag",                                 False),
+    ("git tag -l",                              False),
+    # Shell utilities
+    ("wc -l README.md",                         False),
+    ("head -20 README.md",                      False),
+    ("tail -10 README.md",                      False),
+    ("jq '.' settings.json",                    False),
+    ("date",                                    False),
+    # Directory creation
+    ("mkdir -p src/foo",                        False),
+    ("mkdir src/components",                    False),
+    # Stash (non-destructive write)
+    ("git stash push -m 'wip'",                 False),
+    ("git stash apply stash@{0}",               False),
+    # Verify still blocked
+    ("git stash pop",                           True),
+    ("git stash drop",                          True),
     # Destructive commands — must be blocked
     ("git add .",                               True),
     ("git add -A",                              True),
