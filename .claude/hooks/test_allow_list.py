@@ -370,9 +370,11 @@ cases = [
     ("git tag",                                 False),
     ("git tag -l",                              False),
     ("git tag -l v*",                           False),
+    ("git tag v1.0.0",                          False),
+    ("git tag -a v1.0.0 -m 'release'",         False),
     ("git tag -d v1.0.0",                       True),
     ("git tag -f v1.0.0",                       True),
-    ("git tag v1.0.0",                          True),
+    ("git tag -fa v1.0.0",                      True),
     # Shell utilities
     ("wc -l README.md",                         False),
     ("head -20 README.md",                      False),
