@@ -29,6 +29,17 @@
 - Do not declare work done until tests pass — inferred success is not success
 - Reading a workflow document is not evidence it was followed; follow it, verify it
 
+### Memory
+
+Save to memory only when the insight is non-obvious and reusable across future conversations:
+- User corrections or confirmed non-default approaches (feedback type)
+- Decisions driven by constraints not visible in the code (project type)
+- Where to find information in external systems (reference type)
+
+Do NOT save: code patterns derivable from the codebase, task-specific context, anything already in CLAUDE.md, or ephemeral state.
+
+The memory_guard hook enforces the 200-line limit automatically. If MEMORY.md is approaching 180 lines, prune stale or low-value entries before adding new ones.
+
 ### Bash commands
 
 - All Bash commands that reference repository paths must use absolute paths derived from `git rev-parse --show-toplevel` or `$REPO_ROOT`; never rely on an implicit working directory. Exception: `find` must be invoked as `find . <pattern>` from the repo root — the allow list only covers this relative-path form; absolute paths are blocked.
