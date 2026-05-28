@@ -98,7 +98,6 @@
       "Bash(diff *)",
       "Bash(.claude/hooks/trash.sh*)",
       "Bash(chmod +x .claude/hooks/*)",
-      "Bash(chmod 644 .claude/hooks/*)",
       "Bash(wc *)",
       "Bash(head *)",
       "Bash(tail *)",
