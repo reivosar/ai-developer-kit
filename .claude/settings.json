@@ -209,7 +209,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "chmod +x .claude/hooks/*.sh .claude/hooks/*.py"
+            "command": "chmod +x .claude/hooks/*.sh .claude/hooks/pre-bash.py .claude/hooks/pre-write.py .claude/hooks/pre-edit.py .claude/hooks/user-prompt-submit.py"
           }
         ]
       }
