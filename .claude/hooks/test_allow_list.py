@@ -369,6 +369,10 @@ cases = [
     ("git blame src/app.py",                    False),
     ("git tag",                                 False),
     ("git tag -l",                              False),
+    ("git tag -l v*",                           False),
+    ("git tag -d v1.0.0",                       True),
+    ("git tag -f v1.0.0",                       True),
+    ("git tag v1.0.0",                          True),
     # Shell utilities
     ("wc -l README.md",                         False),
     ("head -20 README.md",                      False),
@@ -389,6 +393,9 @@ cases = [
     ("git add -A",                              True),
     ("git add -A .",                            True),
     ("git add --all",                           True),
+    ("git commit -a -m 'x'",                    True),
+    ("git commit -am 'x'",                      True),
+    ("git commit --all -m 'x'",                 True),
     ("git commit --amend",                      True),
     ("git commit --no-verify -m 'x'",           True),
     ("git pull --ff-only",                      False),
@@ -429,6 +436,8 @@ branch_cases = [
     ("cd /repo && git commit -m 'test'", False, "feat/x"),
     ("git commit --amend",               True,  "feat/my-feature"),
     ("git commit --no-verify -m 'x'",   True,  "feat/my-feature"),
+    ("git commit -a -m 'x'",            True,  "feat/my-feature"),
+    ("git commit --all -m 'x'",         True,  "feat/my-feature"),
 ]
 
 b_passed = b_failed = 0
