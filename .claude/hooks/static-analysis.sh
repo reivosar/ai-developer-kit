@@ -25,16 +25,18 @@ py_files=()
 ts_files=()
 md_files=()
 json_files=()
+yaml_files=()
 has_go=false
 
 while IFS= read -r file; do
     [ -f "$file" ] || continue
     case "$file" in
-        *.py)       py_files+=("$file") ;;
-        *.ts|*.tsx) ts_files+=("$file") ;;
-        *.md)       md_files+=("$file") ;;
-        *.json)     json_files+=("$file") ;;
-        *.go)       has_go=true ;;
+        *.py)           py_files+=("$file") ;;
+        *.ts|*.tsx)     ts_files+=("$file") ;;
+        *.md)           md_files+=("$file") ;;
+        *.json)         json_files+=("$file") ;;
+        *.yml|*.yaml)   yaml_files+=("$file") ;;
+        *.go)           has_go=true ;;
     esac
 done <<< "$changed_files"
 
@@ -54,12 +56,14 @@ if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then
     markdownlint "${md_files[@]}" || exit_code=1
 fi
 
-if [ ${#json_files[@]} -gt 0 ]; then
-    if require_tool python3; then
-        for f in "${json_files[@]}"; do
-            python3 -m json.tool "$f" > /dev/null || { echo "JSON error: $f"; exit_code=1; }
-        done
-    fi
+if [ ${#json_files[@]} -gt 0 ] && require_tool python3; then
+    for f in "${json_files[@]}"; do
+        python3 -m json.tool "$f" > /dev/null || { echo "JSON error: $f"; exit_code=1; }
+    done
+fi
+
+if [ ${#yaml_files[@]} -gt 0 ] && require_tool yamllint; then
+    yamllint "${yaml_files[@]}" || exit_code=1
 fi
 
 exit "$exit_code"

@@ -3,17 +3,26 @@ set -euo pipefail
 
 OS="$(uname -s)"
 
-install_flake8() {
-    if command -v flake8 >/dev/null 2>&1; then
-        echo "flake8 already installed"
+install_pip_package() {
+    local package="$1" binary="${2:-$1}"
+    if command -v "$binary" >/dev/null 2>&1; then
+        echo "$binary already installed"
         return
     fi
     if ! command -v pip3 >/dev/null 2>&1; then
         echo "SKIP: pip3 not found. Install Python 3 first: https://www.python.org/" >&2
         return 0
     fi
-    echo "Installing flake8..."
-    pip3 install --quiet flake8
+    echo "Installing $package..."
+    pip3 install --quiet "$package"
+}
+
+install_flake8() {
+    install_pip_package flake8
+}
+
+install_yamllint() {
+    install_pip_package yamllint
 }
 
 install_npm_package() {
@@ -76,6 +85,7 @@ verify_tools() {
     echo ""
     echo "Tool versions:"
     flake8 --version       2>/dev/null || echo "flake8: not available"
+    yamllint --version     2>/dev/null || echo "yamllint: not available"
     tsc --version          2>/dev/null || echo "tsc: not available"
     markdownlint --version 2>/dev/null || echo "markdownlint: not available"
     go version             2>/dev/null || echo "go: not available"
@@ -85,6 +95,7 @@ main() {
     echo "Setting up ai-developer-kit static analysis tools (OS: $OS)"
     echo ""
     install_flake8
+    install_yamllint
     install_tsc
     install_markdownlint
     install_go
