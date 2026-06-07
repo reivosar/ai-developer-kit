@@ -103,6 +103,15 @@ def _test_cp_guards(cp, p: list, f: list) -> None:
         _report(f"check_cp_destination({cmd!r}) blocked=={expect_block}",
                 _is_blocked(cp.check_cp_destination, cmd) == expect_block, p, f)
 
+    for cmd, expect_block in [
+        ("cp /tmp/foo.py .claude/hooks/bar.py",    True),
+        ("cp /var/tmp/x.sh .claude/hooks/run.sh",  True),
+        ("cp src/foo.py dst/bar.py",               False),
+        ("cp .claude/hooks/a.py .claude/hooks/b.py", False),
+    ]:
+        _report(f"check_cp_source({cmd!r}) blocked=={expect_block}",
+                _is_blocked(cp.check_cp_source, cmd) == expect_block, p, f)
+
     tmppath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_test_cp_dest_tmp.txt')
     with open(tmppath, 'w'):
         pass
@@ -308,6 +317,8 @@ cases = [
     ("cp -r src/ dst/",          False),
     ("cp README.md docs/",       False),
     ("cp -rp src/ dst/",         False),
+    ("cp /tmp/foo.py .claude/hooks/bar.py",   True),
+    ("cp /var/tmp/x.sh .claude/hooks/run.sh", True),
     ("diff file1.txt file2.txt",                                          False),
     ("diff -q .upstream/.claude/rules/behavior.md .claude/rules/behavior.md", False),
     ("diff -r dir1/ dir2/",                                               False),

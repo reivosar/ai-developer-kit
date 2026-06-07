@@ -2,13 +2,14 @@
 """PreToolUse[Write] entry point."""
 import os
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import content_guard  # noqa: E402
 import tdd_guard  # noqa: E402
 import worktree_guard  # noqa: E402
 from env_file_guard import is_blocked_env_file  # noqa: E402
-from hook_lib import read_stdin_json, block  # noqa: E402
+from hook_lib import read_stdin_json, block, REPO_ROOT  # noqa: E402
 
 
 def main() -> None:
@@ -17,6 +18,13 @@ def main() -> None:
     file_path = tool_input.get("file_path", "")
     if not file_path:
         sys.exit(0)
+    try:
+        Path(file_path).resolve().relative_to(REPO_ROOT)
+    except ValueError:
+        block(
+            f"Write to '{file_path}' is outside the project root and is not permitted.",
+            "Do not stage content in /tmp/ or other external paths.",
+        )
     worktree_guard.check(file_path)
     if is_blocked_env_file(file_path):
         block(

@@ -5,6 +5,7 @@ import re
 import shlex
 import subprocess
 import sys
+from pathlib import Path
 from typing import Generator
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -56,5 +57,21 @@ def check_cp_options(command: str) -> None:
             if arg in _BLOCKED_OPTIONS or arg.startswith('--target-directory='):
                 hook_lib.block(
                     f"cp option '{arg}' is not permitted.",
+                    f"Command: {command[:300]}",
+                )
+
+
+def check_cp_source(command: str) -> None:
+    """Block cp invocations whose source is outside the project root."""
+    for args in _parse_cp_segments(command):
+        positional = [a for a in args[1:] if not a.startswith('-')]
+        if len(positional) < 2:
+            continue
+        for src in positional[:-1]:
+            try:
+                Path(src).resolve().relative_to(hook_lib.REPO_ROOT)
+            except ValueError:
+                hook_lib.block(
+                    f"cp source '{src}' is outside the project root and is not permitted.",
                     f"Command: {command[:300]}",
                 )
