@@ -362,7 +362,9 @@ cases = [
     ("cp --target-directory=dest/ src.txt",     True),
     ("python3 /tmp/test.py",                    True),
     ("python3 ../test_something.py",            True),
-    # Efficiency additions — read-only git
+    ("python3 .claude/worktrees/bootstrap/test_patch_settings.py", True),
+    ("python3 .claude/worktrees/feat-foo/test_api.py",             True),
+    # Efficiency additions -- read-only git
     ("git show HEAD",                           False),
     ("git show abc123",                         False),
     ("git remote",                              False),
@@ -397,7 +399,7 @@ cases = [
     # Verify still blocked
     ("git stash pop",                           True),
     ("git stash drop",                          True),
-    # Destructive commands — must be blocked
+    # Destructive commands -- must be blocked
     ("git add .",                               True),
     ("git add -A",                              True),
     ("git add -A .",                            True),
