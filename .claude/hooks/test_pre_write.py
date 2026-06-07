@@ -8,6 +8,7 @@ import sys
 import tempfile
 
 HOOK = os.path.join(os.path.dirname(__file__), "pre-write.py")
+HOOKS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 passed = failed = 0
 
@@ -29,39 +30,35 @@ def run(file_path: str, content: str = "") -> int:
     return r.returncode
 
 
-# File guard tests
-check("TC-WR-01 nonexistent file allowed", run("/nonexistent/path/xyz.py"), 0)
-
-with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as f:
-    existing = f.name
-try:
-    check("TC-WR-02 existing file blocked", run(existing), 2)
-finally:
-    os.unlink(existing)
-
+# File guard tests (paths must be inside the repo)
+_nonexistent = os.path.join(HOOKS_DIR, "_nonexistent_test_xyz.py")
+check("TC-WR-01 nonexistent file inside repo allowed", run(_nonexistent), 0)
+check("TC-WR-02 existing file blocked", run(HOOK), 2)
 check("TC-WR-03 empty path allowed", run(""), 0)
 
-# .env guard tests (use temp dirs to avoid hitting real files)
-d1 = tempfile.mkdtemp()
-try:
-    check("TC-ENV-01 Write .env blocked",       run(os.path.join(d1, ".env")), 2)
-    check("TC-ENV-02 Write .env.local blocked",  run(os.path.join(d1, ".env.local")), 2)
-    check("TC-ENV-03 Write .env.sample allowed", run(os.path.join(d1, ".env.sample")), 0)
-    check("TC-ENV-04 Write .env.example allowed",run(os.path.join(d1, ".env.example")), 0)
-finally:
-    shutil.rmtree(d1, ignore_errors=True)
+# .env guard tests (use hooks dir which is inside the repo)
+check("TC-ENV-01 Write .env blocked",       run(os.path.join(HOOKS_DIR, ".env")), 2)
+check("TC-ENV-02 Write .env.local blocked",  run(os.path.join(HOOKS_DIR, ".env.local")), 2)
+check("TC-ENV-03 Write .env.sample allowed", run(os.path.join(HOOKS_DIR, ".env.sample")), 0)
+check("TC-ENV-04 Write .env.example allowed",run(os.path.join(HOOKS_DIR, ".env.example")), 0)
+
+# Outside-repo guard tests
+check("TC-ORP-01 Write to /tmp/ blocked",
+      run("/tmp/throwaway_script.py", "print('hi')"), 2)
+check("TC-ORP-02 Write to /var/tmp/ blocked",
+      run("/var/tmp/foo.py", "x = 1"), 2)
 
 # Content guard tests — build bad strings at runtime via chr()
 _JP = chr(0x3053) + chr(0x3093) + chr(0x306b)    # hiragana
 _EM = chr(0x1F600)                                  # emoji face
-_ascii_path = "/tmp/nonexistent_test_file_x.py"
+_repo_nonexistent = os.path.join(os.path.dirname(__file__), "_nonexistent_test_x.py")
 
 check("TC-CG-01 Japanese content blocked",
-      run(_ascii_path, "hello " + _JP + " world"), 2)
+      run(_repo_nonexistent, "hello " + _JP + " world"), 2)
 check("TC-CG-02 emoji content blocked",
-      run(_ascii_path, "nice " + _EM + " job"), 2)
+      run(_repo_nonexistent, "nice " + _EM + " job"), 2)
 check("TC-CG-03 ASCII content allowed",
-      run(_ascii_path, "def hello(): pass"), 0)
+      run(_repo_nonexistent, "def hello(): pass"), 0)
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(0 if failed == 0 else 1)

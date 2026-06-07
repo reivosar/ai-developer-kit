@@ -103,6 +103,15 @@ def _test_cp_guards(cp, p: list, f: list) -> None:
         _report(f"check_cp_destination({cmd!r}) blocked=={expect_block}",
                 _is_blocked(cp.check_cp_destination, cmd) == expect_block, p, f)
 
+    for cmd, expect_block in [
+        ("cp /tmp/foo.py .claude/hooks/bar.py",    True),
+        ("cp /var/tmp/x.sh .claude/hooks/run.sh",  True),
+        ("cp src/foo.py dst/bar.py",               False),
+        ("cp .claude/hooks/a.py .claude/hooks/b.py", False),
+    ]:
+        _report(f"check_cp_source({cmd!r}) blocked=={expect_block}",
+                _is_blocked(cp.check_cp_source, cmd) == expect_block, p, f)
+
     tmppath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_test_cp_dest_tmp.txt')
     with open(tmppath, 'w'):
         pass
@@ -144,6 +153,14 @@ def _test_raw_guards(bash, p: list, f: list) -> None:
         ("python3 tests/test_foo.py", False),
         ("python3 .claude/hooks/test_allow_list.py", False),
         ("python3 --version", False),
+    ]:
+        _report(f"check_python3_path({cmd!r}) blocked=={expect_block}",
+                _is_blocked(bash.check_python3_path, cmd) == expect_block, p, f)
+
+    # Any script under .claude/worktrees/ is always blocked regardless of registration
+    for cmd, expect_block in [
+        ("python3 .claude/worktrees/bootstrap/test_patch.py", True),
+        ("python3 .claude/worktrees/feat-foo/test_api.py",    True),
     ]:
         _report(f"check_python3_path({cmd!r}) blocked=={expect_block}",
                 _is_blocked(bash.check_python3_path, cmd) == expect_block, p, f)
@@ -300,6 +317,8 @@ cases = [
     ("cp -r src/ dst/",          False),
     ("cp README.md docs/",       False),
     ("cp -rp src/ dst/",         False),
+    ("cp /tmp/foo.py .claude/hooks/bar.py",   True),
+    ("cp /var/tmp/x.sh .claude/hooks/run.sh", True),
     ("diff file1.txt file2.txt",                                          False),
     ("diff -q .upstream/.claude/rules/behavior.md .claude/rules/behavior.md", False),
     ("diff -r dir1/ dir2/",                                               False),
@@ -362,7 +381,9 @@ cases = [
     ("cp --target-directory=dest/ src.txt",     True),
     ("python3 /tmp/test.py",                    True),
     ("python3 ../test_something.py",            True),
-    # Efficiency additions — read-only git
+    ("python3 .claude/worktrees/bootstrap/test_patch_settings.py", True),
+    ("python3 .claude/worktrees/feat-foo/test_api.py",             True),
+    # Efficiency additions -- read-only git
     ("git show HEAD",                           False),
     ("git show abc123",                         False),
     ("git remote",                              False),
@@ -397,7 +418,7 @@ cases = [
     # Verify still blocked
     ("git stash pop",                           True),
     ("git stash drop",                          True),
-    # Destructive commands — must be blocked
+    # Destructive commands -- must be blocked
     ("git add .",                               True),
     ("git add -A",                              True),
     ("git add -A .",                            True),

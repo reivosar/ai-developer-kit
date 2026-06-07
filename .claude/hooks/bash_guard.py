@@ -92,7 +92,8 @@ def check_raw_operators(command: str) -> None:
 
 
 def check_python3_path(command: str) -> None:
-    """Block python3 invocations referencing absolute paths or path traversal."""
+    """Block python3 invocations referencing absolute paths, path traversal,
+    or any script path under .claude/worktrees/."""
     for seg in split_segments(command):
         seg = seg.strip()
         if not re.match(r'python3\s', seg):
@@ -114,6 +115,12 @@ def check_python3_path(command: str) -> None:
                 if '../' in arg:
                     hook_lib.block(
                         f"python3: path traversal '{arg}' is not permitted.",
+                        f"Command: {command[:300]}",
+                    )
+                if arg.startswith(".claude/worktrees/"):
+                    hook_lib.block(
+                        "python3: scripts under .claude/worktrees/ must be run "
+                        "from inside the worktree using a relative path.",
                         f"Command: {command[:300]}",
                     )
                 break
