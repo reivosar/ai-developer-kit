@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import anomaly_guard  # noqa: E402
 import commit_guard  # noqa: E402
 from bash_guard import check_raw_operators, load_patterns, is_whitelisted, is_denied, check_python3_path  # noqa: E402
 from cp_guard import check_cp_destination, check_cp_options  # noqa: E402
@@ -14,7 +15,8 @@ from hook_lib import read_stdin_json, block  # noqa: E402
 
 def main() -> None:
     settings_path = str(Path(__file__).resolve().parent.parent / "settings.json")
-    command = read_stdin_json().get("tool_input", {}).get("command", "")
+    data = read_stdin_json()
+    command = data.get("tool_input", {}).get("command", "")
     if not command:
         sys.exit(0)
     check_raw_operators(command)
@@ -35,6 +37,7 @@ def main() -> None:
     check_cp_options(command)
     check_python3_path(command)
     commit_guard.check_pre_commit(command)
+    anomaly_guard.check_sensitive_path(command)
     sys.exit(0)
 
 
