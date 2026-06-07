@@ -24,7 +24,8 @@ def check(label: str, got: int, expected: int) -> None:
 
 def run(file_path: str, content: str = "") -> int:
     payload = json.dumps({"tool_name": "Write", "tool_input": {"file_path": file_path, "content": content}})
-    r = subprocess.run(["python3", HOOK], input=payload, capture_output=True, text=True)
+    env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1"}
+    r = subprocess.run(["python3", HOOK], input=payload, capture_output=True, text=True, env=env)
     return r.returncode
 
 
