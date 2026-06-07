@@ -73,6 +73,8 @@
       "Bash(npm run dev*)",
       "Bash(npm run start*)",
       "Bash(python3 *test*.py)",
+      "Bash(python3 -m pytest*)",
+      "Bash(pytest .claude/hooks/test_*.py*)",
       "Bash(gh status*)",
       "Bash(gh auth status*)",
       "Bash(gh auth login*)",
@@ -167,6 +169,15 @@
             "command": ".claude/hooks/block-read.sh"
           }
         ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/pre-mcp.py"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -180,6 +191,15 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/memory_guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/post-tool.py"
           }
         ]
       }

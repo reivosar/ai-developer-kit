@@ -32,6 +32,9 @@ Thumbs.db
 *.log
 logs/
 
+# Runtime state (Claude Code hooks)
+.claude/rate-state.json
+
 # Test coverage
 coverage/
 .nyc_output/

@@ -16,6 +16,11 @@ python3 .claude/hooks/test_pre_edit.py
 python3 .claude/hooks/test_pre_write.py
 python3 .claude/hooks/test_hook_lib.py
 python3 .claude/hooks/test_content_guard.py
+pytest .claude/hooks/test_prompt_injection_guard.py
+pytest .claude/hooks/test_mcp_guard.py
+pytest .claude/hooks/test_audit_log.py
+pytest .claude/hooks/test_rate_limiter.py
+pytest .claude/hooks/test_anomaly_guard.py
 ```
 
 When adding a new allowed or denied Bash command, write a failing test in `test_allow_list.py` first, then update `settings.json`.
