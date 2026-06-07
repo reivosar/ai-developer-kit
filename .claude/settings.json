@@ -113,7 +113,6 @@
       "Bash(mkdir *)"
     ],
     "deny": [
-      "Bash(python3 .claude/worktrees/*)",
       "Bash(git switch *--detach*)",
       "Bash(gh label create *--repo*)",
       "Bash(cwd)",

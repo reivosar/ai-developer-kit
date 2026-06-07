@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shlex
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -91,8 +92,27 @@ def check_raw_operators(command: str) -> None:
                 )
 
 
-def check_python3_path(command: str) -> None:
-    """Block python3 invocations referencing absolute paths or path traversal."""
+def _get_registered_worktree_names() -> set[str]:
+    """Return directory names of worktrees registered under .claude/worktrees/."""
+    result = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        capture_output=True, text=True,
+    )
+    prefix = str(hook_lib.WORKTREES_DIR) + "/"
+    names: set[str] = set()
+    for line in result.stdout.splitlines():
+        if line.startswith("worktree "):
+            path = line[len("worktree "):]
+            if path.startswith(prefix):
+                name = path[len(prefix):].split("/")[0]
+                if name:
+                    names.add(name)
+    return names
+
+
+def check_python3_path(command: str, _registered: "set[str] | None" = None) -> None:
+    """Block python3 invocations referencing absolute paths, path traversal,
+    or scripts in unregistered worktree staging directories."""
     for seg in split_segments(command):
         seg = seg.strip()
         if not re.match(r'python3\s', seg):
@@ -116,4 +136,15 @@ def check_python3_path(command: str) -> None:
                         f"python3: path traversal '{arg}' is not permitted.",
                         f"Command: {command[:300]}",
                     )
+                _worktrees_prefix = ".claude/worktrees/"
+                if arg.startswith(_worktrees_prefix):
+                    rest = arg[len(_worktrees_prefix):]
+                    name = rest.split("/")[0] if "/" in rest else ""
+                    if name:
+                        registered = _registered if _registered is not None else _get_registered_worktree_names()
+                        if name not in registered:
+                            hook_lib.block(
+                                f"python3: '.claude/worktrees/{name}/' is not a registered worktree.",
+                                f"Command: {command[:300]}",
+                            )
                 break

@@ -148,6 +148,18 @@ def _test_raw_guards(bash, p: list, f: list) -> None:
         _report(f"check_python3_path({cmd!r}) blocked=={expect_block}",
                 _is_blocked(bash.check_python3_path, cmd) == expect_block, p, f)
 
+    # Worktree staging area guard: block unregistered, allow registered
+    for cmd, registered, expect_block in [
+        ("python3 .claude/worktrees/bootstrap/test_patch.py",  set(),          True),
+        ("python3 .claude/worktrees/feat-foo/test_api.py",     {"feat-foo"},   False),
+        ("python3 .claude/worktrees/feat-foo/test_api.py",     set(),          True),
+    ]:
+        _report(
+            f"check_python3_path({cmd!r}, registered={registered!r}) blocked=={expect_block}",
+            _is_blocked(bash.check_python3_path, cmd, registered) == expect_block,
+            p, f,
+        )
+
 
 def run_unit_tests() -> tuple[int, int]:
     bash = _load("bash_guard")
