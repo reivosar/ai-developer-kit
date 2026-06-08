@@ -4,11 +4,14 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import anomaly_guard  # noqa: E402
+import audit_log  # noqa: E402
 import content_guard  # noqa: E402
 import tdd_guard  # noqa: E402
 import worktree_guard  # noqa: E402
 from env_file_guard import is_blocked_env_file  # noqa: E402
 from hook_lib import read_stdin_json, block  # noqa: E402
+
 
 def main() -> None:
     data = read_stdin_json()
@@ -16,6 +19,8 @@ def main() -> None:
     file_path = tool_input.get("file_path", "")
     if not file_path:
         sys.exit(0)
+    audit_log.record("PreToolUse", "Edit", tool_input)
+    anomaly_guard.check_path_escape(file_path)
     worktree_guard.check(file_path)
     if is_blocked_env_file(file_path):
         block(

@@ -53,7 +53,7 @@ def run(d: str, file_path: str, old_string: str = "") -> int:
         "tool_name": "Edit",
         "tool_input": {"file_path": file_path, "old_string": old_string, "new_string": ""},
     })
-    env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1"}
+    env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1", "ANOMALY_PATH_ESCAPE_DISABLE": "1"}
     r = subprocess.run(["python3", HOOK], input=payload, capture_output=True, text=True, cwd=d, env=env)
     return r.returncode
 

@@ -33,7 +33,7 @@ def check_sensitive_path(command: str) -> None:
 
 
 def check_path_escape(path: str) -> None:
-    if not path:
+    if not path or os.environ.get("ANOMALY_PATH_ESCAPE_DISABLE"):
         return
     try:
         resolved = Path(path).resolve()

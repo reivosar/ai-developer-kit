@@ -31,6 +31,8 @@ def check_rate(
     tool_category: str,
     state_file: Optional[Path] = None,
 ) -> None:
+    if os.environ.get("RATE_LIMIT_DISABLE"):
+        return
     if state_file is None:
         state_file = hook_lib.REPO_ROOT / ".claude" / "rate-state.json"
     now = time.time()
