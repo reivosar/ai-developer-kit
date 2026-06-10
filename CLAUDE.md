@@ -15,6 +15,7 @@ python3 .claude/hooks/test_allow_list.py
 python3 .claude/hooks/test_pre_edit.py
 python3 .claude/hooks/test_pre_write.py
 python3 .claude/hooks/test_post_edit.py
+python3 .claude/hooks/test_block_read.py
 python3 .claude/hooks/test_hook_lib.py
 python3 .claude/hooks/test_content_guard.py
 python3 .claude/hooks/test_trash_sh.py
@@ -29,9 +30,6 @@ pytest .claude/hooks/test_worktree_guard.py
 ```
 
 `test_coverage.py` additionally requires `pip install coverage`.
-
-Known-stale suites (do not run; their targets were rewritten or removed):
-`test_pre_commit.py` (tests deleted `pre-commit.sh`), `test_block_read.py` (expects the old blocking behavior), `test_trash.py` (superseded by `test_trash_sh.py`).
 
 When adding a new allowed or denied Bash command, write a failing test in `test_allow_list.py` first, then update `settings.json`.
 

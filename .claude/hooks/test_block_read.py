@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for block-read.sh: Read tool PreToolUse blocker."""
+"""Tests for block-read.sh: PreToolUse[Read] no-op that allows the Read tool."""
 import os
 import stat
 import subprocess
@@ -31,18 +31,18 @@ if os.path.isfile(BLOCK_READ):
 else:
     check("TC-BLOCK-READ-02 block-read.sh is executable", False)
 
-# TC-BLOCK-READ-03: block-read.sh exits with code 2
+# TC-BLOCK-READ-03: block-read.sh exits 0 so the Read tool is allowed
 if os.path.isfile(BLOCK_READ):
     result = subprocess.run(["bash", BLOCK_READ], capture_output=True)
-    check("TC-BLOCK-READ-03 block-read.sh exits with code 2", result.returncode == 2)
-    # TC-BLOCK-READ-04: block-read.sh prints a message to stderr
+    check("TC-BLOCK-READ-03 block-read.sh exits 0 (Read allowed)", result.returncode == 0)
+    # TC-BLOCK-READ-04: no BLOCKED message is emitted
     check(
-        "TC-BLOCK-READ-04 block-read.sh prints message to stderr",
-        len(result.stderr) > 0,
+        "TC-BLOCK-READ-04 block-read.sh emits no output",
+        len(result.stdout) == 0 and len(result.stderr) == 0,
     )
 else:
-    check("TC-BLOCK-READ-03 block-read.sh exits with code 2", False)
-    check("TC-BLOCK-READ-04 block-read.sh prints message to stderr", False)
+    check("TC-BLOCK-READ-03 block-read.sh exits 0 (Read allowed)", False)
+    check("TC-BLOCK-READ-04 block-read.sh emits no output", False)
 
 print(f"\n{passed} passed, {failed} failed")
 raise SystemExit(0 if failed == 0 else 1)
