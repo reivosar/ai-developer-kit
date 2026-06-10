@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import audit_log  # noqa: E402
 import content_guard  # noqa: E402
 import tdd_guard  # noqa: E402
 import worktree_guard  # noqa: E402
@@ -18,6 +19,7 @@ def main() -> None:
     file_path = tool_input.get("file_path", "")
     if not file_path:
         sys.exit(0)
+    audit_log.record("PreToolUse", "Write", tool_input)
     try:
         Path(file_path).resolve().relative_to(REPO_ROOT)
     except ValueError:
