@@ -403,6 +403,27 @@ cases = [
     ("git tag -d v1.0.0",                       True),
     ("git tag -f v1.0.0",                       True),
     ("git tag -fa v1.0.0",                      True),
+    # Read-only git additions
+    ("git rev-parse HEAD",                      False),
+    ("git rev-parse --show-toplevel",           False),
+    ("git ls-files",                            False),
+    ("git merge-base main HEAD",                False),
+    ("git grep pattern",                        False),
+    ("git config --get user.name",              False),
+    ("git config --list",                       False),
+    ("git reflog",                              False),
+    ("git reflog show HEAD",                    False),
+    # Write/destructive forms of the above stay blocked
+    ("git config user.name x",                  True),
+    ("git config --global user.name x",         True),
+    ("git reflog delete HEAD@{1}",              True),
+    ("git reflog expire --expire=now --all",    True),
+    # Read-only gh additions
+    ("gh pr status",                            False),
+    ("gh run list",                             False),
+    ("gh run view 123 --log",                   False),
+    ("gh run cancel 123",                       True),
+    ("gh run rerun 123",                        True),
     # Shell utilities
     ("wc -l README.md",                         False),
     ("head -20 README.md",                      False),
