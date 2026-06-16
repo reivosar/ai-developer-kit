@@ -39,13 +39,7 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 ### Rules (auto-loaded)
 
-`.claude/rules/*.md` — loaded into every conversation automatically, one file per responsibility:
-- `reasoning.md` — how to reason given the model's biases
-- `behavior.md` — safety and file/command conduct
-- `workflow.md` — process sequencing and step compliance
-- `context-efficiency.md` — context and token cost
-- `style.md` — output language and form
-- `memory.md` — what to persist to memory
+`.claude/rules/*.md` — loaded into every conversation automatically, one file per responsibility.
 
 ### Rule library (on-demand)
 
