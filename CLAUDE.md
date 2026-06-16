@@ -39,7 +39,7 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 ### Rules (auto-loaded)
 
-`.claude/rules/*.md` — loaded into every conversation automatically. Two files: `behavior.md`, `context-efficiency.md`.
+`.claude/rules/*.md` — loaded into every conversation automatically, one file per responsibility.
 
 ### Rule library (on-demand)
 
