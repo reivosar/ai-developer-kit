@@ -116,6 +116,6 @@ Hook scripts enforce constraints the rules alone cannot:
 
 **Worktree isolation** — all implementation work happens in a git worktree (`.claude/worktrees/<name>/`), never in the main working directory. This prevents accidental commits to `main` and allows parallel workstreams without branch conflicts.
 
-**Hook enforcement over trust** — constraints like the allow/deny list and secret detection are enforced by hooks that run before tool execution, not by prompting Claude to remember rules. Hooks fail closed; if a hook errors, the action is blocked.
+**Hook enforcement over trust** — constraints like the allow/deny list and secret detection are enforced by hooks that run before tool execution, not by prompting Claude to remember rules. The hooks that guard a tool call (`pre-bash.py`, `pre-write.py`, `pre-edit.py`, `pre-mcp.py`) fail closed; if one raises or cannot read its input, the action is blocked.
 
 **English-only project files** — all rules, skills, docs, hooks, and commit messages are written in English regardless of the user's locale. This keeps the configuration readable by any contributor and avoids encoding issues in shell scripts.

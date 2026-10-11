@@ -39,6 +39,7 @@ pytest .claude/hooks/test_reference_notice.py
 pytest .claude/hooks/test_tdd_guard.py
 pytest .claude/hooks/test_testing_guard.py
 pytest .claude/hooks/test_hook_lib_helpers.py
+pytest .claude/hooks/test_fail_closed.py
 ```
 
 `test_coverage.py` additionally requires `pip install coverage`.
@@ -96,7 +97,7 @@ Guard modules (imported by entry points):
 - `mcp_guard.py` — checks MCP tool names against `.claude/mcp-allowlist.txt`
 - `audit_log.py` — appends tool invocations to `.claude/audit.log`
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit())
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit())
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command

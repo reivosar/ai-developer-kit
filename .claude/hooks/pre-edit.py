@@ -17,7 +17,8 @@ from env_file_guard import is_blocked_env_file  # noqa: E402
 from hook_lib import (  # noqa: E402
     block,
     emit_additional_context,
-    read_stdin_json,
+    read_hook_input,
+    run_fail_closed,
 )
 
 
@@ -43,7 +44,7 @@ def _block_unsafe_content(
 
 
 def main() -> None:
-    data = read_stdin_json()
+    data = read_hook_input()
     tool_input = data.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
     if not file_path:
@@ -60,4 +61,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_fail_closed(main)

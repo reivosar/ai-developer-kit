@@ -12,12 +12,12 @@ import rate_limiter  # noqa: E402
 from bash_guard import check_raw_operators, load_patterns, is_whitelisted, is_denied, check_python3_path  # noqa: E402
 from cp_guard import check_cp_destination, check_cp_options, check_cp_source  # noqa: E402
 from git_guard import check_stash_destructive, check_checkout_discard, check_branch_force_delete, check_commit_on_main  # noqa: E402
-from hook_lib import read_stdin_json, block  # noqa: E402
+from hook_lib import block, read_hook_input, run_fail_closed  # noqa: E402
 
 
 def main() -> None:
     settings_path = str(Path(__file__).resolve().parent.parent / "settings.json")
-    data = read_stdin_json()
+    data = read_hook_input()
     tool_input = data.get("tool_input", {})
     command = tool_input.get("command", "")
     if not command:
@@ -49,4 +49,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_fail_closed(main)

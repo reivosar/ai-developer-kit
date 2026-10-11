@@ -3,7 +3,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import NoReturn
+from typing import Callable, NoReturn
 
 
 def _find_repo_root() -> Path:
@@ -44,6 +44,35 @@ def read_stdin_json() -> dict:
         return json.load(sys.stdin)
     except Exception:
         return {}
+
+
+def read_hook_input() -> dict:
+    """Return the hook's JSON input; raise ValueError when it is malformed.
+
+    A blocking hook must not read unusable input as "nothing to check",
+    so this raises where read_stdin_json returns an empty object.
+    """
+    try:
+        data = json.load(sys.stdin)
+    except ValueError as error:
+        raise ValueError(f"hook input is not JSON: {error}") from error
+    if not isinstance(data, dict):
+        raise ValueError("hook input is not a JSON object")
+    if not isinstance(data.get("tool_input", {}), dict):
+        raise ValueError("tool_input is not a JSON object")
+    return data
+
+
+def run_fail_closed(main: Callable[[], None]) -> None:
+    """Run a blocking hook; an unexpected error blocks the action."""
+    try:
+        main()
+    except Exception as error:
+        block(
+            f"hook failed: {type(error).__name__}: {error}",
+            "The action is blocked because the hook could not finish"
+            " its checks.",
+        )
 
 
 def emit_additional_context(hook_event: str, notices: list[str]) -> None:
