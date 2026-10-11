@@ -31,6 +31,32 @@ def _write_upstream(project: Path, relative_path: str, content: str) -> None:
     upstream.write_text(content)
 
 
+@pytest.mark.parametrize(
+    "file_name",
+    [
+        "test_orders.py",
+        "orders_test.go",
+        "orders.test.ts",
+        "orders.spec.ts",
+        "OrderTest.java",
+        "OrderSpec.kt",
+        "src/tests/orders.py",
+    ],
+)
+def test_is_test_file_with_test_file_name_returns_true(file_name: str):
+    assert tdd_guard.is_test_file(file_name) is True
+
+
+@pytest.mark.parametrize(
+    "file_name",
+    ["latest_orders.py", "contest.py", "attest-orders.js", "orders.py"],
+)
+def test_is_test_file_with_implementation_file_name_returns_false(
+    file_name: str,
+):
+    assert tdd_guard.is_test_file(file_name) is False
+
+
 def test_check_with_no_test_staged_exits_2(project: Path):
     with pytest.raises(SystemExit) as blocked:
         tdd_guard.check(CANCEL, "src/orders.py")

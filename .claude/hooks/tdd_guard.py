@@ -19,7 +19,12 @@ _IMPL_EXTS = {
 _SKIP_BASENAMES = {'Makefile', 'Dockerfile', 'Procfile', '.gitignore'}
 _SKIP_EXT = {'.md', '.json', '.yaml', '.yml', '.toml', '.ini', '.sh',
              '.txt', '.lock', '.sum', '.env', '.gitignore'}
-_TEST_NAME_RE = re.compile(r'(test|spec)(\.|_|-|$)', re.IGNORECASE)
+# "test" or "spec" must be a whole word of the file name: test_orders.py,
+# orders.spec.ts, OrderTest.java -- but not latest_orders.py or contest.py.
+_TEST_NAME_RE = re.compile(
+    r'(?:^|[._-])(?:test|spec|Test|Spec|TEST|SPEC)(?:[._-]|$)'
+    r'|[a-z0-9](?:Test|Spec)(?:[._-]|$)'
+)
 _TEST_DIR_RE = re.compile(r'(/__tests__/|/tests?/|/specs?/)', re.IGNORECASE)
 
 
