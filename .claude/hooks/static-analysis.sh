@@ -3,7 +3,7 @@
 set -uo pipefail
 
 if [ $# -gt 0 ]; then
-    changed_files="$*"
+    changed_files=$(printf '%s\n' "$@")
 elif [ "${STATIC_ANALYSIS_MODE:-}" = "staged" ]; then
     changed_files=$(git diff --name-only --cached 2>/dev/null) || {
         echo "ERROR: git diff --cached failed (not a git repo?)" >&2

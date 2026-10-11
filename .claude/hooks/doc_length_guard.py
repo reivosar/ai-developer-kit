@@ -64,7 +64,9 @@ def check_edit(
     if not _is_guarded_document(file_path) or not Path(file_path).is_file():
         return
     current_text = _read_document(file_path)
-    edited_text = _apply_edit(current_text, old_string, new_string, replace_all)
+    edited_text = _apply_edit(
+        current_text, old_string, new_string, replace_all
+    )
     edited_count = _count_lines(edited_text)
     if _grows_past_limit(_count_lines(current_text), edited_count):
         _block_over_limit(file_path, edited_count)

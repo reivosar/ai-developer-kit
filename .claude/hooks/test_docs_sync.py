@@ -73,6 +73,8 @@ def test_every_kit_markdown_document_fits_line_limit() -> None:
         for document in _kit_markdown_documents()
     }
     too_long = {
-        name: count for name, count in line_counts.items() if count > LINE_LIMIT
+        name: count
+        for name, count in line_counts.items()
+        if count > LINE_LIMIT
     }
     assert not too_long, f"Documents over {LINE_LIMIT} lines: {too_long}"

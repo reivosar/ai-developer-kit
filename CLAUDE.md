@@ -32,6 +32,7 @@ pytest .claude/hooks/test_pre_edit_path_escape.py
 pytest .claude/hooks/test_pre_write_audit.py
 pytest .claude/hooks/test_docs_sync.py
 pytest .claude/hooks/test_doc_length_guard.py
+pytest .claude/hooks/test_static_analysis.py
 ```
 
 `test_coverage.py` additionally requires `pip install coverage`.
