@@ -2,11 +2,12 @@
 
 ## What These Rules Protect
 
-Every rule in this file is a means to three properties of a change. When two rules conflict, or a rule does not fit the case, choose the option that keeps more of these properties.
+Every rule in this file serves one goal: keep the cost of a change small, so that a failure can be fixed quickly and one fix does not break something else. The goal is the same in every language and framework; only the means differ. A change is cheap when two things hold:
 
-- **Local impact** — a change affects only the code it touches
-- **One reason to change** — a unit changes for one kind of request
-- **Obvious change location** — the place to change is reachable from the words of the request
+- **The place to change can be identified** — from the words of a request or from the symptom of a failure, the code to change is found quickly and completely
+- **The impact stays local** — a change affects only the code it touches
+
+A unit that changes for one kind of reason serves both: it is easy to find, and a change to it does not spread. When two rules conflict, or a rule does not fit the case, choose the option that keeps the change cheaper by these two measures.
 
 Two kinds of reader work on this code. A person learns the structure once and remembers it. An AI agent starts every session without memory and locates code by text search. Where a convention helps one reader and costs the other, keep the property and choose a means both can follow: explicit over inferred, direct over indirect, one place over many.
 
@@ -62,7 +63,7 @@ Two kinds of reader work on this code. A person learns the structure once and re
 
 ## Searchable Change Locations
 
-A change location that text search cannot reach from the words of the request gets missed or duplicated.
+A change location that text search cannot reach from the words of a request or from the message of a failure gets missed or duplicated.
 
 - Name identifiers, files, and directories with the project's domain terms — the glossary when one exists, otherwise the words already used in the code and in the request; never introduce a synonym for a concept that already has a name (`basket` next to an existing `cart`)
 - Before creating a file, find an existing file of the same kind and use its directory and its naming pattern; where no file of that kind exists yet, follow the layout rules of the applicable domain doc
