@@ -26,7 +26,9 @@ def make_git_repo() -> str:
     d = tempfile.mkdtemp(prefix="hook_test_edit_")
     subprocess.run(["git", "init", d], check=True, capture_output=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=d, check=True, capture_output=True)
-    subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=d, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "t@t.com"], cwd=d, check=True, capture_output=True
+    )
     init = os.path.join(d, "init.txt")
     with open(init, "w") as f:
         f.write("init\n")
@@ -54,7 +56,9 @@ def run(d: str, file_path: str, old_string: str = "") -> int:
         "tool_input": {"file_path": file_path, "old_string": old_string, "new_string": ""},
     })
     env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1", "ANOMALY_PATH_ESCAPE_DISABLE": "1"}
-    r = subprocess.run(["python3", HOOK], input=payload, capture_output=True, text=True, cwd=d, env=env)
+    r = subprocess.run(
+        ["python3", HOOK], input=payload, capture_output=True, text=True, cwd=d, env=env
+    )
     return r.returncode
 
 

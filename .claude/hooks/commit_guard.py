@@ -27,12 +27,15 @@ def _run(cmd: list[str]) -> str:
         return ""
 
 
-def _is_commit(command: str) -> bool:
+def is_commit(command: str) -> bool:
+    """Return whether a Bash command runs git commit."""
     return bool(_COMMIT_RE.search(command))
 
 
-def _staged_files() -> list[str]:
-    return [f for f in _run(["git", "diff", "--cached", "--name-only"]).splitlines() if f]
+def staged_files() -> list[str]:
+    """Return the paths staged for the next commit."""
+    names = _run(["git", "diff", "--cached", "--name-only"]).splitlines()
+    return [name for name in names if name]
 
 
 def _staged_diff() -> str:
@@ -44,16 +47,24 @@ def _check_secrets(diff: str) -> str | None:
         if not line.startswith("+") or line.startswith("+++"):
             continue
         if _SECRET_RE.search(line[1:]) and ".example" not in line:
-            return "Potential secret detected in staged changes. Remove it and use environment variables instead."
+            return (
+                "Potential secret detected in staged changes."
+                " Remove it and use environment variables instead."
+            )
     return None
 
 
 def _check_branch() -> str | None:
-    branch = _run(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip()
-    if branch in ("HEAD", "main", "master"):
+    # --show-current also names a branch that has no commit yet; it is
+    # empty on a detached HEAD, where there is no branch name to check.
+    branch = _run(["git", "branch", "--show-current"]).strip()
+    if branch in ("", "main", "master"):
         return None
     if not _BRANCH_PREFIX_RE.match(branch):
-        return f"Branch name '{branch}' does not follow the required prefix pattern (feat/|fix/|docs/|chore/|refactor/|test/|perf/)."
+        return (
+            f"Branch name '{branch}' does not follow the required prefix"
+            " pattern (feat/|fix/|docs/|chore/|refactor/|test/|perf/)."
+        )
     return None
 
 
@@ -70,22 +81,29 @@ def _check_whitespace() -> str | None:
 def _check_env_files(staged: list[str]) -> str | None:
     for f in staged:
         base = os.path.basename(f)
-        if (base == ".env" or base.startswith(".env.")) and base not in (".env.sample", ".env.example"):
-            return f"'.env' files must not be committed ({f}). Use .env.sample or .env.example instead."
+        is_env_file = base == ".env" or base.startswith(".env.")
+        if is_env_file and base not in (".env.sample", ".env.example"):
+            return (
+                f"'.env' files must not be committed ({f})."
+                " Use .env.sample or .env.example instead."
+            )
     return None
 
 
 def _check_emoji(diff: str) -> str | None:
-    added = "\n".join(l[1:] for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++"))
+    added = "\n".join(
+        line[1:] for line in diff.splitlines()
+        if line.startswith("+") and not line.startswith("+++")
+    )
     if _EMOJI_RE.search(added):
         return "Emoji detected in staged changes. Use plain text instead (e.g. 'Good:' / 'Bad:')."
     return None
 
 
 def check_pre_commit(command: str) -> None:
-    if not _is_commit(command):
+    if not is_commit(command):
         return
-    staged = _staged_files()
+    staged = staged_files()
     if not staged:
         return
     diff = _staged_diff()

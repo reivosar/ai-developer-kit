@@ -8,16 +8,28 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anomaly_guard  # noqa: E402
 import audit_log  # noqa: E402
 import commit_guard  # noqa: E402
+import coverage_guard  # noqa: E402
 import rate_limiter  # noqa: E402
-from bash_guard import check_raw_operators, load_patterns, is_whitelisted, is_denied, check_python3_path  # noqa: E402
+from bash_guard import (  # noqa: E402
+    check_python3_path,
+    check_raw_operators,
+    is_denied,
+    is_whitelisted,
+    load_patterns,
+)
 from cp_guard import check_cp_destination, check_cp_options, check_cp_source  # noqa: E402
-from git_guard import check_stash_destructive, check_checkout_discard, check_branch_force_delete, check_commit_on_main  # noqa: E402
-from hook_lib import read_stdin_json, block  # noqa: E402
+from git_guard import (  # noqa: E402
+    check_branch_force_delete,
+    check_checkout_discard,
+    check_commit_on_main,
+    check_stash_destructive,
+)
+from hook_lib import block, read_hook_input, run_fail_closed  # noqa: E402
 
 
 def main() -> None:
     settings_path = str(Path(__file__).resolve().parent.parent / "settings.json")
-    data = read_stdin_json()
+    data = read_hook_input()
     tool_input = data.get("tool_input", {})
     command = tool_input.get("command", "")
     if not command:
@@ -43,10 +55,11 @@ def main() -> None:
     check_cp_source(command)
     check_python3_path(command)
     commit_guard.check_pre_commit(command)
+    coverage_guard.check_staged_coverage(command)
     anomaly_guard.check_sensitive_path(command)
     rate_limiter.check_rate(session_id, "bash")
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    run_fail_closed(main)

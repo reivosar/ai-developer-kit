@@ -12,7 +12,7 @@ Keep README accurate — a wrong README is worse than no README.
 
 Use ADR format for any significant decision (framework choice, data model, external service, security approach):
 
-```
+```text
 # NNN: Title
 
 ## Status
@@ -42,6 +42,12 @@ Store ADRs in `docs/adr/NNN-short-title.md`. Never delete them — mark as Super
 - Keep the spec co-located with the code (e.g., `openapi.yaml` in the service root)
 - Generate docs from the spec, not by hand — hand-written docs drift
 - Document all error responses, not just success cases
+
+## Document Length
+
+- Every Markdown document stays within 200 lines; when one would exceed it, split it by responsibility into a separate document and link the two
+- `doc_length_guard.py` blocks a write or edit that takes a Markdown document past the limit; an edit that shortens an oversized document is allowed, so it can be trimmed in steps
+- The guard is off while the environment variable `DOC_LENGTH_GUARD_DISABLE` is set; use it only for a document that must grow without bound, such as a changelog
 
 ## Co-location
 

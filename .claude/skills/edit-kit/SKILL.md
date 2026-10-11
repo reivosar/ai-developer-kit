@@ -18,7 +18,7 @@ If the user wants something to happen automatically in response to an EVENT, the
 - "When I run bash commands, log them" → PreToolUse hook with Bash matcher
 - "Always run tests after code changes" → PostToolUse hook
 
-**Hook events:** PreToolUse, PostToolUse, PreCompact, PostCompact, Stop, Notification, SessionStart
+**Hook events:** PreToolUse, PostToolUse, UserPromptSubmit, PreCompact, PostCompact, Stop, Notification, SessionStart
 
 ## CRITICAL: Read Before Write
 
@@ -60,7 +60,7 @@ For permission allow/deny changes, identify the test file (e.g., `test_allow_lis
 
 Pass a concrete spec to `/coding` that includes:
 
-```
+```text
 Modify <settings_file_path> to <change_description>.
 
 Files to change:

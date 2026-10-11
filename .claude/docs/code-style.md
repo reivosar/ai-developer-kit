@@ -7,8 +7,9 @@
 - No JavaDoc (`/** */`), no multi-line comment blocks — one short inline line at most
 - Docstrings follow language conventions (see language-specific rules)
 - No commented-out code — delete it; git history preserves it
-- Max function / method body: 20 lines (blank lines and comments excluded); if exceeded, extract until each function fits
-- Max file length: 200 lines; if exceeded, split by distinct responsibility
+- Max function / method body: 20 lines (blank lines and comments excluded); if exceeded, extract until each function fits, and keep a function extracted only to meet this limit in the same file as its caller
+- A code file holds one concept or one feature. At 200 lines, check whether it holds two; if it does, split by distinct responsibility. Never split one concept across files only to reduce the line count — a concept spread over files is harder to find and to change than a long file
+- Markdown documents have a hard 200-line limit — see `documentation.md`
 
 ## Naming Conventions
 

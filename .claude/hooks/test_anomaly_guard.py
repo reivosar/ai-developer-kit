@@ -3,7 +3,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 
 HOOKS_DIR = str(Path(__file__).resolve().parent)
 

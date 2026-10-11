@@ -27,9 +27,24 @@ pytest .claude/hooks/test_rate_limiter.py
 pytest .claude/hooks/test_anomaly_guard.py
 pytest .claude/hooks/test_memory_guard.py
 pytest .claude/hooks/test_worktree_guard.py
+pytest .claude/hooks/test_pre_bash_audit_rate.py
+pytest .claude/hooks/test_pre_edit_path_escape.py
+pytest .claude/hooks/test_pre_write_audit.py
+pytest .claude/hooks/test_docs_sync.py
+pytest .claude/hooks/test_doc_length_guard.py
+pytest .claude/hooks/test_static_analysis.py
+pytest .claude/hooks/test_function_definitions.py
+pytest .claude/hooks/test_dynamic_name_guard.py
+pytest .claude/hooks/test_reference_notice.py
+pytest .claude/hooks/test_tdd_guard.py
+pytest .claude/hooks/test_testing_guard.py
+pytest .claude/hooks/test_hook_lib_helpers.py
+pytest .claude/hooks/test_fail_closed.py
+pytest .claude/hooks/test_commit_guard.py
+pytest .claude/hooks/test_coverage_guard.py
 ```
 
-`test_coverage.py` additionally requires `pip install coverage`.
+`pytest .claude/hooks/test_coverage.py` runs the pytest-style suites under coverage and fails when a hook module falls below 90% branch or line coverage. It needs `pytest-cov`. The modules it cannot measure are listed in the file.
 
 When adding a new allowed or denied Bash command, write a failing test in `test_allow_list.py` first, then update `settings.json`.
 
@@ -54,9 +69,9 @@ This kit is Claude Code configuration only — no application code. Everything l
 `.claude/hooks/` — one entry-point script per Claude Code tool event; logic lives in guard modules.
 
 Entry points (one process spawn per event):
-- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + anomaly guard
-- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + TDD guard + worktree guard
-- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + TDD guard + worktree guard
+- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + coverage guard + anomaly guard
+- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + TDD guard + worktree guard + reference notice
+- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + TDD guard + worktree guard + reference notice
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
 - `post-edit.sh` — PostToolUse[Write|Edit]: auto-format; prints WARNING on formatter failure
 - `post-tool.py` — PostToolUse[Bash|Write|Edit]: audit logging
@@ -70,8 +85,14 @@ Entry points (one process spawn per event):
 Guard modules (imported by entry points):
 - `bash_guard.py`, `git_guard.py`, `cp_guard.py` — Bash safety checks
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
+- `coverage_guard.py` — on `git commit`, runs the tests under pytest-cov and blocks when a staged Python file outside `.claude/` is below 90% branch or line coverage
 - `env_file_guard.py` — blocks writes to .env files
 - `content_guard.py` — blocks Japanese characters and emoji in file content
+- `doc_length_guard.py` — blocks a Write or Edit that takes a Markdown document past 200 lines
+- `dynamic_name_guard.py` — blocks a Write or Edit that adds a name assembled from strings at runtime
+- `reference_notice.py` — does not block; returns to the agent the references to a changed function and the location of a function name that is already defined elsewhere
+- `function_definitions.py` — finds function definitions by file extension; shared by `tdd_guard.py` and `reference_notice.py`
+- `testing_guard.py` — blocks a Write or Edit that adds a test with no assertion, an always-true assertion, sleep, a snapshot, or a name outside the convention
 - `tdd_guard.py` — blocks impl edits without staged tests covering modified functions
 - `worktree_guard.py` — when running inside `.claude/worktrees/<name>`, blocks writes outside that worktree
 - `anomaly_guard.py` — blocks sensitive system paths (`~/.ssh`, `/etc/passwd`, ...) and paths escaping the repo root
@@ -79,7 +100,8 @@ Guard modules (imported by entry points):
 - `mcp_guard.py` — checks MCP tool names against `.claude/mcp-allowlist.txt`
 - `audit_log.py` — appends tool invocations to `.claude/audit.log`
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), read_stdin_json())
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit())
+- `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command
 

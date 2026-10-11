@@ -3,12 +3,11 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
 
 HOOKS_DIR = str(Path(__file__).resolve().parent)
 sys.path.insert(0, HOOKS_DIR)
 
-import audit_log
+import audit_log  # noqa: E402
 
 
 def test_record_writes_single_jsonl_entry(tmp_path):
@@ -64,6 +63,15 @@ def test_record_appends_multiple_entries(tmp_path):
     assert len(lines) == 2
     assert json.loads(lines[0])["tool_input"]["command"] == "ls"
     assert json.loads(lines[1])["tool_input"]["command"] == "pwd"
+
+
+def test_record_without_log_file_writes_to_repository_audit_log(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(audit_log.hook_lib, "REPO_ROOT", tmp_path)
+    audit_log.record("PostToolUse", "Bash", {"command": "ls"})
+    log_text = (tmp_path / ".claude" / "audit.log").read_text()
+    assert json.loads(log_text.strip())["tool_input"]["command"] == "ls"
 
 
 def test_record_with_unwritable_path_does_not_raise():

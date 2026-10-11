@@ -52,7 +52,7 @@ Subject line rules:
 
 PR body structure (required):
 
-```
+```text
 ## What
 <1-3 bullets describing what changed>
 

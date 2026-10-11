@@ -43,11 +43,13 @@ check("TC-LIB-04 REPO_ROOT is absolute", mod.REPO_ROOT.is_absolute())
 
 # TC-LIB-05: read_stdin_json returns dict from valid JSON
 _orig_stdin = sys.stdin
-sys.stdin = io.TextIOWrapper(io.BytesIO(json.dumps({"tool_input": {"command": "git status"}}).encode()))
+_payload = json.dumps({"tool_input": {"command": "git status"}}).encode()
+sys.stdin = io.TextIOWrapper(io.BytesIO(_payload))
 result = mod.read_stdin_json()
 sys.stdin = _orig_stdin
 check("TC-LIB-05 read_stdin_json returns dict", isinstance(result, dict))
-check("TC-LIB-06 read_stdin_json parses keys", result.get("tool_input", {}).get("command") == "git status")
+_command = result.get("tool_input", {}).get("command")
+check("TC-LIB-06 read_stdin_json parses keys", _command == "git status")
 
 # TC-LIB-07: read_stdin_json returns empty dict on invalid JSON
 sys.stdin = io.TextIOWrapper(io.BytesIO(b"not-json"))

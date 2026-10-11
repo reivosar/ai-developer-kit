@@ -38,7 +38,8 @@ def _test_allow_deny_patterns(bash, allow_pats: list, deny_pats: list, p: list, 
         ("git switch main", True), ("git pull", True),
         ("python3 --version", True), ("node --version", False), ("rm -rf /", False),
     ]:
-        _report(f"is_whitelisted({cmd!r})=={expect}", bash.is_whitelisted(cmd, allow_pats) == expect, p, f)
+        allowed = bash.is_whitelisted(cmd, allow_pats)
+        _report(f"is_whitelisted({cmd!r})=={expect}", allowed == expect, p, f)
 
     for cmd, expect in [
         ('python3 -c "import shutil; shutil.copytree(\'a\',\'b\')"',
@@ -63,13 +64,17 @@ def _test_allow_deny_patterns(bash, allow_pats: list, deny_pats: list, p: list, 
 
 def _test_git_guards(git, p: list, f: list) -> None:
     for fn_name, safe_cmd, dangerous_cmd in [
-        ("check_checkout_discard",  'git commit -m "git checkout -- file"', "git checkout -- README.md"),
+        (
+            "check_checkout_discard",
+            'git commit -m "git checkout -- file"',
+            "git checkout -- README.md",
+        ),
         ("check_stash_destructive", 'git commit -m "git stash drop"',       "git stash drop"),
         ("check_branch_force_delete", 'git commit -m "git branch -D old"',  "git branch -D old"),
     ]:
         fn = getattr(git, fn_name)
-        _report(f"{fn_name}(safe) not blocked",    not _is_blocked(fn, safe_cmd),      p, f)
-        _report(f"{fn_name}(dangerous) blocked",   _is_blocked(fn, dangerous_cmd),     p, f)
+        _report(f"{fn_name}(safe) not blocked", not _is_blocked(fn, safe_cmd), p, f)
+        _report(f"{fn_name}(dangerous) blocked", _is_blocked(fn, dangerous_cmd), p, f)
 
     for cmd, branch, expect_block in [
         ("git commit -m 'test'", "main", True),
@@ -85,7 +90,8 @@ def _test_git_guards(git, p: list, f: list) -> None:
                 os.environ.pop("MOCK_BRANCH", None)
             else:
                 os.environ["MOCK_BRANCH"] = env_bak
-        _report(f"check_commit_on_main({cmd!r}, {branch!r})=={expect_block}", blocked == expect_block, p, f)
+        case = f"check_commit_on_main({cmd!r}, {branch!r})=={expect_block}"
+        _report(case, blocked == expect_block, p, f)
 
     env_bak = os.environ.pop("MOCK_BRANCH", None)
     try:
@@ -513,7 +519,8 @@ for cmd, expect_blocked, branch in branch_cases:
     ok = blocked == expect_blocked
     status = "PASS" if ok else "FAIL"
     label = "blocked" if expect_blocked else "allowed"
-    print(f"[{status}] branch={branch!r:20s} {cmd!r:30s} -> expected {label}, got {'blocked' if blocked else 'allowed'}")
+    outcome = 'blocked' if blocked else 'allowed'
+    print(f"[{status}] branch={branch!r:20s} {cmd!r:30s} -> expected {label}, got {outcome}")
     if ok:
         b_passed += 1
     else:

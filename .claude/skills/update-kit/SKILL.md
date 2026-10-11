@@ -20,7 +20,7 @@ Fetch the latest `.claude` contents from `reivosar/ai-developer-kit` and apply t
 
 ## Step 1: Clone the kit into the worktree
 
-Use the **clone-kit** command from `commands.md`.
+Use the **clone-kit** command from `kit-update-commands.md`.
 
 If `.upstream/` already exists, use the **trash** command from `commands.md` first, then re-run **clone-kit**.
 
@@ -32,7 +32,7 @@ Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`, `.claude/
 
 ### 2a. Enumerate upstream files
 
-Use the **find-upstream** command from `commands.md`.
+Use the **find-upstream** command from `kit-update-commands.md`.
 
 ### 2b. Overwrite changed or new files
 
@@ -40,15 +40,15 @@ For each upstream file:
 
 1. Derive the local path by stripping the `.upstream/` prefix (e.g. `.upstream/.claude/docs/foo.md` → `.claude/docs/foo.md`).
 2. If the local file does not exist: write the upstream content to the local path using the Write tool and continue to the next file.
-3. Compare content: use the **diff-upstream** command from `commands.md`.
+3. Compare content: use the **diff-upstream** command from `kit-update-commands.md`.
 4. If identical (exit 0): skip.
    If differs (exit 1): use the **trash** command from `commands.md` to remove the local file, then write the upstream content.
 
 ### 2c. Trash local-only files
 
-Use the **find-local** command from `commands.md`.
+Use the **find-local** command from `kit-update-commands.md`.
 
-For each local file, check whether the upstream counterpart exists: use the **upstream-exists** command from `commands.md`.
+For each local file, check whether the upstream counterpart exists: use the **upstream-exists** command from `kit-update-commands.md`.
 
 If absent upstream, use the **trash** command from `commands.md`.
 
@@ -74,7 +74,7 @@ Use the **trash** command from `commands.md`.
 
 ## Step 4: Report
 
-Use the **kit-diff-stat** command from `commands.md`.
+Use the **kit-diff-stat** command from `kit-update-commands.md`.
 
 ## Step 5: Commit
 

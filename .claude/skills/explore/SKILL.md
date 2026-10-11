@@ -45,7 +45,7 @@ Start broad, then drill into what's interesting or relevant to the user's work.
 
 ## Output format
 
-```
+```text
 ## Overview
 <One sentence: what this project does and who it's for.>
 

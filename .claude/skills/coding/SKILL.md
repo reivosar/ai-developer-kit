@@ -73,6 +73,7 @@ If any test fails, return to Step 4.
 When done:
 - **What changed**: files/functions affected
 - **Why**: the design decision behind the implementation
+- **References checked**: for each changed function signature, field, or shared state, the number of references found and the number checked
 - **Caveats**: anything the caller should know about edge cases or follow-up work
 
 ### 6. Review

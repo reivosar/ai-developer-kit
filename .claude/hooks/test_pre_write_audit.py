@@ -13,7 +13,8 @@ AUDIT_LOG = REPO_ROOT / ".claude" / "audit.log"
 
 
 def _run(file_path: str, content: str = "") -> subprocess.CompletedProcess:
-    payload = json.dumps({"tool_name": "Write", "tool_input": {"file_path": file_path, "content": content}})
+    tool_input = {"file_path": file_path, "content": content}
+    payload = json.dumps({"tool_name": "Write", "tool_input": tool_input})
     env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1"}
     return subprocess.run(
         ["python3", str(HOOK)], input=payload, capture_output=True, text=True, env=env

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TDD red-phase guard: blocks impl edits unless staged tests cover the modified functions."""
+"""TDD guard: block an implementation change that has no test staged."""
 import os
 import re
 import subprocess
@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hook_lib  # noqa: E402
+from function_definitions import find_definitions  # noqa: E402
 
 _IMPL_EXTS = {
     '.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs',
@@ -18,39 +19,16 @@ _IMPL_EXTS = {
 _SKIP_BASENAMES = {'Makefile', 'Dockerfile', 'Procfile', '.gitignore'}
 _SKIP_EXT = {'.md', '.json', '.yaml', '.yml', '.toml', '.ini', '.sh',
              '.txt', '.lock', '.sum', '.env', '.gitignore'}
-_TEST_NAME_RE = re.compile(r'(test|spec)(\.|_|-|$)', re.IGNORECASE)
+# "test" or "spec" must be a whole word of the file name: test_orders.py,
+# orders.spec.ts, OrderTest.java -- but not latest_orders.py or contest.py.
+_TEST_NAME_RE = re.compile(
+    r'(?:^|[._-])(?:test|spec|Test|Spec|TEST|SPEC)(?:[._-]|$)'
+    r'|[a-z0-9](?:Test|Spec)(?:[._-]|$)'
+)
 _TEST_DIR_RE = re.compile(r'(/__tests__/|/tests?/|/specs?/)', re.IGNORECASE)
-_KEYWORD_SKIP = {
-    'if', 'for', 'while', 'return', 'new', 'switch', 'catch', 'try',
-    'else', 'do', 'case', 'break', 'continue', 'throw', 'import',
-    'class', 'interface', 'enum', 'struct', 'type', 'const', 'let', 'var',
-}
-
-_FUNC_PATTERNS: dict[str, list[str]] = {
-    '.py':    [r'def\s+(\w+)\s*\('],
-    '.go':    [r'func\s+(?:\(\w+\s+\*?\w+\)\s+)?(\w+)\s*\('],
-    '.rb':    [r'def\s+(\w+)'],
-    '.rs':    [r'fn\s+(\w+)\s*[\(<]'],
-    '.kt':    [r'fun\s+(\w+)\s*[\(<]'],
-    '.kts':   [r'fun\s+(\w+)\s*[\(<]'],
-    '.swift': [r'func\s+(\w+)\s*[\(<]'],
-}
-_JS_PATTERNS = [
-    r'function\s+(\w+)\s*\(',
-    r'(?:async\s+)?(?:export\s+)?(?:const|let)\s+(\w+)\s*=\s*(?:async\s*)?\(',
-    r'(?:public|private|protected|static|async)(?:\s+\w+)*\s+(\w+)\s*\(',
-]
-for _ext in ('.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs'):
-    _FUNC_PATTERNS[_ext] = _JS_PATTERNS
-_JAVA_PATTERNS = [r'(?:public|private|protected|static|final|\s)+\w[\w<>\[\]]*\s+(\w+)\s*\(']
-for _ext in ('.java', '.cs'):
-    _FUNC_PATTERNS[_ext] = _JAVA_PATTERNS
-_C_PATTERNS = [r'\b(\w+)\s*\([^;]*\)\s*\{']
-for _ext in ('.c', '.h', '.cpp', '.cc', '.cxx', '.hpp'):
-    _FUNC_PATTERNS[_ext] = _C_PATTERNS
 
 
-def _is_test_file(path: str) -> bool:
+def is_test_file(path: str) -> bool:
     return bool(_TEST_NAME_RE.search(os.path.basename(path)) or _TEST_DIR_RE.search(path))
 
 
@@ -58,25 +36,14 @@ def _is_impl_file(path: str) -> bool:
     basename = os.path.basename(path)
     if basename in _SKIP_BASENAMES:
         return False
-    if '.claude' in Path(path).parts or path.startswith('CLAUDE'):
+    if path.startswith('CLAUDE'):
         return False
     _, ext = os.path.splitext(path)
     if ext.lower() in _SKIP_EXT or not ext or path.startswith('.env'):
         return False
-    if _is_test_file(path):
+    if is_test_file(path):
         return False
     return ext.lower() in _IMPL_EXTS
-
-
-def _extract_func_names(code: str, file_path: str) -> set[str]:
-    _, ext = os.path.splitext(file_path)
-    names: set[str] = set()
-    for pattern in _FUNC_PATTERNS.get(ext.lower(), []):
-        for m in re.finditer(pattern, code, re.MULTILINE):
-            name = m.group(1)
-            if name and len(name) > 1 and name not in _KEYWORD_SKIP:
-                names.add(name)
-    return names
 
 
 def _git_files(cmd: list[str]) -> list[str]:
@@ -112,19 +79,61 @@ def _fail(reason: str, file_path: str, func_names: set[str], staged_tests: list[
     hook_lib.block(reason, *details)
 
 
+def _normalized(name: str) -> str:
+    return name.lower().replace('-', '_')
+
+
+def _module_has_test(test_paths: list[str], file_path: str) -> bool:
+    # A test covers a module when it is named after it or names its file.
+    basename = os.path.basename(file_path)
+    stem = _normalized(re.sub(r'\.\w+$', '', basename))
+    test_names = [_normalized(os.path.basename(t)) for t in test_paths]
+    if any(stem in test_name for test_name in test_names):
+        return True
+    return _test_covers_funcs(test_paths, {basename})
+
+
+def _public_names(definitions: dict) -> set[str]:
+    # A private helper is tested through the public function that calls
+    # it, so tests do not name it; the module's own test must be staged.
+    return {name for name in definitions if not name.startswith('_')}
+
+
+def _is_upstream_sync(code: str, file_path: str) -> bool:
+    # /update-kit writes kit files verbatim from the clone in .upstream/;
+    # copying a file is not authoring it, so no test is demanded.
+    target = Path(file_path).resolve()
+    for ancestor in target.parents:
+        upstream = ancestor / '.upstream' / target.relative_to(ancestor)
+        if upstream.is_file():
+            return upstream.read_text(errors='replace') == code
+    return False
+
+
+def _is_checked(code: str, file_path: str) -> bool:
+    if os.environ.get('TDD_GUARD_DISABLE'):
+        return False
+    if not code or not _is_impl_file(file_path):
+        return False
+    return not _is_upstream_sync(code, file_path)
+
+
 def check(code: str, file_path: str) -> None:
-    if not _is_impl_file(file_path) or not code:
+    if not _is_checked(code, file_path):
         return
-    func_names = _extract_func_names(code, file_path)
-    staged = [f for f in _git_files(['git', 'diff', '--staged', '--name-only']) if _is_test_file(f)]
-    last = [f for f in _git_files(['git', 'log', '-1', '--name-only', '--pretty=format:']) if _is_test_file(f)]
+    func_names = _public_names(find_definitions(code, file_path))
+    staged_names = _git_files(['git', 'diff', '--staged', '--name-only'])
+    last_names = _git_files(['git', 'log', '-1', '--name-only', '--pretty=format:'])
+    staged = [f for f in staged_names if is_test_file(f)]
+    last = [f for f in last_names if is_test_file(f)]
     all_tests = staged + last
     if not all_tests:
         _fail("No test files staged.", file_path, func_names, staged)
     if func_names:
         if not _test_covers_funcs(all_tests, func_names):
-            _fail("Staged tests do not reference the modified functions.", file_path, func_names, staged)
+            reason = "Staged tests do not reference the modified functions."
+            _fail(reason, file_path, func_names, staged)
     else:
-        stem = re.sub(r'\.\w+$', '', os.path.basename(file_path)).lower()
-        if not any(stem in os.path.basename(t).lower() for t in all_tests):
-            _fail(f"No test for '{os.path.basename(file_path)}' found.", file_path, func_names, staged)
+        if not _module_has_test(all_tests, file_path):
+            reason = f"No test for '{os.path.basename(file_path)}' found."
+            _fail(reason, file_path, func_names, staged)

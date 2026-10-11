@@ -27,7 +27,9 @@ def _run(
         "tool_input": {"command": command},
         "session_id": session_id,
     })
-    return subprocess.run(["python3", str(HOOK)], input=payload, capture_output=True, text=True, env=env)
+    return subprocess.run(
+        ["python3", str(HOOK)], input=payload, capture_output=True, text=True, env=env
+    )
 
 
 @pytest.fixture()
