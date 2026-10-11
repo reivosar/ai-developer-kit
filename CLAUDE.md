@@ -42,6 +42,7 @@ pytest .claude/hooks/test_hook_lib_helpers.py
 pytest .claude/hooks/test_fail_closed.py
 pytest .claude/hooks/test_commit_guard.py
 pytest .claude/hooks/test_coverage_guard.py
+pytest .claude/hooks/test_git_guard.py
 ```
 
 `pytest .claude/hooks/test_coverage.py` runs the pytest-style suites under coverage and fails when a hook module falls below 90% branch or line coverage. It needs `pytest-cov`. The modules it cannot measure are listed in the file.
