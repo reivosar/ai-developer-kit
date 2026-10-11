@@ -27,6 +27,10 @@ pytest .claude/hooks/test_rate_limiter.py
 pytest .claude/hooks/test_anomaly_guard.py
 pytest .claude/hooks/test_memory_guard.py
 pytest .claude/hooks/test_worktree_guard.py
+pytest .claude/hooks/test_pre_bash_audit_rate.py
+pytest .claude/hooks/test_pre_edit_path_escape.py
+pytest .claude/hooks/test_pre_write_audit.py
+pytest .claude/hooks/test_docs_sync.py
 ```
 
 `test_coverage.py` additionally requires `pip install coverage`.
@@ -80,6 +84,7 @@ Guard modules (imported by entry points):
 - `audit_log.py` — appends tool invocations to `.claude/audit.log`
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
 - `hook_lib.py` — shared utilities (REPO_ROOT, block(), read_stdin_json())
+- `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command
 
