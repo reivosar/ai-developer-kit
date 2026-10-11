@@ -33,6 +33,17 @@ def read_stdin_json() -> dict:
         return {}
 
 
+def emit_additional_context(hook_event: str, notices: list[str]) -> None:
+    """Print notices as non-blocking context that the agent reads."""
+    if not notices:
+        return
+    context = {
+        "hookEventName": hook_event,
+        "additionalContext": "\n".join(notices),
+    }
+    print(json.dumps({"hookSpecificOutput": context}))
+
+
 def block(reason: str, *detail_lines: str) -> NoReturn:
     print(f"BLOCKED: {reason}", file=sys.stderr)
     for line in detail_lines:

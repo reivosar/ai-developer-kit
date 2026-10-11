@@ -92,7 +92,7 @@ Hook scripts enforce constraints the rules alone cannot:
 | Hook | Trigger | Purpose |
 |---|---|---|
 | `pre-bash.py` | Before every Bash command | Enforces the allow/deny list in `settings.json`; runs the git, `cp`, commit, sensitive-path, and rate-limit guards |
-| `pre-write.py` / `pre-edit.py` | Before file writes/edits | Blocks paths outside the repository or the active worktree, `.env` files, Japanese characters and emoji in content, Markdown documents over 200 lines, and implementation changes without tests; `pre-write.py` also refuses to overwrite an existing file |
+| `pre-write.py` / `pre-edit.py` | Before file writes/edits | Blocks paths outside the repository or the active worktree, `.env` files, Japanese characters and emoji in content, Markdown documents over 200 lines, names assembled at runtime, and implementation changes without tests; `pre-write.py` also refuses to overwrite an existing file. Without blocking, both return to the agent the references to a changed function and the location of a duplicate function name |
 | `pre-mcp.py` | Before every MCP tool call | Checks the tool name against `mcp-allowlist.txt`; applies the rate limit |
 | `memory_guard.py` | Before file writes, after file writes/edits | Enforces the 200-line limit on the memory index |
 | `post-edit.sh` | After file writes/edits | Runs the installed formatter on the changed file |

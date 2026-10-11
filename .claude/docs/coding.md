@@ -80,3 +80,22 @@ A change location that text search cannot reach from the words of a request or f
 - Before adding code, check whether replacing existing code achieves the request; add only when no replacement does
 - After changing a function signature, a field, or shared state, search every reference to it (`reference_search` in `investigation-tools.md`) and check each one — do not stop at the first match
 - Report the number of references found and the number checked; the two numbers must match
+
+## Enforcement
+
+A rule stated only in prose is not reliably followed, so each rule is paired with the hook that checks it. A rule with no hook is listed as unchecked to keep the gap visible.
+
+| Rule | Check |
+|---|---|
+| Names are literal, not assembled at runtime | `dynamic_name_guard.py` blocks the Write or Edit |
+| Search every reference to a changed function | `reference_notice.py` returns the reference count and locations when a definition line changes or disappears |
+| Search before writing | `reference_notice.py` returns the existing location when a new function name is already defined in another file |
+| Tests before implementation | `tdd_guard.py` blocks the Write or Edit |
+| Markdown document within 200 lines | `doc_length_guard.py` blocks the Write or Edit |
+| Domain terms as names | Unchecked — needs a project glossary |
+| Same-kind files in the same place | Unchecked |
+| Change only what the request names | Unchecked |
+| Interfaces and mapping only at system boundaries | Unchecked |
+| Function body within 20 lines | Unchecked |
+
+Limits of the checks: `reference_notice.py` matches the function name as a whole word in files git does not ignore, so an unrelated identifier with the same name is counted. Its duplicate check recognizes definitions written as `def`, `func`, `function`, `fn`, or `fun` followed by the name. `dynamic_name_guard.py` covers Python, JavaScript, TypeScript, Ruby, Java, Kotlin, and Go. Both skip test files. Each is off while its environment variable is set: `DYNAMIC_NAME_GUARD_DISABLE`, `REFERENCE_NOTICE_DISABLE`.

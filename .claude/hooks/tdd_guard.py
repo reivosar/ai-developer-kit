@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hook_lib  # noqa: E402
+from function_definitions import find_definitions  # noqa: E402
 
 _IMPL_EXTS = {
     '.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs',
@@ -20,37 +21,9 @@ _SKIP_EXT = {'.md', '.json', '.yaml', '.yml', '.toml', '.ini', '.sh',
              '.txt', '.lock', '.sum', '.env', '.gitignore'}
 _TEST_NAME_RE = re.compile(r'(test|spec)(\.|_|-|$)', re.IGNORECASE)
 _TEST_DIR_RE = re.compile(r'(/__tests__/|/tests?/|/specs?/)', re.IGNORECASE)
-_KEYWORD_SKIP = {
-    'if', 'for', 'while', 'return', 'new', 'switch', 'catch', 'try',
-    'else', 'do', 'case', 'break', 'continue', 'throw', 'import',
-    'class', 'interface', 'enum', 'struct', 'type', 'const', 'let', 'var',
-}
-
-_FUNC_PATTERNS: dict[str, list[str]] = {
-    '.py':    [r'def\s+(\w+)\s*\('],
-    '.go':    [r'func\s+(?:\(\w+\s+\*?\w+\)\s+)?(\w+)\s*\('],
-    '.rb':    [r'def\s+(\w+)'],
-    '.rs':    [r'fn\s+(\w+)\s*[\(<]'],
-    '.kt':    [r'fun\s+(\w+)\s*[\(<]'],
-    '.kts':   [r'fun\s+(\w+)\s*[\(<]'],
-    '.swift': [r'func\s+(\w+)\s*[\(<]'],
-}
-_JS_PATTERNS = [
-    r'function\s+(\w+)\s*\(',
-    r'(?:async\s+)?(?:export\s+)?(?:const|let)\s+(\w+)\s*=\s*(?:async\s*)?\(',
-    r'(?:public|private|protected|static|async)(?:\s+\w+)*\s+(\w+)\s*\(',
-]
-for _ext in ('.ts', '.tsx', '.js', '.jsx', '.mts', '.mjs'):
-    _FUNC_PATTERNS[_ext] = _JS_PATTERNS
-_JAVA_PATTERNS = [r'(?:public|private|protected|static|final|\s)+\w[\w<>\[\]]*\s+(\w+)\s*\(']
-for _ext in ('.java', '.cs'):
-    _FUNC_PATTERNS[_ext] = _JAVA_PATTERNS
-_C_PATTERNS = [r'\b(\w+)\s*\([^;]*\)\s*\{']
-for _ext in ('.c', '.h', '.cpp', '.cc', '.cxx', '.hpp'):
-    _FUNC_PATTERNS[_ext] = _C_PATTERNS
 
 
-def _is_test_file(path: str) -> bool:
+def is_test_file(path: str) -> bool:
     return bool(_TEST_NAME_RE.search(os.path.basename(path)) or _TEST_DIR_RE.search(path))
 
 
@@ -63,20 +36,9 @@ def _is_impl_file(path: str) -> bool:
     _, ext = os.path.splitext(path)
     if ext.lower() in _SKIP_EXT or not ext or path.startswith('.env'):
         return False
-    if _is_test_file(path):
+    if is_test_file(path):
         return False
     return ext.lower() in _IMPL_EXTS
-
-
-def _extract_func_names(code: str, file_path: str) -> set[str]:
-    _, ext = os.path.splitext(file_path)
-    names: set[str] = set()
-    for pattern in _FUNC_PATTERNS.get(ext.lower(), []):
-        for m in re.finditer(pattern, code, re.MULTILINE):
-            name = m.group(1)
-            if name and len(name) > 1 and name not in _KEYWORD_SKIP:
-                names.add(name)
-    return names
 
 
 def _git_files(cmd: list[str]) -> list[str]:
@@ -115,9 +77,9 @@ def _fail(reason: str, file_path: str, func_names: set[str], staged_tests: list[
 def check(code: str, file_path: str) -> None:
     if not _is_impl_file(file_path) or not code:
         return
-    func_names = _extract_func_names(code, file_path)
-    staged = [f for f in _git_files(['git', 'diff', '--staged', '--name-only']) if _is_test_file(f)]
-    last = [f for f in _git_files(['git', 'log', '-1', '--name-only', '--pretty=format:']) if _is_test_file(f)]
+    func_names = set(find_definitions(code, file_path))
+    staged = [f for f in _git_files(['git', 'diff', '--staged', '--name-only']) if is_test_file(f)]
+    last = [f for f in _git_files(['git', 'log', '-1', '--name-only', '--pretty=format:']) if is_test_file(f)]
     all_tests = staged + last
     if not all_tests:
         _fail("No test files staged.", file_path, func_names, staged)
