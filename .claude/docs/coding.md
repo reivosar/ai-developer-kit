@@ -1,11 +1,22 @@
 # Coding Rules
 
+## What These Rules Protect
+
+Every rule in this file is a means to three properties of a change. When two rules conflict, or a rule does not fit the case, choose the option that keeps more of these properties.
+
+- **Local impact** — a change affects only the code it touches
+- **One reason to change** — a unit changes for one kind of request
+- **Obvious change location** — the place to change is reachable from the words of the request
+
+Two kinds of reader work on this code. A person learns the structure once and remembers it. An AI agent starts every session without memory and locates code by text search. Where a convention helps one reader and costs the other, keep the property and choose a means both can follow: explicit over inferred, direct over indirect, one place over many.
+
 ## Dependency Injection
 
 - Every dependency (database, external service, logger, clock, config) is injected from outside — never instantiated inside a function or class
 - A function or class that creates its own dependencies cannot be tested without side effects
-- Inject at the construction boundary: pass dependencies through constructors, function parameters, or a DI container — not via globals or module-level singletons
-- Injectable dependencies are expressed as interfaces, not concrete types — the caller decides the implementation
+- Inject at the construction boundary: pass dependencies through constructors or function parameters — not via globals or module-level singletons
+- Wire dependencies in explicit code at one composition root, where each concrete type is named. When the project's framework supplies a container (Spring, NestJS), use its standard constructor injection with explicit types; do not add resolution by string key, naming convention, or custom reflection — the call target must be findable by reading the wiring
+- Express an injected dependency as an interface where a second implementation exists or a test needs a fake: the system boundaries — database, external service, clock. Do not create an interface for a type that has one implementation inside the system; depend on the concrete type and call it directly
 
 ## Testable Structure
 
@@ -44,13 +55,14 @@
 
 - Validate data at the entry boundary of each layer; trust data that has already been validated within the same layer
 - The contract between layers is the type/interface — if the type is correct, the implementation can change freely
-- Do not leak internal representations across layer boundaries; map explicitly at each crossing
+- Do not leak internal representations across a system boundary — API response, database row, external service payload; map explicitly at each of those crossings
+- Between layers inside one domain, pass the same type; do not add a per-layer copy of the data — a per-layer copy turns one new field into an edit in every layer
 - Write the contract first: define the function signature, return type, and error types before writing the body — callers must never depend on implementation details discovered by reading the body
 - If two implementations of the same contract are conceivable, the contract is correct; if only one implementation is possible, the contract leaks implementation — generalize it
 
 ## Searchable Change Locations
 
-Code is located by text search, starting from the words of the request. A change location that search cannot reach gets missed or duplicated.
+A change location that text search cannot reach from the words of the request gets missed or duplicated.
 
 - Name identifiers, files, and directories with the project's domain terms — the glossary when one exists, otherwise the words already used in the code and in the request; never introduce a synonym for a concept that already has a name (`basket` next to an existing `cart`)
 - Before creating a file, find an existing file of the same kind and use its directory and its naming pattern; where no file of that kind exists yet, follow the layout rules of the applicable domain doc
