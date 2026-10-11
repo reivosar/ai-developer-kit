@@ -11,6 +11,7 @@ import doc_length_guard  # noqa: E402
 import dynamic_name_guard  # noqa: E402
 import reference_notice  # noqa: E402
 import tdd_guard  # noqa: E402
+import testing_guard  # noqa: E402
 import worktree_guard  # noqa: E402
 from env_file_guard import is_blocked_env_file  # noqa: E402
 from hook_lib import (  # noqa: E402
@@ -48,6 +49,7 @@ def _block_unsafe_content(file_path: str, content: str) -> None:
     content_guard.check_emoji(content, file_path)
     doc_length_guard.check_write(file_path, content)
     dynamic_name_guard.check(file_path, "", content)
+    testing_guard.check_write(file_path, content)
     tdd_guard.check(content, file_path)
 
 

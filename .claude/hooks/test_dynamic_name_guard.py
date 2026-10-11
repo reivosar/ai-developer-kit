@@ -62,16 +62,18 @@ def test_check_with_assembled_name_exits_2(file_path: str, content: str):
 
 @pytest.mark.parametrize("file_path,content", LITERAL_SAMPLES)
 def test_check_with_literal_name_does_not_block(file_path: str, content: str):
-    dynamic_name_guard.check(file_path, "", content)
+    assert dynamic_name_guard.check(file_path, "", content) is None
 
 
 def test_check_with_test_file_does_not_block():
-    dynamic_name_guard.check("test_orders.py", "", PY_ASSEMBLED)
+    outcome = dynamic_name_guard.check("test_orders.py", "", PY_ASSEMBLED)
+    assert outcome is None
 
 
 def test_check_with_assembled_name_already_present_does_not_block():
     edited = PY_ASSEMBLED + "total = 1\n"
-    dynamic_name_guard.check("orders.py", PY_ASSEMBLED, edited)
+    outcome = dynamic_name_guard.check("orders.py", PY_ASSEMBLED, edited)
+    assert outcome is None
 
 
 def test_check_with_second_assembled_name_added_exits_2():
@@ -84,7 +86,7 @@ def test_check_with_guard_disabled_does_not_block(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("DYNAMIC_NAME_GUARD_DISABLE", "1")
-    dynamic_name_guard.check("orders.py", "", PY_ASSEMBLED)
+    assert dynamic_name_guard.check("orders.py", "", PY_ASSEMBLED) is None
 
 
 def test_pre_write_with_assembled_name_exits_2():

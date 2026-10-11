@@ -49,6 +49,26 @@ def test_check_with_staged_test_naming_other_function_exits_2(project: Path):
     assert blocked.value.code == 2
 
 
+def test_check_with_staged_test_deleted_from_disk_exits_2(project: Path):
+    _stage(project, "test_orders.py", CANCEL_TEST)
+    (project / "test_orders.py").unlink()
+    with pytest.raises(SystemExit) as blocked:
+        tdd_guard.check(CANCEL, "src/orders.py")
+    assert blocked.value.code == 2
+
+
+def test_check_when_git_cannot_run_exits_2(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+):
+    def fail_to_run(command: list, **options: object) -> None:
+        raise OSError("git is not installed")
+
+    monkeypatch.setattr(tdd_guard.subprocess, "run", fail_to_run)
+    with pytest.raises(SystemExit) as blocked:
+        tdd_guard.check(CANCEL, "src/orders.py")
+    assert blocked.value.code == 2
+
+
 def test_check_with_file_inside_worktree_and_no_test_exits_2(project: Path):
     worktree = project / ".claude" / "worktrees" / "cancel-order"
     with pytest.raises(SystemExit) as blocked:
@@ -70,6 +90,7 @@ def test_check_with_hook_module_and_no_test_exits_2(project: Path):
         ".claude/hooks/notify.sh",
         "CLAUDE.md",
         "test_orders.py",
+        "Makefile",
     ],
 )
 def test_check_with_file_that_is_not_implementation_does_not_block(

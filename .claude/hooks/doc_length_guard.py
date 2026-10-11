@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from hook_lib import block  # noqa: E402
+from hook_lib import apply_edit, block, read_text  # noqa: E402
 
 LINE_LIMIT = 200
 DOCUMENT_SUFFIX = ".md"
@@ -19,17 +19,6 @@ def _is_guarded_document(file_path: str) -> bool:
 
 def _count_lines(text: str) -> int:
     return len(text.splitlines())
-
-
-def _apply_edit(
-    text: str, old_string: str, new_string: str, replace_all: bool
-) -> str:
-    replacement_count = -1 if replace_all else 1
-    return text.replace(old_string, new_string, replacement_count)
-
-
-def _read_document(file_path: str) -> str:
-    return Path(file_path).read_text(errors="replace")
 
 
 def _grows_past_limit(current_count: int, edited_count: int) -> bool:
@@ -63,10 +52,8 @@ def check_edit(
     """
     if not _is_guarded_document(file_path) or not Path(file_path).is_file():
         return
-    current_text = _read_document(file_path)
-    edited_text = _apply_edit(
-        current_text, old_string, new_string, replace_all
-    )
+    current_text = read_text(file_path)
+    edited_text = apply_edit(current_text, old_string, new_string, replace_all)
     edited_count = _count_lines(edited_text)
     if _grows_past_limit(_count_lines(current_text), edited_count):
         _block_over_limit(file_path, edited_count)

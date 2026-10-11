@@ -42,18 +42,21 @@ def test_check_write_with_markdown_over_limit_exits_2() -> None:
 
 
 def test_check_write_with_markdown_at_limit_does_not_block() -> None:
-    doc_length_guard.check_write("docs/guide.md", ONE_LINE * LIMIT)
+    at_limit = ONE_LINE * LIMIT
+    assert doc_length_guard.check_write("docs/guide.md", at_limit) is None
 
 
 def test_check_write_with_non_markdown_over_limit_does_not_block() -> None:
-    doc_length_guard.check_write("src/data.py", ONE_LINE * (LIMIT + 1))
+    over_limit = ONE_LINE * (LIMIT + 1)
+    assert doc_length_guard.check_write("src/data.py", over_limit) is None
 
 
 def test_check_write_with_guard_disabled_does_not_block(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("DOC_LENGTH_GUARD_DISABLE", "1")
-    doc_length_guard.check_write("docs/guide.md", ONE_LINE * (LIMIT + 1))
+    over_limit = ONE_LINE * (LIMIT + 1)
+    assert doc_length_guard.check_write("docs/guide.md", over_limit) is None
 
 
 def test_check_edit_growing_markdown_past_limit_exits_2(
@@ -69,14 +72,16 @@ def test_check_edit_growing_markdown_to_limit_does_not_block(
     tmp_path: Path,
 ) -> None:
     document = _write_document(tmp_path, LIMIT - 1)
-    doc_length_guard.check_edit(str(document), ONE_LINE, TWO_LINES)
+    outcome = doc_length_guard.check_edit(str(document), ONE_LINE, TWO_LINES)
+    assert outcome is None
 
 
 def test_check_edit_shrinking_over_limit_markdown_does_not_block(
     tmp_path: Path,
 ) -> None:
     document = _write_document(tmp_path, LIMIT + 10)
-    doc_length_guard.check_edit(str(document), TWO_LINES, ONE_LINE)
+    outcome = doc_length_guard.check_edit(str(document), TWO_LINES, ONE_LINE)
+    assert outcome is None
 
 
 def test_check_edit_with_replace_all_growing_past_limit_exits_2(
@@ -91,8 +96,9 @@ def test_check_edit_with_replace_all_growing_past_limit_exits_2(
 
 
 def test_check_edit_with_missing_file_does_not_block(tmp_path: Path) -> None:
-    absent = tmp_path / "absent.md"
-    doc_length_guard.check_edit(str(absent), ONE_LINE, TWO_LINES)
+    absent = str(tmp_path / "absent.md")
+    outcome = doc_length_guard.check_edit(absent, ONE_LINE, TWO_LINES)
+    assert outcome is None
 
 
 def test_check_edit_with_non_utf8_markdown_does_not_block(
@@ -100,7 +106,8 @@ def test_check_edit_with_non_utf8_markdown_does_not_block(
 ) -> None:
     document = tmp_path / "legacy.md"
     document.write_bytes(b"caf\xe9\n")
-    doc_length_guard.check_edit(str(document), "caf", "tea")
+    outcome = doc_length_guard.check_edit(str(document), "caf", "tea")
+    assert outcome is None
 
 
 def test_pre_write_with_markdown_over_limit_exits_2() -> None:

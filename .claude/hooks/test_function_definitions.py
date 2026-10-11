@@ -30,6 +30,15 @@ def test_find_definitions_with_go_method_returns_name():
     assert set(find_definitions(code, "cart.go")) == {"AddItem"}
 
 
+def test_find_definitions_with_keyword_before_parenthesis_skips_keyword():
+    code = "int add(int a, int b) {\n  if (a > b) {\n    return a;\n  }\n}\n"
+    assert set(find_definitions(code, "sum.c")) == {"add"}
+
+
+def test_find_definitions_with_one_letter_name_skips_name():
+    assert find_definitions("def f():\n    pass\n", "sum.py") == {}
+
+
 def test_find_definitions_with_unknown_extension_returns_empty():
     assert find_definitions("def cancel_order():\n", "notes.txt") == {}
 

@@ -26,6 +26,19 @@ REPO_ROOT: Path = _find_repo_root()
 WORKTREES_DIR: Path = REPO_ROOT / ".claude" / "worktrees"
 
 
+def read_text(file_path: str) -> str:
+    """Return a file's text; undecodable bytes are replaced, not raised."""
+    return Path(file_path).read_text(errors="replace")
+
+
+def apply_edit(
+    text: str, old_string: str, new_string: str, replace_all: bool
+) -> str:
+    """Return text as the Edit tool would leave it."""
+    replacement_count = -1 if replace_all else 1
+    return text.replace(old_string, new_string, replacement_count)
+
+
 def read_stdin_json() -> dict:
     try:
         return json.load(sys.stdin)

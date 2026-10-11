@@ -37,6 +37,8 @@ pytest .claude/hooks/test_function_definitions.py
 pytest .claude/hooks/test_dynamic_name_guard.py
 pytest .claude/hooks/test_reference_notice.py
 pytest .claude/hooks/test_tdd_guard.py
+pytest .claude/hooks/test_testing_guard.py
+pytest .claude/hooks/test_hook_lib_helpers.py
 ```
 
 `test_coverage.py` additionally requires `pip install coverage`.
@@ -65,8 +67,8 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 Entry points (one process spawn per event):
 - `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + anomaly guard
-- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + TDD guard + worktree guard + reference notice
-- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + TDD guard + worktree guard + reference notice
+- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + TDD guard + worktree guard + reference notice
+- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + TDD guard + worktree guard + reference notice
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
 - `post-edit.sh` — PostToolUse[Write|Edit]: auto-format; prints WARNING on formatter failure
 - `post-tool.py` — PostToolUse[Bash|Write|Edit]: audit logging
@@ -86,6 +88,7 @@ Guard modules (imported by entry points):
 - `dynamic_name_guard.py` — blocks a Write or Edit that adds a name assembled from strings at runtime
 - `reference_notice.py` — does not block; returns to the agent the references to a changed function and the location of a function name that is already defined elsewhere
 - `function_definitions.py` — finds function definitions by file extension; shared by `tdd_guard.py` and `reference_notice.py`
+- `testing_guard.py` — blocks a Write or Edit that adds a test with no assertion, an always-true assertion, sleep, a snapshot, or a name outside the convention
 - `tdd_guard.py` — blocks impl edits without staged tests covering modified functions
 - `worktree_guard.py` — when running inside `.claude/worktrees/<name>`, blocks writes outside that worktree
 - `anomaly_guard.py` — blocks sensitive system paths (`~/.ssh`, `/etc/passwd`, ...) and paths escaping the repo root
@@ -93,7 +96,7 @@ Guard modules (imported by entry points):
 - `mcp_guard.py` — checks MCP tool names against `.claude/mcp-allowlist.txt`
 - `audit_log.py` — appends tool invocations to `.claude/audit.log`
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), emit_additional_context(), read_stdin_json())
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit())
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command
