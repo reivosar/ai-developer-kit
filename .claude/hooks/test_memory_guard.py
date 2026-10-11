@@ -7,7 +7,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from memory_guard import check_edit, check_write
+from memory_guard import check_edit, check_write  # noqa: E402
 
 
 def make_content(lines: int) -> str:

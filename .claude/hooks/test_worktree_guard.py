@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import worktree_guard
+import worktree_guard  # noqa: E402
 
 
 def test_allows_any_file_when_not_in_worktree(tmp_path):

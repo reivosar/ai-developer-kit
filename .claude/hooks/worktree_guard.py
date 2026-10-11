@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from hook_lib import WORKTREES_DIR, block
+from hook_lib import WORKTREES_DIR, block  # noqa: E402
 
 
 def _current_worktree() -> "Path | None":

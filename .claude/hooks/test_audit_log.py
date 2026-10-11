@@ -3,12 +3,11 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
 
 HOOKS_DIR = str(Path(__file__).resolve().parent)
 sys.path.insert(0, HOOKS_DIR)
 
-import audit_log
+import audit_log  # noqa: E402
 
 
 def test_record_writes_single_jsonl_entry(tmp_path):

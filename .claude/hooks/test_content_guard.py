@@ -16,9 +16,9 @@ _KA = chr(0x30b3) + chr(0x30fc) + chr(0x30c9)                                # k
 _CJ = chr(0x65e5) + chr(0x672c) + chr(0x8a9e)                                # CJK
 
 # Build emoji test strings at runtime via codepoints.
-_EMOJI_FACE    = "Great job! " + chr(0x1F600)
-_EMOJI_CHECK   = "status: " + chr(0x2705) + " done"
-_EMOJI_VS      = "arrow >" + chr(0xFE0F) + " here"
+_EMOJI_FACE = "Great job! " + chr(0x1F600)
+_EMOJI_CHECK = "status: " + chr(0x2705) + " done"
+_EMOJI_VS = "arrow >" + chr(0xFE0F) + " here"
 _EMOJI_SNOWMAN = "weather " + chr(0x26C4) + " today"
 
 passed = failed = 0
@@ -53,10 +53,19 @@ def runs_allowed(func_name: str, content: str, file_path: str = "src/app.py") ->
 check("TC-JA-01 hiragana blocked",       runs_blocked("check_japanese", "hello " + _HI + " world"))
 check("TC-JA-02 katakana blocked",       runs_blocked("check_japanese", "test " + _KA + " here"))
 check("TC-JA-03 CJK ideograph blocked",  runs_blocked("check_japanese", "return " + _CJ))
-check("TC-JA-04 ASCII-only allowed",     runs_allowed("check_japanese", "def fetch_user(user_id: int) -> User:"))
+check(
+    "TC-JA-04 ASCII-only allowed",
+    runs_allowed("check_japanese", "def fetch_user(user_id: int) -> User:"),
+)
 check("TC-JA-05 locale path exempted",   runs_allowed("check_japanese", _HI, "src/locale/ja.json"))
-check("TC-JA-06 i18n path exempted",     runs_allowed("check_japanese", _HI, "src/i18n/messages.json"))
-check("TC-JA-07 fixtures path exempted", runs_allowed("check_japanese", _CJ, "tests/fixtures/ja.json"))
+check(
+    "TC-JA-06 i18n path exempted",
+    runs_allowed("check_japanese", _HI, "src/i18n/messages.json"),
+)
+check(
+    "TC-JA-07 fixtures path exempted",
+    runs_allowed("check_japanese", _CJ, "tests/fixtures/ja.json"),
+)
 check("TC-JA-08 empty content allowed",  runs_allowed("check_japanese", ""))
 check("TC-JA-09 latin accents allowed",  runs_allowed("check_japanese", "cafe naif"))
 

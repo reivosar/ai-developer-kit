@@ -2,10 +2,8 @@
 """Integration tests for pre-write.py: env guard, file-exists guard, content checks."""
 import json
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 
 HOOK = os.path.join(os.path.dirname(__file__), "pre-write.py")
 HOOKS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +22,8 @@ def check(label: str, got: int, expected: int) -> None:
 
 
 def run(file_path: str, content: str = "") -> int:
-    payload = json.dumps({"tool_name": "Write", "tool_input": {"file_path": file_path, "content": content}})
+    tool_input = {"file_path": file_path, "content": content}
+    payload = json.dumps({"tool_name": "Write", "tool_input": tool_input})
     env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1"}
     r = subprocess.run(["python3", HOOK], input=payload, capture_output=True, text=True, env=env)
     return r.returncode
@@ -40,7 +39,7 @@ check("TC-WR-03 empty path allowed", run(""), 0)
 check("TC-ENV-01 Write .env blocked",       run(os.path.join(HOOKS_DIR, ".env")), 2)
 check("TC-ENV-02 Write .env.local blocked",  run(os.path.join(HOOKS_DIR, ".env.local")), 2)
 check("TC-ENV-03 Write .env.sample allowed", run(os.path.join(HOOKS_DIR, ".env.sample")), 0)
-check("TC-ENV-04 Write .env.example allowed",run(os.path.join(HOOKS_DIR, ".env.example")), 0)
+check("TC-ENV-04 Write .env.example allowed", run(os.path.join(HOOKS_DIR, ".env.example")), 0)
 
 # Outside-repo guard tests
 check("TC-ORP-01 Write to /tmp/ blocked",

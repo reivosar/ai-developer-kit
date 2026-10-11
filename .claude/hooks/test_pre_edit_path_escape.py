@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from hook_lib import REPO_ROOT  # noqa: E402

@@ -2,7 +2,6 @@
 """Tests for post-edit.sh: auto-format dispatch and graceful skip on missing files."""
 import json
 import os
-import shutil
 import subprocess
 import sys
 import tempfile

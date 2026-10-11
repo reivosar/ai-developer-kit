@@ -9,7 +9,7 @@ import pytest
 HOOKS_DIR = str(Path(__file__).resolve().parent)
 sys.path.insert(0, HOOKS_DIR)
 
-import rate_limiter
+import rate_limiter  # noqa: E402
 
 
 def test_check_rate_under_bash_limit_passes(tmp_path):
