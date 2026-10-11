@@ -19,7 +19,7 @@ git diff --staged --stat       # commit
 
 Read the summary line: `N files changed, X insertions(+), Y deletions(-)`.
 
-```
+```text
 DIFF_LINE_THRESHOLD = 500   (X + Y from the summary line)
 ```
 

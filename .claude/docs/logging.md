@@ -30,9 +30,9 @@ Required fields on every log line:
 Context fields (add when available): `user_id`, `request_id`, `method`, `path`, `status_code`, `duration_ms`, `error_code`
 
 The `message` field must be static text — dynamic values go in separate fields:
-```
-✅  message: "Order placed", fields: { order_id: "ord_123", amount_cents: 4999 }
-❌  message: "Order ord_123 placed for $49.99"
+```text
+Good: message: "Order placed", fields: { order_id: "ord_123", amount_cents: 4999 }
+Bad:  message: "Order ord_123 placed for $49.99"
 ```
 
 ## Sensitive Data

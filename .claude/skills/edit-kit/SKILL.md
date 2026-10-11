@@ -60,7 +60,7 @@ For permission allow/deny changes, identify the test file (e.g., `test_allow_lis
 
 Pass a concrete spec to `/coding` that includes:
 
-```
+```text
 Modify <settings_file_path> to <change_description>.
 
 Files to change:

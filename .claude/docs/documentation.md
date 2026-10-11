@@ -12,7 +12,7 @@ Keep README accurate — a wrong README is worse than no README.
 
 Use ADR format for any significant decision (framework choice, data model, external service, security approach):
 
-```
+```text
 # NNN: Title
 
 ## Status

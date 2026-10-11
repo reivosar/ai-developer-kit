@@ -37,7 +37,7 @@ When exploring, spawn 2-3 Explore subagents in a single parallel batch — each 
 
 Produce the plan in this format:
 
-```
+```text
 ## Implementation Plan: <task name>
 
 ### Context

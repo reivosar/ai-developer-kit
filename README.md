@@ -62,7 +62,7 @@ pytest .claude/hooks/test_docs_sync.py
 
 Everything lives under `.claude/`. There is no application code in this repository.
 
-```
+```text
 .claude/
   rules/          # Auto-loaded into every conversation
   docs/           # On-demand rule library; skills read only what they need

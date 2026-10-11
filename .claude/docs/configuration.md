@@ -10,7 +10,7 @@ Naming convention: `APP_<SERVICE>_<KEY>` in SCREAMING_SNAKE_CASE
 | Numeric values: plain integer or decimal | No units in the value; encode units in the key name (`TIMEOUT_SECONDS`) |
 
 Examples:
-```
+```text
 AUTH_SERVICE_JWT_SECRET=...
 PAYMENT_STRIPE_API_KEY=...
 DB_MAX_CONNECTIONS=20
