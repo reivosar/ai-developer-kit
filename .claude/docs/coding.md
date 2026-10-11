@@ -90,7 +90,7 @@ A rule stated only in prose is not reliably followed, so each rule is paired wit
 | Names are literal, not assembled at runtime | `dynamic_name_guard.py` blocks the Write or Edit |
 | Search every reference to a changed function | `reference_notice.py` returns the reference count and locations when a definition line changes or disappears |
 | Search before writing | `reference_notice.py` returns the existing location when a new function name is already defined in another file |
-| Tests before implementation | `tdd_guard.py` blocks the Write or Edit |
+| Tests before implementation | `tdd_guard.py` blocks the Write or Edit unless a staged or last-committed test file names the changed function. It does not check that the test failed first, and it skips every file under `.claude/` |
 | Markdown document within 200 lines | `doc_length_guard.py` blocks the Write or Edit |
 | Domain terms as names | Unchecked — needs a project glossary |
 | Same-kind files in the same place | Unchecked |
