@@ -47,3 +47,23 @@
 - Do not leak internal representations across layer boundaries; map explicitly at each crossing
 - Write the contract first: define the function signature, return type, and error types before writing the body — callers must never depend on implementation details discovered by reading the body
 - If two implementations of the same contract are conceivable, the contract is correct; if only one implementation is possible, the contract leaks implementation — generalize it
+
+## Searchable Change Locations
+
+Code is located by text search, starting from the words of the request. A change location that search cannot reach gets missed or duplicated.
+
+- Name identifiers, files, and directories with the project's domain terms — the glossary when one exists, otherwise the words already used in the code and in the request; never introduce a synonym for a concept that already has a name (`basket` next to an existing `cart`)
+- Before creating a file, find an existing file of the same kind and use its directory and its naming pattern; where no file of that kind exists yet, follow the layout rules of the applicable domain doc
+- Refer to every function, class, module, route, event, and config key by its full literal name; never assemble a name from strings at runtime (`getattr(handler, "handle_" + kind)`, a computed import path) — a name that exists only at runtime cannot be found by search
+
+## Search Before Writing
+
+- Before writing a function, type, or constant, search for one that already does the job; if it exists, call it — do not write a second copy
+- Search by the domain term and by the verb, not by a single guess — a missed search produces a duplicate that later changes update in only one place
+
+## Change Scope
+
+- Change only what the request names; leave code, formatting, and naming unrelated to the request as they are
+- Before adding code, check whether replacing existing code achieves the request; add only when no replacement does
+- After changing a function signature, a field, or shared state, search every reference to it (`reference_search` in `investigation-tools.md`) and check each one — do not stop at the first match
+- Report the number of references found and the number checked; the two numbers must match
