@@ -90,7 +90,7 @@ A rule stated only in prose is not reliably followed, so each rule is paired wit
 | Names are literal, not assembled at runtime | `dynamic_name_guard.py` blocks the Write or Edit |
 | Search every reference to a changed function | `reference_notice.py` returns the reference count and locations when a definition line changes or disappears |
 | Search before writing | `reference_notice.py` returns the existing location when a new function name is already defined in another file |
-| Tests before implementation | `tdd_guard.py` blocks the Write or Edit unless a staged or last-committed test file names the changed function; for a private function, the test file of the same module must be staged. Hook code and files inside a worktree are covered. It does not check that the test failed first |
+| Tests before implementation | `tdd_guard.py` blocks the Write or Edit unless a staged or last-committed test file names the changed function; for a private function, a staged test must be named after the module or name the module's file. Hook code and files inside a worktree are covered. It does not check that the test failed first |
 | Markdown document within 200 lines | `doc_length_guard.py` blocks the Write or Edit |
 | Domain terms as names | Unchecked — needs a project glossary |
 | Same-kind files in the same place | Unchecked |

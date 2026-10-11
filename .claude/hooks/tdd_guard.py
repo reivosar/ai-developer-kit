@@ -78,6 +78,16 @@ def _normalized(name: str) -> str:
     return name.lower().replace('-', '_')
 
 
+def _module_has_test(test_paths: list[str], file_path: str) -> bool:
+    # A test covers a module when it is named after it or names its file.
+    basename = os.path.basename(file_path)
+    stem = _normalized(re.sub(r'\.\w+$', '', basename))
+    test_names = [_normalized(os.path.basename(t)) for t in test_paths]
+    if any(stem in test_name for test_name in test_names):
+        return True
+    return _test_covers_funcs(test_paths, {basename})
+
+
 def _public_names(definitions: dict) -> set[str]:
     # A private helper is tested through the public function that calls
     # it, so tests do not name it; the module's own test must be staged.
@@ -116,7 +126,5 @@ def check(code: str, file_path: str) -> None:
         if not _test_covers_funcs(all_tests, func_names):
             _fail("Staged tests do not reference the modified functions.", file_path, func_names, staged)
     else:
-        stem = _normalized(re.sub(r'\.\w+$', '', os.path.basename(file_path)))
-        test_names = [_normalized(os.path.basename(t)) for t in all_tests]
-        if not any(stem in test_name for test_name in test_names):
+        if not _module_has_test(all_tests, file_path):
             _fail(f"No test for '{os.path.basename(file_path)}' found.", file_path, func_names, staged)

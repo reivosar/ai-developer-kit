@@ -96,6 +96,22 @@ def test_check_with_private_helper_and_other_module_test_exits_2(
     assert blocked.value.code == 2
 
 
+def test_check_with_staged_test_naming_module_file_does_not_block(
+    project: Path,
+):
+    _stage(project, "test_guard_wiring.py", 'HOOK = "pre-edit.py"\n')
+    assert tdd_guard.check("LIMIT = 1\n", "hooks/pre-edit.py") is None
+
+
+def test_check_with_staged_test_naming_other_module_file_exits_2(
+    project: Path,
+):
+    _stage(project, "test_guard_wiring.py", 'HOOK = "pre-write.py"\n')
+    with pytest.raises(SystemExit) as blocked:
+        tdd_guard.check("LIMIT = 1\n", "hooks/pre-edit.py")
+    assert blocked.value.code == 2
+
+
 def test_check_with_content_identical_to_upstream_clone_does_not_block(
     project: Path,
 ):
