@@ -10,7 +10,7 @@ to a skill in the dispatch table below, invoke that skill directly — do not us
 
 ## Dispatch Table
 
-Every task must go through a skill — never handle any task inline.
+A task that matches an entry below goes through that skill — do not handle it inline. A task that matches none is answered inline; see Catch-all.
 
 ### Implementation
 
