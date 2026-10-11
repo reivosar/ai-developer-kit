@@ -183,6 +183,36 @@ def test_check_staged_coverage_when_pytest_cannot_run_exits_2(
     assert "could not be measured" in _blocked_reasons(capsys)
 
 
+def _pytest_result(returncode: int) -> subprocess.CompletedProcess:
+    return subprocess.CompletedProcess(
+        [], returncode, stdout="", stderr="pytest: error: unrecognized"
+    )
+
+
+def test_check_staged_coverage_when_pytest_rejects_arguments_exits_2(
+    project: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture,
+):
+    _stage(project, "orders.py", ORDERS)
+    monkeypatch.setattr(
+        coverage_guard, "_run_tests", lambda report_path: _pytest_result(4)
+    )
+    assert "could not be measured" in _blocked_reasons(capsys)
+
+
+def test_check_staged_coverage_when_no_test_writes_no_report_reports_zero(
+    project: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture,
+):
+    _stage(project, "orders.py", ORDERS)
+    monkeypatch.setattr(
+        coverage_guard, "_run_tests", lambda report_path: _pytest_result(5)
+    )
+    assert "orders.py: 0%" in _blocked_reasons(capsys)
+
+
 def test_pre_bash_with_commit_of_untested_branch_exits_2(project: Path):
     _stage(project, "orders.py", ORDERS)
     _stage(project, "test_orders.py", ONE_BRANCH_TEST)

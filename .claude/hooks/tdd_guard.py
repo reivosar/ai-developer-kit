@@ -122,14 +122,18 @@ def check(code: str, file_path: str) -> None:
     if not _is_checked(code, file_path):
         return
     func_names = _public_names(find_definitions(code, file_path))
-    staged = [f for f in _git_files(['git', 'diff', '--staged', '--name-only']) if is_test_file(f)]
-    last = [f for f in _git_files(['git', 'log', '-1', '--name-only', '--pretty=format:']) if is_test_file(f)]
+    staged_names = _git_files(['git', 'diff', '--staged', '--name-only'])
+    last_names = _git_files(['git', 'log', '-1', '--name-only', '--pretty=format:'])
+    staged = [f for f in staged_names if is_test_file(f)]
+    last = [f for f in last_names if is_test_file(f)]
     all_tests = staged + last
     if not all_tests:
         _fail("No test files staged.", file_path, func_names, staged)
     if func_names:
         if not _test_covers_funcs(all_tests, func_names):
-            _fail("Staged tests do not reference the modified functions.", file_path, func_names, staged)
+            reason = "Staged tests do not reference the modified functions."
+            _fail(reason, file_path, func_names, staged)
     else:
         if not _module_has_test(all_tests, file_path):
-            _fail(f"No test for '{os.path.basename(file_path)}' found.", file_path, func_names, staged)
+            reason = f"No test for '{os.path.basename(file_path)}' found."
+            _fail(reason, file_path, func_names, staged)

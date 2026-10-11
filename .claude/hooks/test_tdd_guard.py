@@ -63,6 +63,17 @@ def test_check_with_no_test_staged_exits_2(project: Path):
     assert blocked.value.code == 2
 
 
+def test_check_with_no_test_staged_names_file_and_function_in_message(
+    project: Path, capsys: pytest.CaptureFixture
+):
+    with pytest.raises(SystemExit):
+        tdd_guard.check(CANCEL, "src/orders.py")
+    message = capsys.readouterr().err
+    assert "File: src/orders.py" in message
+    assert "Functions being modified: cancel_order" in message
+    assert "Write a failing test for these functions first" in message
+
+
 def test_check_with_staged_test_naming_function_does_not_block(project: Path):
     _stage(project, "test_orders.py", CANCEL_TEST)
     assert tdd_guard.check(CANCEL, "src/orders.py") is None

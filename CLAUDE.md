@@ -40,9 +40,11 @@ pytest .claude/hooks/test_tdd_guard.py
 pytest .claude/hooks/test_testing_guard.py
 pytest .claude/hooks/test_hook_lib_helpers.py
 pytest .claude/hooks/test_fail_closed.py
+pytest .claude/hooks/test_commit_guard.py
+pytest .claude/hooks/test_coverage_guard.py
 ```
 
-`test_coverage.py` additionally requires `pip install coverage`.
+`pytest .claude/hooks/test_coverage.py` runs the pytest-style suites under coverage and fails when a hook module falls below 90% branch or line coverage. It needs `pytest-cov`. The modules it cannot measure are listed in the file.
 
 When adding a new allowed or denied Bash command, write a failing test in `test_allow_list.py` first, then update `settings.json`.
 
@@ -67,7 +69,7 @@ This kit is Claude Code configuration only — no application code. Everything l
 `.claude/hooks/` — one entry-point script per Claude Code tool event; logic lives in guard modules.
 
 Entry points (one process spawn per event):
-- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + anomaly guard
+- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + coverage guard + anomaly guard
 - `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + TDD guard + worktree guard + reference notice
 - `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + TDD guard + worktree guard + reference notice
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
@@ -83,6 +85,7 @@ Entry points (one process spawn per event):
 Guard modules (imported by entry points):
 - `bash_guard.py`, `git_guard.py`, `cp_guard.py` — Bash safety checks
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
+- `coverage_guard.py` — on `git commit`, runs the tests under pytest-cov and blocks when a staged Python file outside `.claude/` is below 90% branch or line coverage
 - `env_file_guard.py` — blocks writes to .env files
 - `content_guard.py` — blocks Japanese characters and emoji in file content
 - `doc_length_guard.py` — blocks a Write or Edit that takes a Markdown document past 200 lines

@@ -92,7 +92,7 @@ A rule stated only in prose is not reliably followed, so each rule is paired wit
 | Search before writing | `reference_notice.py` returns the existing location when a new function name is already defined in another file |
 | Tests before implementation | `tdd_guard.py` blocks the Write or Edit unless a staged or last-committed test file names the changed function; for a private function, a staged test must be named after the module or name the module's file. Hook code and files inside a worktree are covered. It does not check that the test failed first |
 | A test asserts something; no always-true assertion, sleep, or snapshot; test names follow the convention | `testing_guard.py` blocks the Write or Edit that adds the violation (Python, JavaScript, TypeScript, Go; off while `TESTING_GUARD_DISABLE` is set) |
-| Tests take every branch | Unchecked — needs the tests to run under a coverage tool |
+| Tests take every branch | `coverage_guard.py` blocks a `git commit` when a staged Python implementation file is below 90% branch or line coverage, measured by running the tests under `pytest-cov` (off while `COVERAGE_GUARD_DISABLE` is set). Other languages are unchecked. The kit's own hooks are measured by `test_coverage.py` |
 | Markdown document within 200 lines | `doc_length_guard.py` blocks the Write or Edit |
 | Domain terms as names | Unchecked — needs a project glossary |
 | Same-kind files in the same place | Unchecked |

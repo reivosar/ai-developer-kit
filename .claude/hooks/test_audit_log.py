@@ -65,6 +65,15 @@ def test_record_appends_multiple_entries(tmp_path):
     assert json.loads(lines[1])["tool_input"]["command"] == "pwd"
 
 
+def test_record_without_log_file_writes_to_repository_audit_log(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(audit_log.hook_lib, "REPO_ROOT", tmp_path)
+    audit_log.record("PostToolUse", "Bash", {"command": "ls"})
+    log_text = (tmp_path / ".claude" / "audit.log").read_text()
+    assert json.loads(log_text.strip())["tool_input"]["command"] == "ls"
+
+
 def test_record_with_unwritable_path_does_not_raise():
     log_file = Path("/nonexistent_dir/audit.log")
     audit_log.record("PostToolUse", "Bash", {"command": "ls"}, log_file=log_file)

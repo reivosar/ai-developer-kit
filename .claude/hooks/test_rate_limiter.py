@@ -57,6 +57,26 @@ def test_check_rate_pruning_removes_old_entries(tmp_path):
     rate_limiter.check_rate("sess1", "bash", state_file=state_file)
 
 
+def test_check_rate_with_limit_disabled_does_not_count_calls(
+    tmp_path, monkeypatch
+):
+    state_file = tmp_path / "rate-state.json"
+    monkeypatch.setenv("RATE_LIMIT_DISABLE", "1")
+    for _ in range(31):
+        rate_limiter.check_rate("sess1", "bash", state_file=state_file)
+    assert not state_file.exists()
+
+
+def test_check_rate_without_state_file_uses_repository_state(
+    tmp_path, monkeypatch
+):
+    monkeypatch.delenv("RATE_LIMIT_DISABLE", raising=False)
+    monkeypatch.setattr(rate_limiter.hook_lib, "REPO_ROOT", tmp_path)
+    rate_limiter.check_rate("sess1", "bash")
+    state_text = (tmp_path / ".claude" / "rate-state.json").read_text()
+    assert len(json.loads(state_text)["sess1"]["bash"]) == 1
+
+
 def test_check_rate_state_persists_across_calls(tmp_path):
     state_file = tmp_path / "rate-state.json"
     for _ in range(15):
