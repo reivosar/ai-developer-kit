@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import audit_log  # noqa: E402
 import content_guard  # noqa: E402
+import doc_length_guard  # noqa: E402
 import tdd_guard  # noqa: E402
 import worktree_guard  # noqa: E402
 from env_file_guard import is_blocked_env_file  # noqa: E402
@@ -38,6 +39,7 @@ def main() -> None:
     content = tool_input.get("content", "")
     content_guard.check_japanese(content, file_path)
     content_guard.check_emoji(content, file_path)
+    doc_length_guard.check_write(file_path, content)
     tdd_guard.check(content, file_path)
     sys.exit(0)
 

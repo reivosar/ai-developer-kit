@@ -31,6 +31,7 @@ pytest .claude/hooks/test_pre_bash_audit_rate.py
 pytest .claude/hooks/test_pre_edit_path_escape.py
 pytest .claude/hooks/test_pre_write_audit.py
 pytest .claude/hooks/test_docs_sync.py
+pytest .claude/hooks/test_doc_length_guard.py
 ```
 
 `test_coverage.py` additionally requires `pip install coverage`.
@@ -59,8 +60,8 @@ This kit is Claude Code configuration only — no application code. Everything l
 
 Entry points (one process spawn per event):
 - `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + anomaly guard
-- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + TDD guard + worktree guard
-- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + TDD guard + worktree guard
+- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + TDD guard + worktree guard
+- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + TDD guard + worktree guard
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
 - `post-edit.sh` — PostToolUse[Write|Edit]: auto-format; prints WARNING on formatter failure
 - `post-tool.py` — PostToolUse[Bash|Write|Edit]: audit logging
@@ -76,6 +77,7 @@ Guard modules (imported by entry points):
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
 - `env_file_guard.py` — blocks writes to .env files
 - `content_guard.py` — blocks Japanese characters and emoji in file content
+- `doc_length_guard.py` — blocks a Write or Edit that takes a Markdown document past 200 lines
 - `tdd_guard.py` — blocks impl edits without staged tests covering modified functions
 - `worktree_guard.py` — when running inside `.claude/worktrees/<name>`, blocks writes outside that worktree
 - `anomaly_guard.py` — blocks sensitive system paths (`~/.ssh`, `/etc/passwd`, ...) and paths escaping the repo root
