@@ -36,6 +36,7 @@ pytest .claude/hooks/test_static_analysis.py
 pytest .claude/hooks/test_function_definitions.py
 pytest .claude/hooks/test_dynamic_name_guard.py
 pytest .claude/hooks/test_reference_notice.py
+pytest .claude/hooks/test_tdd_guard.py
 ```
 
 `test_coverage.py` additionally requires `pip install coverage`.

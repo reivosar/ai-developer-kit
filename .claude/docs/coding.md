@@ -90,7 +90,7 @@ A rule stated only in prose is not reliably followed, so each rule is paired wit
 | Names are literal, not assembled at runtime | `dynamic_name_guard.py` blocks the Write or Edit |
 | Search every reference to a changed function | `reference_notice.py` returns the reference count and locations when a definition line changes or disappears |
 | Search before writing | `reference_notice.py` returns the existing location when a new function name is already defined in another file |
-| Tests before implementation | `tdd_guard.py` blocks the Write or Edit unless a staged or last-committed test file names the changed function. It does not check that the test failed first, and it skips every file under `.claude/` |
+| Tests before implementation | `tdd_guard.py` blocks the Write or Edit unless a staged or last-committed test file names the changed function; for a private function, the test file of the same module must be staged. Hook code and files inside a worktree are covered. It does not check that the test failed first |
 | Markdown document within 200 lines | `doc_length_guard.py` blocks the Write or Edit |
 | Domain terms as names | Unchecked — needs a project glossary |
 | Same-kind files in the same place | Unchecked |
@@ -98,4 +98,4 @@ A rule stated only in prose is not reliably followed, so each rule is paired wit
 | Interfaces and mapping only at system boundaries | Unchecked |
 | Function body within 20 lines | Unchecked |
 
-Limits of the checks: `reference_notice.py` matches the function name as a whole word in files git does not ignore, so an unrelated identifier with the same name is counted. Its duplicate check recognizes definitions written as `def`, `func`, `function`, `fn`, or `fun` followed by the name. `dynamic_name_guard.py` covers Python, JavaScript, TypeScript, Ruby, Java, Kotlin, and Go. Both skip test files. Each is off while its environment variable is set: `DYNAMIC_NAME_GUARD_DISABLE`, `REFERENCE_NOTICE_DISABLE`.
+Limits of the checks: `reference_notice.py` matches the function name as a whole word in files git does not ignore, so an unrelated identifier with the same name is counted. Its duplicate check recognizes definitions written as `def`, `func`, `function`, `fn`, or `fun` followed by the name. `dynamic_name_guard.py` covers Python, JavaScript, TypeScript, Ruby, Java, Kotlin, and Go. Both skip test files. Each is off while its environment variable is set: `DYNAMIC_NAME_GUARD_DISABLE`, `REFERENCE_NOTICE_DISABLE`. `tdd_guard.py` is off while `TDD_GUARD_DISABLE` is set, and lets `/update-kit` write a file whose content is identical to its copy in `.upstream/`.

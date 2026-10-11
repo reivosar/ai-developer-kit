@@ -21,8 +21,7 @@ JOBS = "cancel_order(2)\n"
 
 @pytest.fixture
 def repo(tmp_path: Path) -> Path:
-    # ".claude" in the path keeps tdd_guard out of the hook-level tests
-    root = tmp_path / ".claude"
+    root = tmp_path / "project"
     root.mkdir()
     subprocess.run(["git", "init", "-q", str(root)], check=True)
     (root / "orders.py").write_text(ORDERS)
@@ -36,6 +35,7 @@ def _run_hook(hook_name: str, tool_input: dict) -> subprocess.CompletedProcess:
         **os.environ,
         "WORKTREE_GUARD_DISABLE": "1",
         "ANOMALY_PATH_ESCAPE_DISABLE": "1",
+        "TDD_GUARD_DISABLE": "1",
     }
     return subprocess.run(
         ["python3", str(HOOKS_DIR / hook_name)],

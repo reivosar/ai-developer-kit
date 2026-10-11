@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TDD red-phase guard: blocks impl edits unless staged tests cover the modified functions."""
+"""TDD guard: block an implementation change that has no test staged."""
 import os
 import re
 import subprocess
@@ -31,7 +31,7 @@ def _is_impl_file(path: str) -> bool:
     basename = os.path.basename(path)
     if basename in _SKIP_BASENAMES:
         return False
-    if '.claude' in Path(path).parts or path.startswith('CLAUDE'):
+    if path.startswith('CLAUDE'):
         return False
     _, ext = os.path.splitext(path)
     if ext.lower() in _SKIP_EXT or not ext or path.startswith('.env'):
@@ -74,10 +74,39 @@ def _fail(reason: str, file_path: str, func_names: set[str], staged_tests: list[
     hook_lib.block(reason, *details)
 
 
+def _normalized(name: str) -> str:
+    return name.lower().replace('-', '_')
+
+
+def _public_names(definitions: dict) -> set[str]:
+    # A private helper is tested through the public function that calls
+    # it, so tests do not name it; the module's own test must be staged.
+    return {name for name in definitions if not name.startswith('_')}
+
+
+def _is_upstream_sync(code: str, file_path: str) -> bool:
+    # /update-kit writes kit files verbatim from the clone in .upstream/;
+    # copying a file is not authoring it, so no test is demanded.
+    target = Path(file_path).resolve()
+    for ancestor in target.parents:
+        upstream = ancestor / '.upstream' / target.relative_to(ancestor)
+        if upstream.is_file():
+            return upstream.read_text(errors='replace') == code
+    return False
+
+
+def _is_checked(code: str, file_path: str) -> bool:
+    if os.environ.get('TDD_GUARD_DISABLE'):
+        return False
+    if not code or not _is_impl_file(file_path):
+        return False
+    return not _is_upstream_sync(code, file_path)
+
+
 def check(code: str, file_path: str) -> None:
-    if not _is_impl_file(file_path) or not code:
+    if not _is_checked(code, file_path):
         return
-    func_names = set(find_definitions(code, file_path))
+    func_names = _public_names(find_definitions(code, file_path))
     staged = [f for f in _git_files(['git', 'diff', '--staged', '--name-only']) if is_test_file(f)]
     last = [f for f in _git_files(['git', 'log', '-1', '--name-only', '--pretty=format:']) if is_test_file(f)]
     all_tests = staged + last
@@ -87,6 +116,7 @@ def check(code: str, file_path: str) -> None:
         if not _test_covers_funcs(all_tests, func_names):
             _fail("Staged tests do not reference the modified functions.", file_path, func_names, staged)
     else:
-        stem = re.sub(r'\.\w+$', '', os.path.basename(file_path)).lower()
-        if not any(stem in os.path.basename(t).lower() for t in all_tests):
+        stem = _normalized(re.sub(r'\.\w+$', '', os.path.basename(file_path)))
+        test_names = [_normalized(os.path.basename(t)) for t in all_tests]
+        if not any(stem in test_name for test_name in test_names):
             _fail(f"No test for '{os.path.basename(file_path)}' found.", file_path, func_names, staged)
