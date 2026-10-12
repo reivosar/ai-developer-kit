@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for bash_guard, git_guard, cp_guard, and pre-bash.py integration."""
+"""Tests for bash_guard, cp_guard, and pre-bash.py integration."""
 import importlib.util
 import json
 import os
@@ -60,46 +60,6 @@ def _test_allow_deny_patterns(bash, allow_pats: list, deny_pats: list, p: list, 
         ('gh label create bug --color e11d48', False),
     ]:
         _report(f"is_denied({cmd!r})=={expect}", bash.is_denied(cmd, deny_pats) == expect, p, f)
-
-
-def _test_git_guards(git, p: list, f: list) -> None:
-    for fn_name, safe_cmd, dangerous_cmd in [
-        (
-            "check_checkout_discard",
-            'git commit -m "git checkout -- file"',
-            "git checkout -- README.md",
-        ),
-        ("check_stash_destructive", 'git commit -m "git stash drop"',       "git stash drop"),
-        ("check_branch_force_delete", 'git commit -m "git branch -D old"',  "git branch -D old"),
-    ]:
-        fn = getattr(git, fn_name)
-        _report(f"{fn_name}(safe) not blocked", not _is_blocked(fn, safe_cmd), p, f)
-        _report(f"{fn_name}(dangerous) blocked", _is_blocked(fn, dangerous_cmd), p, f)
-
-    for cmd, branch, expect_block in [
-        ("git commit -m 'test'", "main", True),
-        ("git commit -m 'test'", "feat/my-feat", False),
-        ("git status", "main", False),
-    ]:
-        env_bak = os.environ.get("MOCK_BRANCH")
-        os.environ["MOCK_BRANCH"] = branch
-        try:
-            blocked = _is_blocked(git.check_commit_on_main, cmd)
-        finally:
-            if env_bak is None:
-                os.environ.pop("MOCK_BRANCH", None)
-            else:
-                os.environ["MOCK_BRANCH"] = env_bak
-        case = f"check_commit_on_main({cmd!r}, {branch!r})=={expect_block}"
-        _report(case, blocked == expect_block, p, f)
-
-    env_bak = os.environ.pop("MOCK_BRANCH", None)
-    try:
-        blocked = _is_blocked(git.check_commit_on_main, "git commit -m 'test'")
-    finally:
-        if env_bak is not None:
-            os.environ["MOCK_BRANCH"] = env_bak
-    _report("check_commit_on_main via real subprocess (non-main branch)", not blocked, p, f)
 
 
 def _test_cp_guards(cp, p: list, f: list) -> None:
@@ -174,7 +134,6 @@ def _test_raw_guards(bash, p: list, f: list) -> None:
 
 def run_unit_tests() -> tuple[int, int]:
     bash = _load("bash_guard")
-    git = _load("git_guard")
     cp = _load("cp_guard")
     allow_pats = bash.load_patterns(SETTINGS, "allow")
     deny_pats = bash.load_patterns(SETTINGS, "deny")
@@ -182,7 +141,6 @@ def run_unit_tests() -> tuple[int, int]:
     p: list = []
     f: list = []
     _test_allow_deny_patterns(bash, allow_pats, deny_pats, p, f)
-    _test_git_guards(git, p, f)
     _test_cp_guards(cp, p, f)
     _test_raw_guards(bash, p, f)
     return len(p), len(f)

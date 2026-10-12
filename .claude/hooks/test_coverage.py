@@ -27,7 +27,6 @@ NOT_MEASURED = {
     "content_guard.py",
     "cp_guard.py",
     "env_file_guard.py",
-    "git_guard.py",
     "mcp_guard.py",
     "post-tool.py",
     "pre-bash.py",
