@@ -10,6 +10,7 @@ import content_guard  # noqa: E402
 import doc_comment_guard  # noqa: E402
 import doc_length_guard  # noqa: E402
 import dynamic_name_guard  # noqa: E402
+import function_length_guard  # noqa: E402
 import reference_notice  # noqa: E402
 import tdd_guard  # noqa: E402
 import testing_guard  # noqa: E402
@@ -42,6 +43,7 @@ def _block_unsafe_content(
     dynamic_name_guard.check(file_path, old_string, new_string)
     testing_guard.check_edit(file_path, old_string, new_string, replace_all)
     doc_comment_guard.check_edit(file_path, old_string, new_string, replace_all)
+    function_length_guard.check_edit(file_path, old_string, new_string, replace_all)
     tdd_guard.check(old_string, file_path)
 
 

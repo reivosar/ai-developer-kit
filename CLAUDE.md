@@ -41,6 +41,9 @@ pytest .claude/hooks/test_tdd_guard.py
 pytest .claude/hooks/test_testing_guard.py
 pytest .claude/hooks/test_doc_comments.py
 pytest .claude/hooks/test_doc_comment_guard.py
+pytest .claude/hooks/test_function_length_guard.py
+pytest .claude/hooks/test_static_analysis_guard.py
+pytest .claude/hooks/test_bash_guard.py
 pytest .claude/hooks/test_hook_lib_helpers.py
 pytest .claude/hooks/test_fail_closed.py
 pytest .claude/hooks/test_commit_guard.py
@@ -73,9 +76,9 @@ This kit is Claude Code configuration only — no application code. Everything l
 `.claude/hooks/` — one entry-point script per Claude Code tool event; logic lives in guard modules.
 
 Entry points (one process spawn per event):
-- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + coverage guard + anomaly guard
-- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + TDD guard + worktree guard + reference notice
-- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + TDD guard + worktree guard + reference notice
+- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + static analysis guard + coverage guard + anomaly guard
+- `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
+- `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
 - `post-edit.sh` — PostToolUse[Write|Edit]: auto-format; prints WARNING on formatter failure
 - `post-tool.py` — PostToolUse[Bash|Write|Edit]: audit logging
@@ -99,6 +102,8 @@ Guard modules (imported by entry points):
 - `testing_guard.py` — blocks a Write or Edit that adds a test with no assertion, an always-true assertion, sleep, a snapshot, or a name outside the convention
 - `doc_comment_guard.py` — blocks a Write or Edit that adds a public function, method, or type with no doc comment, or with one whose parameter list does not match the signature
 - `doc_comments.py` — finds public definitions with their doc comment and parameters (Python, Go, JavaScript, TypeScript, Java, Kotlin); used by `doc_comment_guard.py`
+- `function_length_guard.py` — blocks a Write or Edit that adds a function body longer than 20 lines, or lengthens one that is already longer (Python, Go, JavaScript, TypeScript, Java, Kotlin)
+- `static_analysis_guard.py` — on `git commit`, runs `static-analysis.sh` on the staged files and blocks when it reports a problem
 - `tdd_guard.py` — blocks impl edits without staged tests covering modified functions
 - `worktree_guard.py` — when running inside `.claude/worktrees/<name>`, blocks writes outside that worktree
 - `anomaly_guard.py` — blocks sensitive system paths (`~/.ssh`, `/etc/passwd`, ...) and paths escaping the repo root

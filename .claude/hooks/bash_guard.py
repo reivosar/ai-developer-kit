@@ -6,48 +6,41 @@ import os
 import re
 import shlex
 import sys
+from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hook_lib  # noqa: E402
 
 
+def _quote_state(char: str, in_single: bool, in_double: bool) -> tuple[bool, bool]:
+    if char == "'" and not in_double:
+        return not in_single, in_double
+    if char == '"' and not in_single:
+        return in_single, not in_double
+    return in_single, in_double
+
+
+def _separator_length(command: str, index: int) -> int:
+    if command[index:index + 2] == "&&":
+        return 2
+    return 1 if command[index] in ";|" else 0
+
+
 def split_segments(command: str) -> list[str]:
     """Split on &&, ;, and | outside of single or double quotes."""
-    segments: list[str] = []
-    current: list[str] = []
+    pieces: list[str] = []
     in_single = in_double = False
-    i = 0
-    while i < len(command):
-        c = command[i]
-        if c == "'" and not in_double:
-            in_single = not in_single
-            current.append(c)
-        elif c == '"' and not in_single:
-            in_double = not in_double
-            current.append(c)
-        elif not in_single and not in_double:
-            if command[i:i + 2] == "&&":
-                seg = "".join(current).strip()
-                if seg:
-                    segments.append(seg)
-                current = []
-                i += 2
-                continue
-            elif c in (";", "|"):
-                seg = "".join(current).strip()
-                if seg:
-                    segments.append(seg)
-                current = []
-                i += 1
-                continue
-            else:
-                current.append(c)
-        else:
-            current.append(c)
-        i += 1
-    seg = "".join(current).strip()
-    if seg:
-        segments.append(seg)
+    start = index = 0
+    while index < len(command):
+        in_single, in_double = _quote_state(command[index], in_single, in_double)
+        quoted = in_single or in_double
+        length = 0 if quoted else _separator_length(command, index)
+        if length:
+            pieces.append(command[start:index])
+            start = index + length
+        index += length or 1
+    pieces.append(command[start:])
+    segments = [piece.strip() for piece in pieces if piece.strip()]
     return segments if segments else [command]
 
 
@@ -94,37 +87,45 @@ def check_raw_operators(command: str) -> None:
                 )
 
 
+def _runner_arguments(segment: str) -> list[str]:
+    if not re.match(r'(python3|pytest)\s', segment):
+        return []
+    try:
+        return shlex.split(segment)
+    except ValueError:
+        return []
+
+
+def _first_script(arguments: list[str]) -> Optional[str]:
+    scripts = [
+        argument for argument in arguments[1:]
+        if not argument.startswith('-') and argument.endswith('.py')
+    ]
+    return scripts[0] if scripts else None
+
+
+def _script_path_problem(runner: str, script: str) -> Optional[str]:
+    if script.startswith('/'):
+        return (
+            f"{runner}: absolute path '{script}' is not permitted. "
+            "Use a relative path within the project."
+        )
+    if '../' in script:
+        return f"{runner}: path traversal '{script}' is not permitted."
+    if script.startswith(".claude/worktrees/"):
+        return (
+            f"{runner}: scripts under .claude/worktrees/ must be run "
+            "from inside the worktree using a relative path."
+        )
+    return None
+
+
 def check_python3_path(command: str) -> None:
     """Block python3 and pytest invocations referencing absolute paths, path
     traversal, or any script path under .claude/worktrees/."""
-    for seg in split_segments(command):
-        seg = seg.strip()
-        if not re.match(r'(python3|pytest)\s', seg):
-            continue
-        try:
-            args = shlex.split(seg)
-        except ValueError:
-            continue
-        runner = args[0]
-        for arg in args[1:]:
-            if arg.startswith('-'):
-                continue
-            if arg.endswith('.py'):
-                if arg.startswith('/'):
-                    hook_lib.block(
-                        f"{runner}: absolute path '{arg}' is not permitted. "
-                        "Use a relative path within the project.",
-                        f"Command: {command[:300]}",
-                    )
-                if '../' in arg:
-                    hook_lib.block(
-                        f"{runner}: path traversal '{arg}' is not permitted.",
-                        f"Command: {command[:300]}",
-                    )
-                if arg.startswith(".claude/worktrees/"):
-                    hook_lib.block(
-                        f"{runner}: scripts under .claude/worktrees/ must be run "
-                        "from inside the worktree using a relative path.",
-                        f"Command: {command[:300]}",
-                    )
-                break
+    for segment in split_segments(command):
+        arguments = _runner_arguments(segment.strip())
+        script = _first_script(arguments)
+        problem = _script_path_problem(arguments[0], script) if script else None
+        if problem:
+            hook_lib.block(problem, f"Command: {command[:300]}")
