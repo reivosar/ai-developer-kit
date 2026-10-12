@@ -23,14 +23,21 @@ fi
 
 exit_code=0
 
+hooks_dir="."
+case "${BASH_SOURCE[0]}" in
+    */*) hooks_dir="${BASH_SOURCE[0]%/*}" ;;
+esac
+INSTALLER="$hooks_dir/install-tool.sh"
+
+# A missing linter is installed, not skipped: a skipped linter reports nothing,
+# which reads the same as a clean file.
 require_tool() {
     local tool="$1"
-    if ! command -v "$tool" >/dev/null 2>&1; then
-        echo "ERROR: $tool not installed. Run ./setup.sh to install required tools." >&2
-        exit_code=1
-        return 1
-    fi
-    return 0
+    command -v "$tool" >/dev/null 2>&1 && return 0
+    "$INSTALLER" "$tool" && return 0
+    echo "ERROR: $tool is not installed and could not be installed." >&2
+    exit_code=1
+    return 1
 }
 
 py_files=()

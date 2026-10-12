@@ -14,9 +14,11 @@ from tdd_guard import is_test_file  # noqa: E402
 
 THRESHOLD = 90  # percent, for branches and for lines
 TEST_TIMEOUT = 300  # seconds
+INSTALL_TIMEOUT = 300  # seconds
 OUTPUT_LINES = 15
+INSTALLER = Path(__file__).with_name("install-tool.sh")
 _MEASURED_SUFFIXES = {".py"}
-_TESTS_PASSED, _TESTS_FAILED, _NO_TESTS_COLLECTED = 0, 1, 5
+_TESTS_PASSED, _TESTS_FAILED, _USAGE_ERROR, _NO_TESTS_COLLECTED = 0, 1, 4, 5
 
 
 def _is_measured(path: str) -> bool:
@@ -87,11 +89,44 @@ def _read_report(result: subprocess.CompletedProcess, report_path: str) -> dict:
     block("Coverage could not be measured.", *output)
 
 
+def _lacks_coverage_plugin(result: subprocess.CompletedProcess) -> bool:
+    return result.returncode == _USAGE_ERROR and "--cov" in result.stderr
+
+
+def _install_test_tools() -> None:
+    result = subprocess.run(
+        [str(INSTALLER), "pytest", "pytest-cov"],
+        capture_output=True, text=True, timeout=INSTALL_TIMEOUT,
+    )
+    if result.returncode != 0:
+        block(
+            "Coverage could not be measured: pytest and pytest-cov are not"
+            " installed, and installing them failed.",
+            *_last_lines(result.stderr),
+        )
+
+
+def _run_tests_after_install(report_path: str) -> subprocess.CompletedProcess:
+    _install_test_tools()
+    return _run_tests(report_path)
+
+
+def _run_tests_with_tools(report_path: str) -> subprocess.CompletedProcess:
+    """Run the tests, installing pytest or pytest-cov first when one is missing."""
+    try:
+        result = _run_tests(report_path)
+    except FileNotFoundError:
+        return _run_tests_after_install(report_path)
+    if _lacks_coverage_plugin(result):
+        return _run_tests_after_install(report_path)
+    return result
+
+
 def _measure() -> dict:
     with tempfile.TemporaryDirectory() as directory:
         report_path = os.path.join(directory, "coverage.json")
         try:
-            result = _run_tests(report_path)
+            result = _run_tests_with_tools(report_path)
         except (OSError, subprocess.SubprocessError) as error:
             block("Coverage could not be measured.", str(error))
         return _read_report(result, report_path)

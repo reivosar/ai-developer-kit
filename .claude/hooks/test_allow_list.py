@@ -463,6 +463,14 @@ cases = [
     # Static analysis script
     (".claude/hooks/static-analysis.sh",                                             False),
     (".claude/hooks/static-analysis.sh src/foo.py src/bar.py",                       False),
+    # Tool installer: the script accepts only the kit's own tool names, so
+    # the package managers themselves stay blocked.
+    (".claude/hooks/install-tool.sh pytest pytest-cov",                              False),
+    (".claude/hooks/install-tool.sh --list",                                         False),
+    ("pipx install flake8",                                                          True),
+    ("brew install go",                                                              True),
+    ("npm install -g typescript",                                                    True),
+    ("python3 -m pip install pytest",                                                True),
     # Static analysis tools
     ("flake8 .claude/hooks/memory_guard.py",                                        True),
     ("flake8 .claude/hooks/test_allow_list.py .claude/hooks/test_memory_guard.py",  True),
