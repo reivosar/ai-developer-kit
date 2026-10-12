@@ -72,7 +72,7 @@ Good code quality means the next developer can understand and modify the code sa
 Report every finding emitted by the static analysis tools run above:
 - Type errors and undefined references
 - Lint violations (PEP 8, import ordering, unused variables, etc.)
-- Note any tool that was skipped because it is not installed
+- Note any tool that could not be installed — `static-analysis.sh` installs a missing linter itself, so a skipped tool means the install failed
 
 ### Conventions
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)

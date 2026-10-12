@@ -33,6 +33,7 @@ pytest .claude/hooks/test_pre_write_audit.py
 pytest .claude/hooks/test_docs_sync.py
 pytest .claude/hooks/test_doc_length_guard.py
 pytest .claude/hooks/test_static_analysis.py
+pytest .claude/hooks/test_install_tool.py
 pytest .claude/hooks/test_function_definitions.py
 pytest .claude/hooks/test_dynamic_name_guard.py
 pytest .claude/hooks/test_reference_notice.py
@@ -86,7 +87,7 @@ Entry points (one process spawn per event):
 Guard modules (imported by entry points):
 - `bash_guard.py`, `git_guard.py`, `cp_guard.py` — Bash safety checks
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
-- `coverage_guard.py` — on `git commit`, runs the tests under pytest-cov and blocks when a staged Python file outside `.claude/` is below 90% branch or line coverage
+- `coverage_guard.py` — on `git commit`, runs the tests under pytest-cov and blocks when a staged Python file outside `.claude/` is below 90% branch or line coverage; installs pytest or pytest-cov first when one is missing
 - `env_file_guard.py` — blocks writes to .env files
 - `content_guard.py` — blocks Japanese characters and emoji in file content
 - `doc_length_guard.py` — blocks a Write or Edit that takes a Markdown document past 200 lines
@@ -104,7 +105,9 @@ Guard modules (imported by entry points):
 - `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit())
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
-- `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command
+- `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command; installs a missing linter before running it
+- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
+- `conftest.py` — pytest fixture `tool_stubs`: a PATH of stand-in commands for tests that run the shell scripts
 
 ### Settings
 

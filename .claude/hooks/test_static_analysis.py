@@ -5,6 +5,7 @@ from pathlib import Path
 SCRIPT = Path(__file__).parent / "static-analysis.sh"
 UNUSED_IMPORT = "import os\n"
 CLEAN_MODULE = "VALUE = 1\n"
+YAML_DOCUMENT = "key: value\n"
 
 
 def _write(directory: Path, name: str, source: str) -> Path:
@@ -49,3 +50,25 @@ def test_static_analysis_with_several_clean_files_exits_0(
     second = _write(tmp_path, "second.py", CLEAN_MODULE)
     result = _run(first, second)
     assert result.returncode == 0, result.stdout
+
+
+def test_static_analysis_with_missing_linter_installs_it_and_lints(
+    tmp_path: Path, tool_stubs
+) -> None:
+    document = _write(tmp_path, "settings.yaml", YAML_DOCUMENT)
+    tool_stubs.add("pipx", provides={"install yamllint": ["yamllint"]})
+    result = tool_stubs.run_script(SCRIPT, str(document))
+    assert result.returncode == 0, result.stderr
+    assert tool_stubs.calls() == [
+        "pipx install yamllint", f"yamllint {document}"
+    ]
+
+
+def test_static_analysis_with_linter_that_cannot_be_installed_exits_1(
+    tmp_path: Path, tool_stubs
+) -> None:
+    document = _write(tmp_path, "settings.yaml", YAML_DOCUMENT)
+    result = tool_stubs.run_script(SCRIPT, str(document))
+    assert result.returncode == 1
+    assert "yamllint is not installed and could not be installed" in result.stderr
+    assert tool_stubs.calls() == []

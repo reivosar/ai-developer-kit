@@ -147,6 +147,20 @@ install_go() {
     esac
 }
 
+# The installer holds the list of tools the hooks call, so a tool added there
+# is installed here without this file naming it.
+install_missing_kit_tools() {
+    local kit_root="."
+    case "$0" in
+        */*) kit_root="${0%/*}" ;;
+    esac
+    local installer="$kit_root/.claude/hooks/install-tool.sh"
+    echo "Installing the hook tools that are still missing..."
+    # shellcheck disable=SC2046
+    "$installer" $("$installer" --list) \
+        || echo "WARNING: some hook tools could not be installed." >&2
+}
+
 verify_tools() {
     echo ""
     echo "Tool versions:"
@@ -154,6 +168,7 @@ verify_tools() {
     pipx --version         2>/dev/null || echo "pipx: not available"
     flake8 --version       2>/dev/null || echo "flake8: not available"
     yamllint --version     2>/dev/null || echo "yamllint: not available"
+    pytest --version       2>/dev/null || echo "pytest: not available"
     node --version         2>/dev/null || echo "node: not available"
     tsc --version          2>/dev/null || echo "tsc: not available"
     markdownlint --version 2>/dev/null || echo "markdownlint: not available"
@@ -178,6 +193,7 @@ main() {
     install_tsc
     install_markdownlint
     install_go
+    install_missing_kit_tools
     verify_tools
     echo ""
     echo "Setup complete."

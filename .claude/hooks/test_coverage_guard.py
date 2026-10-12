@@ -213,6 +213,77 @@ def test_check_staged_coverage_when_no_test_writes_no_report_reports_zero(
     assert "orders.py: 0%" in _blocked_reasons(capsys)
 
 
+def _installer(project: Path, status: int) -> Path:
+    script = project / "install-tool.sh"
+    script.write_text(
+        "#!/bin/sh\n"
+        f'echo "$@" >> "{project}/installed.log"\n'
+        "echo 'ERROR: could not install pytest.' >&2\n"
+        f"exit {status}\n"
+    )
+    script.chmod(0o755)
+    return script
+
+
+def _raise_missing_pytest() -> None:
+    raise FileNotFoundError("pytest")
+
+
+def _missing_plugin_result() -> subprocess.CompletedProcess:
+    rejected = "pytest: error: unrecognized arguments: --cov=. --cov-branch"
+    return subprocess.CompletedProcess([], 4, stdout="", stderr=rejected)
+
+
+def _fail_first_test_run(monkeypatch: pytest.MonkeyPatch, failure) -> None:
+    run_tests = coverage_guard._run_tests
+    attempts = []
+
+    def run_after_first_failure(report_path: str):
+        attempts.append(report_path)
+        return failure() if len(attempts) == 1 else run_tests(report_path)
+
+    monkeypatch.setattr(coverage_guard, "_run_tests", run_after_first_failure)
+
+
+@pytest.mark.parametrize("failure", [_raise_missing_pytest, _missing_plugin_result])
+def test_check_staged_coverage_when_test_tool_is_missing_installs_it_and_measures(
+    project: Path, monkeypatch: pytest.MonkeyPatch, failure
+):
+    _stage(project, "orders.py", ORDERS)
+    _stage(project, "test_orders.py", BOTH_BRANCHES_TEST)
+    _fail_first_test_run(monkeypatch, failure)
+    monkeypatch.setattr(coverage_guard, "INSTALLER", _installer(project, 0))
+    assert coverage_guard.check_staged_coverage(COMMIT) is None
+    assert (project / "installed.log").read_text() == "pytest pytest-cov\n"
+
+
+def test_check_staged_coverage_when_test_tool_cannot_be_installed_exits_2(
+    project: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture,
+):
+    _stage(project, "orders.py", ORDERS)
+    _fail_first_test_run(monkeypatch, _raise_missing_pytest)
+    monkeypatch.setattr(coverage_guard, "INSTALLER", _installer(project, 1))
+    reasons = _blocked_reasons(capsys)
+    assert "pytest and pytest-cov are not installed" in reasons
+    assert "could not install pytest" in reasons
+
+
+def test_check_staged_coverage_when_pytest_is_missing_after_install_exits_2(
+    project: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture,
+):
+    _stage(project, "orders.py", ORDERS)
+    monkeypatch.setattr(
+        coverage_guard, "_run_tests", lambda report_path: _raise_missing_pytest()
+    )
+    monkeypatch.setattr(coverage_guard, "INSTALLER", _installer(project, 0))
+    assert "could not be measured" in _blocked_reasons(capsys)
+    assert (project / "installed.log").read_text() == "pytest pytest-cov\n"
+
+
 def test_pre_bash_with_commit_of_untested_branch_exits_2(project: Path):
     _stage(project, "orders.py", ORDERS)
     _stage(project, "test_orders.py", ONE_BRANCH_TEST)
