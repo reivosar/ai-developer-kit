@@ -159,6 +159,10 @@ def _test_raw_guards(bash, p: list, f: list) -> None:
         ("python3 tests/test_foo.py", False),
         ("python3 .claude/hooks/test_allow_list.py", False),
         ("python3 --version", False),
+        ("pytest /tmp/test_evil.py", True), ("pytest ../test_attack.py", True),
+        ("pytest .claude/worktrees/feat-foo/test_api.py", True),
+        ("pytest tests/test_foo.py", False), ("pytest", False),
+        ("pytest --cov=. --cov-branch", False),
     ]:
         _report(f"check_python3_path({cmd!r}) blocked=={expect_block}",
                 _is_blocked(bash.check_python3_path, cmd) == expect_block, p, f)
@@ -351,8 +355,15 @@ cases = [
     ("python3 -m pytest .claude/hooks/test_foo.py -v",          False),
     ("pytest .claude/hooks/test_foo.py",                        False),
     ("pytest .claude/hooks/test_allow_list.py -v",              False),
-    ("pytest tests/",                                           True),
-    ("pytest",                                                  True),
+    # A project's own tests run through pytest, under the same path rules
+    # as python3.
+    ("pytest tests/",                                           False),
+    ("pytest",                                                  False),
+    ("pytest --cov=. --cov-branch --cov-report=term-missing",   False),
+    ("pytest trial/test_coupon_discount.py -q",                 False),
+    ("pytest /tmp/test_evil.py",                                True),
+    ("pytest ../test_attack.py",                                True),
+    ("pytest-watch",                                            True),
     ("git worktree add .claude/worktrees/user-auth -b feat/user-auth origin/main", False),
     ("git worktree list",                                                  False),
     ("gh pr merge feat/foo",          True),

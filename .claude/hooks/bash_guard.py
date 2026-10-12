@@ -92,34 +92,35 @@ def check_raw_operators(command: str) -> None:
 
 
 def check_python3_path(command: str) -> None:
-    """Block python3 invocations referencing absolute paths, path traversal,
-    or any script path under .claude/worktrees/."""
+    """Block python3 and pytest invocations referencing absolute paths, path
+    traversal, or any script path under .claude/worktrees/."""
     for seg in split_segments(command):
         seg = seg.strip()
-        if not re.match(r'python3\s', seg):
+        if not re.match(r'(python3|pytest)\s', seg):
             continue
         try:
             args = shlex.split(seg)
         except ValueError:
             continue
+        runner = args[0]
         for arg in args[1:]:
             if arg.startswith('-'):
                 continue
             if arg.endswith('.py'):
                 if arg.startswith('/'):
                     hook_lib.block(
-                        f"python3: absolute path '{arg}' is not permitted. "
+                        f"{runner}: absolute path '{arg}' is not permitted. "
                         "Use a relative path within the project.",
                         f"Command: {command[:300]}",
                     )
                 if '../' in arg:
                     hook_lib.block(
-                        f"python3: path traversal '{arg}' is not permitted.",
+                        f"{runner}: path traversal '{arg}' is not permitted.",
                         f"Command: {command[:300]}",
                     )
                 if arg.startswith(".claude/worktrees/"):
                     hook_lib.block(
-                        "python3: scripts under .claude/worktrees/ must be run "
+                        f"{runner}: scripts under .claude/worktrees/ must be run "
                         "from inside the worktree using a relative path.",
                         f"Command: {command[:300]}",
                     )
