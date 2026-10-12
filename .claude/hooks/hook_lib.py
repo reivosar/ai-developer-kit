@@ -6,20 +6,26 @@ from pathlib import Path
 from typing import Callable, NoReturn
 
 
+def _git_rev_parse(hooks_dir: Path, option: str) -> str:
+    command = ["git", "-C", str(hooks_dir), "rev-parse", option]
+    output = subprocess.check_output(
+        command, text=True, stderr=subprocess.DEVNULL
+    )
+    return output.strip()
+
+
 def _find_repo_root() -> Path:
     hooks_dir = Path(__file__).resolve().parent
-    git_common = subprocess.check_output(
-        ["git", "-C", str(hooks_dir), "rev-parse", "--git-common-dir"],
-        text=True,
-    ).strip()
-    p = Path(git_common)
-    if p.is_absolute():
-        return p.parent
-    toplevel = subprocess.check_output(
-        ["git", "-C", str(hooks_dir), "rev-parse", "--show-toplevel"],
-        text=True,
-    ).strip()
-    return Path(toplevel).resolve()
+    try:
+        git_common = Path(_git_rev_parse(hooks_dir, "--git-common-dir"))
+        if git_common.is_absolute():
+            return git_common.parent
+        return Path(_git_rev_parse(hooks_dir, "--show-toplevel")).resolve()
+    except (OSError, subprocess.CalledProcessError):
+        # Outside a git repository, or without git, the project is the
+        # directory that holds .claude/. Raising here would stop every hook
+        # from loading, and the guards would be off for the whole project.
+        return hooks_dir.parents[1]
 
 
 REPO_ROOT: Path = _find_repo_root()

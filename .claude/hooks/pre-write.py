@@ -5,6 +5,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import fail_closed  # noqa: E402
+
+# Installed before the guards are imported: one that fails to load must block
+# the write, not let it through unchecked.
+fail_closed.install()
 import audit_log  # noqa: E402
 import content_guard  # noqa: E402
 import doc_comment_guard  # noqa: E402

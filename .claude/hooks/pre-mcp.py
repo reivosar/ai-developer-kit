@@ -4,6 +4,11 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import fail_closed  # noqa: E402
+
+# Installed before the guards are imported: one that fails to load must block
+# the tool call, not let it through unchecked.
+fail_closed.install()
 import audit_log  # noqa: E402
 import mcp_guard  # noqa: E402
 import rate_limiter  # noqa: E402

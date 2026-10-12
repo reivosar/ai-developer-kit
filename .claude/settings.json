@@ -151,7 +151,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/pre-bash.py"
+            "command": "python3 .claude/hooks/run-hook.py pre-bash.py"
           }
         ]
       },
@@ -160,11 +160,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/pre-write.py"
+            "command": "python3 .claude/hooks/run-hook.py pre-write.py"
           },
           {
             "type": "command",
-            "command": "python3 .claude/hooks/memory_guard.py"
+            "command": "python3 .claude/hooks/run-hook.py memory_guard.py"
           }
         ]
       },
@@ -173,7 +173,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/pre-edit.py"
+            "command": "python3 .claude/hooks/run-hook.py pre-edit.py"
           }
         ]
       },
@@ -191,7 +191,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/pre-mcp.py"
+            "command": "python3 .claude/hooks/run-hook.py pre-mcp.py"
           }
         ]
       }

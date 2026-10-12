@@ -34,6 +34,7 @@ NOT_MEASURED = {
     "pre-mcp.py",
     "pre-write.py",
     "prompt_injection_guard.py",
+    "run-hook.py",
     "user-prompt-submit.py",
 }
 
