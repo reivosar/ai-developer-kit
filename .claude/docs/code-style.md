@@ -1,6 +1,6 @@
 ## Universal Rules
 
-- Indent: 2 spaces for JS/TS/JSON/YAML/HTML; 4 spaces for Python; tabs for Go
+- Indent: 2 spaces for JS/TS/JSON/YAML/HTML; 4 spaces for Python and Rust; tabs for Go
 - Max line length: 120 characters (100 for Python)
 - No trailing whitespace; single blank line at end of file
 - Comments explain *why*, not *what* — the code speaks for itself
@@ -15,10 +15,10 @@
 
 | Context | Style | Example |
 |---|---|---|
-| Variables / functions | camelCase (JS/TS/Java), snake_case (Python/Go) | `fetchUserData`, `fetch_user_data` |
+| Variables / functions | camelCase (JS/TS/Java/Go), snake_case (Python/Rust) | `fetchUserData`, `fetch_user_data` |
 | Classes / types | PascalCase | `UserService`, `PaymentRequest` |
 | Constants | SCREAMING_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| File names | kebab-case (JS/TS), snake_case (Python/Go/Java) | `user-service.ts`, `user_service.py` |
+| File names | kebab-case (JS/TS), snake_case (Python/Go/Java/Rust) | `user-service.ts`, `user_service.py` |
 | Booleans | Prefix with `is`, `has`, `can`, `should` | `isActive`, `hasPermission` |
 | Interfaces (TS) | No `I` prefix — PascalCase only | `UserRepository` not `IUserRepository` |
 
@@ -57,6 +57,7 @@ Every public function, method, and type carries a doc comment in the language's 
 | JavaScript / TypeScript | `/** */` (JSDoc) | `export`, or a method marked `public` |
 | Java | `/** */` (Javadoc) | `public` |
 | Kotlin | `/** */` (KDoc) | no `private`, `internal`, or `protected` modifier |
+| Rust | `///` lines directly above; attributes may sit in between | `pub` with no restriction such as `pub(crate)` |
 
 - A comment that lists parameters (`Args:` in Python, `@param` elsewhere) lists exactly the parameters the signature has. A one-line summary with no parameter list is enough for a simple function.
 - A method that overrides another (`@Override`, `override`), a property setter, and an `@overload` need no comment of their own.
@@ -88,6 +89,7 @@ Always use the language's canonical formatter — do not leave formatting as a m
 | TypeScript / JavaScript | Prettier | `.prettierrc` |
 | Python | Black + isort | `pyproject.toml` |
 | Go | gofmt / goimports | built-in; no config |
+| Rust | rustfmt | `rustfmt.toml`; defaults when absent |
 | Java | google-java-format | enforced via CI |
 | YAML / JSON | Prettier | `.prettierrc` |
 
@@ -122,6 +124,13 @@ Treat formatter output as authoritative. Never fight the formatter — change th
 - Exported identifiers must have godoc comments
 - Avoid global state; pass dependencies via function arguments or struct fields
 - `defer` for cleanup; place `defer` immediately after the resource is acquired
+
+### Rust
+
+- Return `Result` for an operation that can fail; keep `unwrap()` and `expect()` out of non-test code unless the failure is a bug in the program
+- `cargo clippy` reports nothing with warnings denied
+- Public items carry `///` doc comments
+- Borrow before cloning; clone only when ownership is needed
 
 ### Java
 

@@ -24,6 +24,16 @@ JS_GOOD = 'it("cancels once", () => {\n  expect(cancel(1)).toBe(1);\n});\n'
 JS_NO_ASSERT = 'it("cancels once", () => {\n  cancel(1);\n});\n'
 GO_GOOD = "func TestCancel(t *testing.T) {\n\tt.Errorf(\"failed\")\n}\n"
 GO_NO_ASSERT = "func TestCancel(t *testing.T) {\n\tCancel(1)\n}\n"
+RUST_IMPLEMENTATION = "pub fn cancel(id: u32) -> u32 {\n    sleep(id);\n    id\n}\n\n"
+
+
+def _rust_test(body: str, attributes: str = "#[test]") -> str:
+    test = f"    {attributes}\n    fn cancels_once() {{\n    {body}\n    }}\n"
+    return f"{RUST_IMPLEMENTATION}#[cfg(test)]\nmod tests {{\n{test}}}\n"
+
+
+RUST_GOOD = _rust_test("    assert_eq!(cancel(1), 1);")
+RUST_NO_ASSERT = _rust_test("    cancel(1);")
 
 VIOLATIONS = [
     (PY_NO_ASSERT, "test_orders.py", f"{NAME}: no assertion"),
@@ -80,6 +90,30 @@ VIOLATIONS = [
         "orders.test.tsx",
         "renders: snapshot test",
     ),
+    (RUST_NO_ASSERT, "src/orders.rs", "cancels_once: no assertion"),
+    (
+        _rust_test("    assert!(true);"),
+        "tests/orders.rs",
+        "cancels_once: assertion that is always true",
+    ),
+    (
+        _rust_test("    assert_eq!(1, 1);"),
+        "tests/orders.rs",
+        "cancels_once: assertion that is always true",
+    ),
+    (
+        _rust_test(
+            "    std::thread::sleep(Duration::from_secs(1));\n"
+            "    assert_eq!(cancel(1), 1);"
+        ),
+        "src/orders.rs",
+        "cancels_once: sleep in a test",
+    ),
+    (
+        _rust_test("    insta::assert_snapshot!(render());"),
+        "src/orders.rs",
+        "cancels_once: snapshot test",
+    ),
     (GO_NO_ASSERT, "orders_test.go", "TestCancel: no assertion"),
     (
         "func TestCancel(t *testing.T) {\n\ttime.Sleep(time.Second)\n"
@@ -101,6 +135,13 @@ VALID = [
     (_python_test("    _assert_cancelled(cancel_order(1))"), "test_orders.py"),
     (JS_GOOD, "orders.test.ts"),
     (GO_GOOD, "orders_test.go"),
+    (RUST_GOOD, "src/orders.rs"),
+    (_rust_test("    cancel(1);", "#[test]\n    #[should_panic]"), "src/orders.rs"),
+    (
+        _rust_test("    assert!(fetch(1).await.is_ok());", "#[tokio::test]"),
+        "tests/orders.rs",
+    ),
+    (RUST_IMPLEMENTATION, "src/orders.rs"),
     (PY_NO_ASSERT, "orders_test.rb"),
 ]
 
@@ -210,3 +251,16 @@ def test_pre_edit_adding_broken_test_exits_2(tmp_path: Path):
     result = _run_hook("pre-edit.py", tool_input)
     assert result.returncode == 2, result.stderr
     assert "no assertion" in result.stderr
+
+
+def test_check_write_with_broken_test_inside_rust_source_file_exits_2(
+    capsys: pytest.CaptureFixture,
+):
+    with pytest.raises(SystemExit) as blocked:
+        testing_guard.check_write("src/orders.rs", RUST_NO_ASSERT)
+    assert blocked.value.code == 2
+    assert "cancels_once: no assertion" in capsys.readouterr().err
+
+
+def test_check_write_with_rust_source_file_without_tests_does_not_block():
+    assert testing_guard.check_write("src/orders.rs", RUST_IMPLEMENTATION) is None

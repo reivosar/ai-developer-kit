@@ -24,7 +24,7 @@ class Definition(NamedTuple):
 class _Language(NamedTuple):
     definitions: tuple  # regexes with a group "name"; one ending in "(" is callable
     param_name: Optional[str] = None  # regex with a group "name", per parameter
-    line_comments: bool = False  # the doc comment is a run of // lines
+    doc_prefix: Optional[str] = None  # the doc comment is a run of such lines
     inherits_doc: str = _NEVER  # marks a definition documented where it is declared
 
 
@@ -58,7 +58,16 @@ _GO = _Language(
         r"^type[ \t]+(?P<name>[A-Z]\w*)\b",
         r"^func[ \t]+(?:\([^)\n]*\)[ \t]*)?(?P<name>[A-Z]\w*)[ \t]*[(\[]",
     ),
-    line_comments=True,
+    doc_prefix="//",
+)
+_RUST_QUALIFIERS = r'(?:(?:async|const|unsafe|extern(?:[ \t]+"[^"\n]*")?)[ \t]+)*'
+_RUST = _Language(
+    definitions=(
+        r"^[ \t]*pub[ \t]+(?:struct|enum|trait|union)[ \t]+(?P<name>\w+)",
+        r"^[ \t]*pub[ \t]+" + _RUST_QUALIFIERS
+        + r"fn[ \t]+(?P<name>\w+)[ \t]*(?:<[^(\n]*>)?[ \t]*\(",
+    ),
+    doc_prefix="///",
 )
 _JS_NAME = r"(?P<name>[A-Za-z_$][\w$]*)[ \t]*"
 _JS_CALL = r"(?:<[^>\n]*>)?[ \t]*\("
@@ -80,7 +89,7 @@ _JAVASCRIPT = _Language(
 )
 
 _LANGUAGES: dict[str, _Language] = {
-    ".java": _JAVA, ".kt": _KOTLIN, ".kts": _KOTLIN, ".go": _GO,
+    ".java": _JAVA, ".kt": _KOTLIN, ".kts": _KOTLIN, ".go": _GO, ".rs": _RUST,
 }
 for _extension in (".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts"):
     _LANGUAGES[_extension] = _JAVASCRIPT
@@ -148,12 +157,23 @@ def _block_doc(lines_above: list[str]) -> Optional[str]:
     return None
 
 
-def _line_doc(lines_above: list[str]) -> Optional[str]:
-    comment_lines = itertools.takewhile(
-        lambda line: line.startswith("//"), reversed(lines_above)
+def _line_doc(lines_above: list[str], prefix: str) -> Optional[str]:
+    # A Rust attribute such as #[derive(Debug)] may sit between the comment
+    # and the item it documents.
+    below_attributes = itertools.dropwhile(
+        lambda line: line.lstrip().startswith("#["), reversed(lines_above)
     )
-    text = [line[2:].strip() for line in comment_lines]
+    comment_lines = itertools.takewhile(
+        lambda line: line.lstrip().startswith(prefix), below_attributes
+    )
+    text = [line.lstrip()[len(prefix):].strip() for line in comment_lines]
     return "\n".join(reversed(text)) or None
+
+
+def _doc(lines_above: list[str], language: _Language) -> Optional[str]:
+    if language.doc_prefix:
+        return _line_doc(lines_above, language.doc_prefix)
+    return _block_doc(lines_above)
 
 
 def _inherits_doc(
@@ -220,9 +240,8 @@ def _definition_at(
     lines_above = lines[:line_index]
     if _inherits_doc(lines_above, lines[line_index], language):
         return None
-    read_doc = _line_doc if language.line_comments else _block_doc
     parameters = _parameters(code, found, language)
-    return Definition(found.group("name"), read_doc(lines_above), parameters)
+    return Definition(found.group("name"), _doc(lines_above, language), parameters)
 
 
 def _pattern_definitions(code: str, language: _Language) -> list[Definition]:
@@ -241,10 +260,10 @@ def _pattern_definitions(code: str, language: _Language) -> list[Definition]:
 def find_public_definitions(code: str, file_path: str) -> list[Definition]:
     """Return the public definitions in code, in source order.
 
-    Python is read through its syntax tree. Go, JavaScript, TypeScript, Java,
-    and Kotlin are read with patterns, which find a definition only when its
-    visibility is written on the definition line. A file in any other
-    language, or Python that does not parse, gives an empty list.
+    Python is read through its syntax tree. Go, JavaScript, TypeScript, Rust,
+    Java, and Kotlin are read with patterns, which find a definition only
+    when its visibility is written on the definition line. A file in any
+    other language, or Python that does not parse, gives an empty list.
     """
     extension = os.path.splitext(file_path)[1].lower()
     if extension == ".py":

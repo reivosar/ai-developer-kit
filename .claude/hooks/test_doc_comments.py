@@ -174,6 +174,64 @@ export function render({ total, rate }: Props, label: string): string {
 '''
 
 
+RUST_ORDER = '''
+/// An order and its lines.
+#[derive(Debug, Clone)]
+pub struct Order {
+    lines: Vec<Line>,
+}
+
+pub enum Status {
+    Open,
+}
+
+impl Order {
+    /// Returns the total of the lines.
+    /// Never negative.
+    pub fn total(&self, rate: u32) -> u32 {
+        rate
+    }
+
+    pub async fn fetch<T: Into<String>>(id: T) -> Order {
+        todo!()
+    }
+
+    pub(crate) fn reset(&mut self) {}
+
+    fn touch(&self) {}
+}
+
+/// A source of orders.
+pub trait OrderSource {
+    fn next(&mut self) -> Option<Order>;
+}
+
+// Not a doc comment.
+pub const fn limit() -> u32 {
+    20
+}
+'''
+
+
+def test_find_public_definitions_in_rust_lists_pub_items_only():
+    assert sorted(_by_name(RUST_ORDER, "orders.rs")) == [
+        "Order", "OrderSource", "Status", "fetch", "limit", "total",
+    ]
+
+
+def test_find_public_definitions_in_rust_reads_doc_lines_above_attributes():
+    found = _by_name(RUST_ORDER, "orders.rs")
+    assert found["Order"].doc == "An order and its lines."
+    assert found["total"].doc == "Returns the total of the lines.\nNever negative."
+
+
+def test_find_public_definitions_in_rust_ignores_plain_comment():
+    found = _by_name(RUST_ORDER, "orders.rs")
+    assert found["limit"].doc is None
+    assert found["Status"].doc is None
+    assert found["total"].params is None
+
+
 def _by_name(code: str, file_name: str) -> dict[str, Definition]:
     found = find_public_definitions(code, file_name)
     return {definition.name: definition for definition in found}

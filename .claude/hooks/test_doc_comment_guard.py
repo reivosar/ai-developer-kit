@@ -84,6 +84,11 @@ GO_FUNCTION = (
     "func ApplyDiscount(total int) int {\n\treturn total\n}\n"
 )
 GO_TYPE = "// An Order is one customer order.\ntype Order struct{}\n"
+RUST_FUNCTION = (
+    "/// Adds the fee to the total.\n"
+    "#[inline]\n"
+    "pub fn apply_fee(total: u32, fee: u32) -> u32 {\n    total + fee\n}\n"
+)
 
 
 def _blocked_reasons(capsys: pytest.CaptureFixture, check, *arguments) -> str:
@@ -103,6 +108,7 @@ def _blocked_reasons(capsys: pytest.CaptureFixture, check, *arguments) -> str:
         (TS_DESTRUCTURED, "order.ts"),
         (GO_FUNCTION, "orders.go"),
         (GO_TYPE, "orders.go"),
+        (RUST_FUNCTION, "orders.rs"),
         (PY_UNDOCUMENTED, "orders.rb"),
     ],
 )
@@ -126,6 +132,7 @@ def test_find_violations_with_undocumented_python_function_reports_it():
         ("/**\n *\n */\npublic int applyFee(int total) {}\n", "Order.java", "applyFee"),
         ("func ApplyFee(total int) int {}\n", "orders.go", "ApplyFee"),
         ("fun applyFee(total: Int): Int = total\n", "Order.kt", "applyFee"),
+        ("pub fn apply_fee(total: u32) -> u32 { total }\n", "orders.rs", "apply_fee"),
     ],
 )
 def test_find_violations_with_missing_or_empty_doc_comment_reports_it(
