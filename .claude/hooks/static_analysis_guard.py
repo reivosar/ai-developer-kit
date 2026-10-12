@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from commit_guard import is_commit, staged_files  # noqa: E402
-from hook_lib import block  # noqa: E402
+from hook_lib import block, tail_lines  # noqa: E402
 
 SCRIPT = Path(__file__).with_name("static-analysis.sh")
 TIMEOUT = 300  # seconds
@@ -23,10 +23,10 @@ def _run_analysis() -> subprocess.CompletedProcess:
 
 
 def _block_findings(result: subprocess.CompletedProcess) -> None:
-    findings = (result.stdout + result.stderr).strip().splitlines()
+    findings = tail_lines(result.stdout + result.stderr, OUTPUT_LINES)
     block(
         "Static analysis found problems in the staged files.",
-        *findings[-OUTPUT_LINES:],
+        *findings,
         "Fix them, stage the fixes, and commit again.",
     )
 

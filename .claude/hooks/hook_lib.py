@@ -87,6 +87,18 @@ def emit_additional_context(hook_event: str, notices: list[str]) -> None:
     print(json.dumps({"hookSpecificOutput": context}))
 
 
+MAX_LINE = 300  # characters of one output line that a block message keeps
+
+
+def tail_lines(text: str, count: int) -> list[str]:
+    """Return the last count lines of text, each cut to MAX_LINE characters.
+
+    Tool output can hold one line of many thousand characters, such as a
+    linker command. Left whole, it buries the lines that say what failed.
+    """
+    return [line[:MAX_LINE] for line in text.strip().splitlines()[-count:]]
+
+
 def block(reason: str, *detail_lines: str) -> NoReturn:
     """Print the reason and its detail lines to stderr, then exit with 2."""
     print(f"BLOCKED: {reason}", file=sys.stderr)

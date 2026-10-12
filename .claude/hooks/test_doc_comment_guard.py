@@ -16,7 +16,7 @@ HOOKS_DIR = Path(__file__).parent
 # names the module. A new hook module fails the list test until it is added.
 HOOK_MODULES = [
     "anomaly_guard.py", "audit_log.py", "bash_guard.py", "commit_guard.py",
-    "content_guard.py", "coverage_guard.py", "cp_guard.py",
+    "content_guard.py", "coverage_guard.py", "coverage_runners.py", "cp_guard.py",
     "doc_comment_guard.py", "doc_comments.py", "doc_length_guard.py",
     "dynamic_name_guard.py", "env_file_guard.py", "function_definitions.py",
     "function_length_guard.py", "git_guard.py", "hook_lib.py", "mcp_guard.py",

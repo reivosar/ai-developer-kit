@@ -48,6 +48,7 @@ pytest .claude/hooks/test_hook_lib_helpers.py
 pytest .claude/hooks/test_fail_closed.py
 pytest .claude/hooks/test_commit_guard.py
 pytest .claude/hooks/test_coverage_guard.py
+pytest .claude/hooks/test_coverage_runners.py
 pytest .claude/hooks/test_git_guard.py
 ```
 
@@ -92,7 +93,8 @@ Entry points (one process spawn per event):
 Guard modules (imported by entry points):
 - `bash_guard.py`, `git_guard.py`, `cp_guard.py` — Bash safety checks
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
-- `coverage_guard.py` — on `git commit`, runs the tests under pytest-cov and blocks when a staged Python file outside `.claude/` is below 90% branch or line coverage; installs pytest or pytest-cov first when one is missing
+- `coverage_guard.py` — on `git commit`, runs the tests under coverage and blocks when a staged Python, Go, Rust, or TypeScript file outside `.claude/` is below 90%; Python is measured here with pytest-cov, which is installed with pytest when either is missing
+- `coverage_runners.py` — measures Go (`go test -coverprofile`), Rust (`cargo llvm-cov`), and TypeScript (vitest or jest) for `coverage_guard.py` and returns a percent per file
 - `env_file_guard.py` — blocks writes to .env files
 - `content_guard.py` — blocks Japanese characters and emoji in file content
 - `doc_length_guard.py` — blocks a Write or Edit that takes a Markdown document past 200 lines
@@ -111,7 +113,7 @@ Guard modules (imported by entry points):
 - `mcp_guard.py` — checks MCP tool names against `.claude/mcp-allowlist.txt`
 - `audit_log.py` — appends tool invocations to `.claude/audit.log`
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit())
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines())
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command; installs a missing linter before running it

@@ -10,6 +10,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hook_lib  # noqa: E402
 
 
+def test_tail_lines_returns_the_last_lines_in_order():
+    assert hook_lib.tail_lines("first\nsecond\nthird\n", 2) == ["second", "third"]
+
+
+def test_tail_lines_cuts_a_line_longer_than_the_limit():
+    linker_command = "cc " + "-L/toolchain/lib " * 400
+    lines = hook_lib.tail_lines(f"error: linking failed\n{linker_command}\n", 5)
+    assert lines == ["error: linking failed", linker_command[:hook_lib.MAX_LINE]]
+
+
 def test_apply_edit_with_repeated_text_replaces_first_occurrence_only():
     edited = hook_lib.apply_edit("a b a", "a", "c", replace_all=False)
     assert edited == "c b a"

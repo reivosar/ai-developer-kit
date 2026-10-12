@@ -94,8 +94,15 @@ install_clippy() {
 }
 
 install_llvm_cov() {
-    has_command rustup && rustup component add llvm-tools-preview \
-        && cargo install cargo-llvm-cov
+    has_command rustup && rustup component add llvm-tools-preview || return 1
+    local output older='`cargo-llvm-cov ([0-9.]+)` supports rustc'
+    output=$(cargo install cargo-llvm-cov 2>&1) && return 0
+    echo "$output"
+    # A toolchain too old for the newest release is told by cargo which
+    # release it can build; that release is installed with its locked
+    # dependencies, which were chosen for the same toolchain.
+    [[ "$output" =~ $older ]] || return 1
+    cargo install cargo-llvm-cov --version "${BASH_REMATCH[1]}" --locked
 }
 
 install_tool() {
