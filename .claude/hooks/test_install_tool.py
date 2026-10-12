@@ -8,7 +8,7 @@ INSTALLER = HOOKS_DIR / "install-tool.sh"
 SETUP = HOOKS_DIR.parents[1] / "setup.sh"
 KIT_TOOLS = [
     "pipx", "npm", "go", "flake8", "yamllint", "pytest", "pytest-cov", "tsc",
-    "markdownlint",
+    "markdownlint", "biome", "cargo-clippy", "cargo-llvm-cov",
 ]
 
 
@@ -59,7 +59,12 @@ def test_install_tool_with_pipx_missing_on_macos_installs_pipx_first(tool_stubs)
 
 
 @pytest.mark.parametrize(
-    "tool, package", [("tsc", "typescript"), ("markdownlint", "markdownlint-cli")]
+    "tool, package",
+    [
+        ("tsc", "typescript"),
+        ("markdownlint", "markdownlint-cli"),
+        ("biome", "@biomejs/biome"),
+    ],
 )
 def test_install_tool_with_missing_node_tool_installs_its_npm_package(
     tool_stubs, tool: str, package: str
@@ -157,6 +162,33 @@ def test_install_tool_inside_virtualenv_installs_pytest_package_with_pip(
     assert result.returncode == 0, result.stderr
     assert f"python3 -m pip install {tool}" in tool_stubs.calls()
     assert not any(call.startswith("pipx") for call in tool_stubs.calls())
+
+
+def test_install_tool_with_clippy_missing_adds_the_rustup_component(tool_stubs):
+    tool_stubs.add("rustup", provides={"component add clippy": ["cargo-clippy"]})
+    result = tool_stubs.run_script(INSTALLER, "cargo-clippy")
+    assert result.returncode == 0, result.stderr
+    assert tool_stubs.calls() == ["rustup component add clippy"]
+
+
+def test_install_tool_with_coverage_command_missing_installs_it_with_cargo(
+    tool_stubs,
+):
+    tool_stubs.add("rustup")
+    tool_stubs.add("cargo", provides={"install cargo-llvm-cov": ["cargo-llvm-cov"]})
+    result = tool_stubs.run_script(INSTALLER, "cargo-llvm-cov")
+    assert result.returncode == 0, result.stderr
+    assert tool_stubs.calls() == [
+        "rustup component add llvm-tools-preview",
+        "cargo install cargo-llvm-cov",
+    ]
+
+
+@pytest.mark.parametrize("tool", ["cargo-clippy", "cargo-llvm-cov"])
+def test_install_tool_for_rust_tool_without_rustup_exits_1(tool_stubs, tool: str):
+    result = tool_stubs.run_script(INSTALLER, tool)
+    assert result.returncode == 1
+    assert f"could not install {tool}" in result.stderr
 
 
 def test_install_tool_when_install_command_fails_exits_1(tool_stubs):

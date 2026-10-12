@@ -45,7 +45,8 @@ ts_files=()
 md_files=()
 json_files=()
 yaml_files=()
-has_go=false
+go_files=()
+has_rust=false
 
 while IFS= read -r file; do
     [ -f "$file" ] || continue
@@ -55,20 +56,65 @@ while IFS= read -r file; do
         *.md)           md_files+=("$file") ;;
         *.json)         json_files+=("$file") ;;
         *.yml|*.yaml)   yaml_files+=("$file") ;;
-        *.go)           has_go=true ;;
+        *.go)           go_files+=("$file") ;;
+        *.rs)           has_rust=true ;;
     esac
 done <<< "$changed_files"
 
+has_eslint_config() {
+    local name
+    for name in eslint.config.js eslint.config.mjs eslint.config.cjs \
+        eslint.config.ts .eslintrc .eslintrc.js .eslintrc.cjs .eslintrc.json \
+        .eslintrc.yml .eslintrc.yaml; do
+        [ -f "$name" ] && return 0
+    done
+    return 1
+}
+
+# A project that configured ESLint is linted by its own rules. Any other
+# project gets Biome, whose default rules need no configuration.
+lint_typescript() {
+    if has_eslint_config; then
+        if require_tool npx; then
+            npx --no-install eslint "$@" || exit_code=1
+        fi
+    elif require_tool biome; then
+        biome lint "$@" || exit_code=1
+    fi
+}
+
+check_go_format() {
+    local unformatted
+    unformatted=$(gofmt -l "$@")
+    if [ -n "$unformatted" ]; then
+        echo "gofmt: not formatted: $unformatted"
+        exit_code=1
+    fi
+}
+
+# Each language gets a check for errors and a check for style: flake8 does
+# both for Python, tsc and a linter for TypeScript, go vet and gofmt for Go,
+# and clippy with warnings denied for Rust.
 if [ ${#py_files[@]} -gt 0 ] && require_tool flake8; then
     flake8 "${py_files[@]}" || exit_code=1
 fi
 
-if [ ${#ts_files[@]} -gt 0 ] && require_tool tsc; then
-    tsc --noEmit || exit_code=1
+if [ ${#ts_files[@]} -gt 0 ]; then
+    if require_tool tsc; then
+        tsc --noEmit || exit_code=1
+    fi
+    lint_typescript "${ts_files[@]}"
 fi
 
-if [ "$has_go" = true ] && require_tool go; then
+if [ ${#go_files[@]} -gt 0 ] && require_tool go; then
     go vet ./... || exit_code=1
+    if require_tool gofmt; then
+        check_go_format "${go_files[@]}"
+    fi
+fi
+
+if [ "$has_rust" = true ] && require_tool cargo && require_tool cargo-clippy; then
+    cargo clippy --all-targets --quiet -- -D warnings || exit_code=1
 fi
 
 if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then

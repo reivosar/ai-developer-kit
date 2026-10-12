@@ -23,7 +23,7 @@ chmod +x .claude/hooks/*.sh .claude/hooks/*.py
 
 Open Claude Code in your project directory. The rules, skills, and hooks load automatically.
 
-The hooks call external tools: flake8, yamllint, tsc, markdownlint, go, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, or npm, and installs nothing outside that list. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
+The hooks call external tools: flake8, yamllint, tsc, Biome, markdownlint, go, clippy, cargo-llvm-cov, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, npm, or rustup, and installs nothing outside that list. Rust itself is not installed: the Rust tools need rustup to be present. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
 
 ## Usage
 
