@@ -24,6 +24,7 @@ _QUOTED_RE = re.compile(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'', re.DOTALL)
 
 
 def check_sensitive_path(command: str) -> None:
+    """Block a command that names a sensitive system path outside quotes."""
     unquoted = _QUOTED_RE.sub("", command)
     if _SENSITIVE_RE.search(unquoted):
         hook_lib.block(
@@ -33,6 +34,11 @@ def check_sensitive_path(command: str) -> None:
 
 
 def check_path_escape(path: str) -> None:
+    """Block a file path that resolves outside the repository root.
+
+    An empty path, a path that cannot be resolved, and every path while
+    ANOMALY_PATH_ESCAPE_DISABLE is set are let through.
+    """
     if not path or os.environ.get("ANOMALY_PATH_ESCAPE_DISABLE"):
         return
     try:

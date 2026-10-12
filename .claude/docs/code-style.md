@@ -4,8 +4,8 @@
 - Max line length: 120 characters (100 for Python)
 - No trailing whitespace; single blank line at end of file
 - Comments explain *why*, not *what* — the code speaks for itself
-- No JavaDoc (`/** */`), no multi-line comment blocks — one short inline line at most
-- Docstrings follow language conventions (see language-specific rules)
+- Inside a function body: no multi-line comment blocks — one short inline line at most
+- Public functions, methods, and types carry a doc comment — see Doc Comments
 - No commented-out code — delete it; git history preserves it
 - Max function / method body: 20 lines (blank lines and comments excluded); if exceeded, extract until each function fits, and keep a function extracted only to meet this limit in the same file as its caller
 - A code file holds one concept or one feature. At 200 lines, check whether it holds two; if it does, split by distinct responsibility. Never split one concept across files only to reduce the line count — a concept spread over files is harder to find and to change than a long file
@@ -45,6 +45,22 @@ Trigger/condition is omitted when the function always applies unconditionally.
 - A reader should understand what any function does from its name and signature alone
 - If understanding requires reading the body, the name is wrong or the function does too much
 - Intermediate variables with names beat inline expressions: `const discountedTotal = basePrice * (1 - discountRate)` over `return price * (1 - r)`
+
+## Doc Comments
+
+Every public function, method, and type carries a doc comment in the language's own form. It tells a caller what the code does, and what it returns or raises when the signature does not show it. A caller then learns the contract without opening the body, and a change that breaks the contract shows up as a comment that no longer fits.
+
+| Language | Form | Public means |
+|---|---|---|
+| Python | docstring | a name without a leading underscore, at module or class level |
+| Go | `//` lines directly above, starting with the name | an exported (capitalized) name |
+| JavaScript / TypeScript | `/** */` (JSDoc) | `export`, or a method marked `public` |
+| Java | `/** */` (Javadoc) | `public` |
+| Kotlin | `/** */` (KDoc) | no `private`, `internal`, or `protected` modifier |
+
+- A comment that lists parameters (`Args:` in Python, `@param` elsewhere) lists exactly the parameters the signature has. A one-line summary with no parameter list is enough for a simple function.
+- A method that overrides another (`@Override`, `override`), a property setter, and an `@overload` need no comment of their own.
+- Private code needs no doc comment.
 
 ## Type Annotations
 

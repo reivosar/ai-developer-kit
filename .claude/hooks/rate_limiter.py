@@ -31,6 +31,12 @@ def check_rate(
     tool_category: str,
     state_file: Optional[Path] = None,
 ) -> None:
+    """Block a tool call once its session reaches the limit for its category.
+
+    Calls are counted per session and tool category over the last
+    _WINDOW_SECONDS seconds, in .claude/rate-state.json unless state_file
+    names another file. Nothing is counted while RATE_LIMIT_DISABLE is set.
+    """
     if os.environ.get("RATE_LIMIT_DISABLE"):
         return
     if state_file is None:

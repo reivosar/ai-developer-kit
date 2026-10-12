@@ -22,6 +22,7 @@ def _extract_prompt(data: dict) -> str:
 
 
 def main() -> None:
+    """Block an injected prompt, then print the skill dispatch reminder."""
     data = read_stdin_json()
     prompt = _extract_prompt(data)
     prompt_injection_guard.check_injection(prompt)

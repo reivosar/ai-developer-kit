@@ -201,7 +201,11 @@ def test_pre_edit_with_unchanged_signature_prints_nothing(repo: Path):
 
 def test_pre_write_with_existing_definition_returns_context_and_exits_0():
     probe = HOOKS_DIR / "_reference_notice_probe.py"
-    content = "def read_stdin_json():\n    return {}\n"
+    content = (
+        "def read_stdin_json():\n"
+        '    """Return an empty object."""\n'
+        "    return {}\n"
+    )
     result = _run_hook(
         "pre-write.py", {"file_path": str(probe), "content": content}
     )

@@ -28,6 +28,7 @@ from hook_lib import block, read_hook_input, run_fail_closed  # noqa: E402
 
 
 def main() -> None:
+    """Check one Bash call and exit 0 when no guard blocks it."""
     settings_path = str(Path(__file__).resolve().parent.parent / "settings.json")
     data = read_hook_input()
     tool_input = data.get("tool_input", {})

@@ -18,6 +18,11 @@ def _current_worktree() -> "Path | None":
 
 
 def check(file_path: str) -> None:
+    """Block a file path outside the active worktree.
+
+    Nothing is blocked outside a worktree or while WORKTREE_GUARD_DISABLE is
+    set.
+    """
     if not file_path:
         return
     if os.environ.get("WORKTREE_GUARD_DISABLE"):

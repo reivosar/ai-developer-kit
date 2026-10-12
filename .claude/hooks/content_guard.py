@@ -26,6 +26,10 @@ _EXEMPT_PATH_RE = re.compile(r"(locale|i18n|fixtures)", re.IGNORECASE)
 
 
 def check_japanese(content: str, file_path: str) -> None:
+    """Block content that has Japanese characters.
+
+    A file whose path contains locale, i18n, or fixtures is let through.
+    """
     if _EXEMPT_PATH_RE.search(file_path):
         return
     if _JAPANESE_RE.search(content):
@@ -37,6 +41,7 @@ def check_japanese(content: str, file_path: str) -> None:
 
 
 def check_emoji(content: str, file_path: str) -> None:
+    """Block content that has an emoji."""
     if _EMOJI_RE.search(content):
         hook_lib.block(
             "Emoji detected in file content.",

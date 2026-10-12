@@ -29,6 +29,7 @@ _TEST_DIR_RE = re.compile(r'(/__tests__/|/tests?/|/specs?/)', re.IGNORECASE)
 
 
 def is_test_file(path: str) -> bool:
+    """Return True when the path names a test file or lies in a test directory."""
     return bool(_TEST_NAME_RE.search(os.path.basename(path)) or _TEST_DIR_RE.search(path))
 
 
@@ -119,6 +120,11 @@ def _is_checked(code: str, file_path: str) -> bool:
 
 
 def check(code: str, file_path: str) -> None:
+    """Block an implementation change that no staged or last-committed test covers.
+
+    A change to public functions needs a test file that names one of them. Any
+    other change needs a test file for the module.
+    """
     if not _is_checked(code, file_path):
         return
     func_names = _public_names(find_definitions(code, file_path))

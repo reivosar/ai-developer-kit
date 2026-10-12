@@ -21,6 +21,7 @@ _INJECTION_RE = re.compile(
 
 
 def check_injection(prompt: str) -> None:
+    """Block a prompt that contains a prompt injection pattern."""
     if _INJECTION_RE.search(prompt):
         hook_lib.block(
             "Prompt injection pattern detected.",

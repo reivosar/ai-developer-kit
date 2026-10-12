@@ -52,6 +52,7 @@ def split_segments(command: str) -> list[str]:
 
 
 def load_patterns(settings_path: str, key: str) -> list[str]:
+    """Return the Bash command patterns listed under permissions.<key>."""
     with open(settings_path) as f:
         settings = json.load(f)
     entries = settings.get("permissions", {}).get(key, [])
@@ -59,11 +60,13 @@ def load_patterns(settings_path: str, key: str) -> list[str]:
 
 
 def is_denied(command: str, patterns: list[str]) -> bool:
+    """Return True when the command or one of its segments matches a pattern."""
     candidates = [command] + split_segments(command)
     return any(fnmatch.fnmatch(c, p) for c in candidates for p in patterns)
 
 
 def is_whitelisted(command: str, patterns: list[str]) -> bool:
+    """Return True when every segment of the command matches a pattern."""
     segments = split_segments(command)
     return all(any(fnmatch.fnmatch(seg, p) for p in patterns) for seg in segments)
 

@@ -101,6 +101,11 @@ def _check_emoji(diff: str) -> str | None:
 
 
 def check_pre_commit(command: str) -> None:
+    """Block a git commit whose staged changes fail a pre-commit check.
+
+    The checks cover secrets, the branch name, whitespace, .env files, and
+    emoji. Any other command, and a commit with nothing staged, is let through.
+    """
     if not is_commit(command):
         return
     staged = staged_files()
