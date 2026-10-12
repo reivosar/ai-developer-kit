@@ -40,6 +40,7 @@ def apply_edit(
 
 
 def read_stdin_json() -> dict:
+    """Return the JSON object on stdin, or an empty dict when it is unreadable."""
     try:
         return json.load(sys.stdin)
     except Exception:
@@ -87,6 +88,7 @@ def emit_additional_context(hook_event: str, notices: list[str]) -> None:
 
 
 def block(reason: str, *detail_lines: str) -> NoReturn:
+    """Print the reason and its detail lines to stderr, then exit with 2."""
     print(f"BLOCKED: {reason}", file=sys.stderr)
     for line in detail_lines:
         print(f"  {line}", file=sys.stderr)

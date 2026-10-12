@@ -6,6 +6,7 @@ ALLOWED_ENV_FILES = {'.env.sample', '.env.example'}
 
 
 def is_blocked_env_file(path: str) -> bool:
+    """Return True for .env and for .env.<name> other than the sample files."""
     basename = os.path.basename(path)
     if basename == '.env':
         return True

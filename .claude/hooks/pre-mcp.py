@@ -11,6 +11,7 @@ from hook_lib import read_hook_input, run_fail_closed  # noqa: E402
 
 
 def main() -> None:
+    """Check one MCP tool call and exit 0 when no guard blocks it."""
     data = read_hook_input()
     tool_name = data.get("tool_name", "")
     session_id = data.get("session_id", "unknown")

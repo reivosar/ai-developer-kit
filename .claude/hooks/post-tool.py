@@ -9,6 +9,7 @@ from hook_lib import read_stdin_json  # noqa: E402
 
 
 def main() -> None:
+    """Record one finished tool call in the audit log."""
     data = read_stdin_json()
     tool_name = data.get("tool_name", "")
     tool_input = data.get("tool_input", {})

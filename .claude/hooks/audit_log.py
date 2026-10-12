@@ -24,6 +24,11 @@ def record(
     tool_input: dict,
     log_file: Optional[Path] = None,
 ) -> None:
+    """Append one tool call to the audit log with its secrets masked.
+
+    The log is .claude/audit.log unless log_file names another file. A log
+    that cannot be written is ignored, so auditing never blocks a tool call.
+    """
     if log_file is None:
         log_file = hook_lib.REPO_ROOT / ".claude" / "audit.log"
     entry = {

@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import audit_log  # noqa: E402
 import content_guard  # noqa: E402
+import doc_comment_guard  # noqa: E402
 import doc_length_guard  # noqa: E402
 import dynamic_name_guard  # noqa: E402
 import reference_notice  # noqa: E402
@@ -51,10 +52,12 @@ def _block_unsafe_content(file_path: str, content: str) -> None:
     doc_length_guard.check_write(file_path, content)
     dynamic_name_guard.check(file_path, "", content)
     testing_guard.check_write(file_path, content)
+    doc_comment_guard.check_write(file_path, content)
     tdd_guard.check(content, file_path)
 
 
 def main() -> None:
+    """Check one Write call and exit 0 when no guard blocks it."""
     data = read_hook_input()
     tool_input = data.get("tool_input", {})
     file_path = tool_input.get("file_path", "")

@@ -11,6 +11,7 @@ from bash_guard import split_segments  # noqa: E402
 
 
 def check_stash_destructive(command: str) -> None:
+    """Block git stash drop and git stash clear, which delete stashed work."""
     if any(re.match(r"git\s+stash\s+(drop|clear)", seg.strip())
            for seg in split_segments(command)):
         hook_lib.block(
@@ -21,6 +22,7 @@ def check_stash_destructive(command: str) -> None:
 
 
 def check_checkout_discard(command: str) -> None:
+    """Block git checkout --, which discards uncommitted changes."""
     if any(re.match(r"git\s+checkout\s+--", seg.strip())
            for seg in split_segments(command)):
         hook_lib.block(
@@ -31,6 +33,7 @@ def check_checkout_discard(command: str) -> None:
 
 
 def check_branch_force_delete(command: str) -> None:
+    """Block git branch -D, which deletes a branch that is not merged."""
     if any(re.match(r"git\s+branch\s+-D\b", seg.strip())
            for seg in split_segments(command)):
         hook_lib.block(
@@ -41,6 +44,11 @@ def check_branch_force_delete(command: str) -> None:
 
 
 def check_commit_on_main(command: str) -> None:
+    """Block a git commit while the current branch is main.
+
+    The branch is MOCK_BRANCH when that is set. Otherwise git reports it for
+    the directory in HOOK_ORIG_CWD, or for the current directory.
+    """
     if not any(re.match(r"git\s+commit\b", seg.strip())
                for seg in split_segments(command)):
         return

@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anomaly_guard  # noqa: E402
 import audit_log  # noqa: E402
 import content_guard  # noqa: E402
+import doc_comment_guard  # noqa: E402
 import doc_length_guard  # noqa: E402
 import dynamic_name_guard  # noqa: E402
 import reference_notice  # noqa: E402
@@ -40,10 +41,12 @@ def _block_unsafe_content(
     doc_length_guard.check_edit(file_path, old_string, new_string, replace_all)
     dynamic_name_guard.check(file_path, old_string, new_string)
     testing_guard.check_edit(file_path, old_string, new_string, replace_all)
+    doc_comment_guard.check_edit(file_path, old_string, new_string, replace_all)
     tdd_guard.check(old_string, file_path)
 
 
 def main() -> None:
+    """Check one Edit call and exit 0 when no guard blocks it."""
     data = read_hook_input()
     tool_input = data.get("tool_input", {})
     file_path = tool_input.get("file_path", "")

@@ -40,6 +40,7 @@ def check_edit(file_path: str) -> None:
 
 
 def main() -> None:
+    """Check one Write or Edit of the memory index against its line limit."""
     data = read_stdin_json()
     tool_name = data.get("tool_name", "")
     tool_input = data.get("tool_input", {})
