@@ -19,9 +19,10 @@ HOOK_MODULES = [
     "content_guard.py", "coverage_guard.py", "cp_guard.py",
     "doc_comment_guard.py", "doc_comments.py", "doc_length_guard.py",
     "dynamic_name_guard.py", "env_file_guard.py", "function_definitions.py",
-    "git_guard.py", "hook_lib.py", "mcp_guard.py", "memory_guard.py",
-    "post-tool.py", "pre-bash.py", "pre-edit.py", "pre-mcp.py", "pre-write.py",
-    "prompt_injection_guard.py", "rate_limiter.py", "reference_notice.py",
+    "function_length_guard.py", "git_guard.py", "hook_lib.py", "mcp_guard.py",
+    "memory_guard.py", "post-tool.py", "pre-bash.py", "pre-edit.py",
+    "pre-mcp.py", "pre-write.py", "prompt_injection_guard.py",
+    "rate_limiter.py", "reference_notice.py", "static_analysis_guard.py",
     "tdd_guard.py", "testing_guard.py", "user-prompt-submit.py",
     "worktree_guard.py",
 ]

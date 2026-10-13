@@ -10,6 +10,7 @@ import content_guard  # noqa: E402
 import doc_comment_guard  # noqa: E402
 import doc_length_guard  # noqa: E402
 import dynamic_name_guard  # noqa: E402
+import function_length_guard  # noqa: E402
 import reference_notice  # noqa: E402
 import tdd_guard  # noqa: E402
 import testing_guard  # noqa: E402
@@ -53,6 +54,7 @@ def _block_unsafe_content(file_path: str, content: str) -> None:
     dynamic_name_guard.check(file_path, "", content)
     testing_guard.check_write(file_path, content)
     doc_comment_guard.check_write(file_path, content)
+    function_length_guard.check_write(file_path, content)
     tdd_guard.check(content, file_path)
 
 
