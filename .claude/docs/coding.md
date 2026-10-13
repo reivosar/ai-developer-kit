@@ -99,6 +99,13 @@ A rule stated only in prose is not reliably followed, so each rule is paired wit
 | Same-kind files in the same place | Unchecked |
 | Change only what the request names | Unchecked |
 | Interfaces and mapping only at system boundaries | Unchecked |
+| Dependencies are injected, not created inside a function or class | Unchecked |
+| Logic is pure; one function does not mix reading, judgment, and side effects | Unchecked |
+| No global state and no work at import time | Unchecked |
+| A module owns one concept | Unchecked |
+| A failure is returned or thrown, not swallowed; configuration is passed in | Unchecked |
+| Data is validated at the entry boundary of each layer | Unchecked |
+| The report gives the number of references found and the number checked | Unchecked — `reference_notice.py` returns the count; nothing reads the report |
 | Function body within 20 lines | `function_length_guard.py` blocks the Write or Edit that adds a longer body or lengthens one that is already longer (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin; off while `FUNCTION_LENGTH_GUARD_DISABLE` is set) |
 | Changed files pass static analysis | `static_analysis_guard.py` blocks a `git commit` when `static-analysis.sh` reports a problem in a staged file (off while `STATIC_ANALYSIS_GUARD_DISABLE` is set) |
 
