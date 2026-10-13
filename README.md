@@ -73,6 +73,7 @@ Everything lives under `.claude/`. There is no application code in this reposito
   settings.json   # Permissions allow/deny list and hook wiring
   mcp-allowlist.txt  # MCP tool names that pre-mcp.py lets through
   worktrees/      # Temporary git worktrees created per task (gitignored)
+  logs/           # Hook records, one directory per session (gitignored)
 ```
 
 ### Rules
@@ -98,12 +99,20 @@ Hook scripts enforce constraints the rules alone cannot:
 | `pre-mcp.py` | Before every MCP tool call | Checks the tool name against `mcp-allowlist.txt`; applies the rate limit |
 | `memory_guard.py` | Before file writes, after file writes/edits | Enforces the 200-line limit on the memory index |
 | `post-edit.sh` | After file writes/edits | Runs the installed formatter on the changed file |
-| `post-tool.py` | After Bash commands and file writes/edits | Appends the tool call to the audit log |
+| `post-tool.py` | After Bash commands and file writes/edits | Appends the tool call to the session's audit file |
 | `user-prompt-submit.py` | On every user prompt | Prompt injection guard and skill dispatch reminder |
 | `block-read.sh` | Before file reads | No-op kept as a wiring point |
 | `notify.sh` | On notifications | Sends a desktop notification |
 | `on-stop.sh` | When Claude stops | Sends a desktop notification and rings the terminal bell |
 | `trash.sh` | On-demand | Moves files to `.trash/<timestamp>/` instead of deleting |
+
+### Records
+
+The hooks write to `.claude/logs/<date>_<session>/`, one directory per session: `audit.jsonl` holds every tool call, and `blocks/<guard>.jsonl` holds one line for each time that check blocked. To see which checks fired in a session and how often:
+
+```bash
+wc -l .claude/logs/2026-10-13_5a429071/blocks/*.jsonl
+```
 
 ### Settings
 

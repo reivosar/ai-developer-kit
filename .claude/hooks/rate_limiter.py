@@ -10,6 +10,7 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hook_lib  # noqa: E402
 
+STATE_FILE_VARIABLE = "RATE_STATE_FILE"
 _WINDOW_SECONDS = 60
 _LIMITS: dict[str, int] = {"bash": 30, "mcp": 10}
 
@@ -26,6 +27,11 @@ def _save_state(state: dict, state_file: Path) -> None:
     state_file.write_text(json.dumps(state))
 
 
+def _default_state_file() -> Path:
+    named = os.environ.get(STATE_FILE_VARIABLE)
+    return Path(named) if named else hook_lib.REPO_ROOT / ".claude" / "rate-state.json"
+
+
 def check_rate(
     session_id: str,
     tool_category: str,
@@ -34,13 +40,14 @@ def check_rate(
     """Block a tool call once its session reaches the limit for its category.
 
     Calls are counted per session and tool category over the last
-    _WINDOW_SECONDS seconds, in .claude/rate-state.json unless state_file
-    names another file. Nothing is counted while RATE_LIMIT_DISABLE is set.
+    _WINDOW_SECONDS seconds. The count is kept in state_file, or in the file
+    RATE_STATE_FILE names, or else in .claude/rate-state.json. Nothing is
+    counted while RATE_LIMIT_DISABLE is set.
     """
     if os.environ.get("RATE_LIMIT_DISABLE"):
         return
     if state_file is None:
-        state_file = hook_lib.REPO_ROOT / ".claude" / "rate-state.json"
+        state_file = _default_state_file()
     now = time.time()
     cutoff = now - _WINDOW_SECONDS
     state = _load_state(state_file)

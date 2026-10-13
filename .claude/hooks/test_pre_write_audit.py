@@ -6,10 +6,14 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from hook_lib import REPO_ROOT  # noqa: E402
+import hook_lib  # noqa: E402
 
 HOOK = Path(__file__).parent / "pre-write.py"
-AUDIT_LOG = REPO_ROOT / ".claude" / "audit.log"
+
+
+def _records(record_name: str) -> list[dict]:
+    [record_file] = hook_lib.records_dir().glob(f"*/{record_name}")
+    return [json.loads(line) for line in record_file.read_text().splitlines()]
 
 
 def _run(file_path: str, content: str = "") -> subprocess.CompletedProcess:
@@ -21,13 +25,20 @@ def _run(file_path: str, content: str = "") -> subprocess.CompletedProcess:
     )
 
 
-def test_pre_write_writes_audit_log_entry_for_blocked_outside_repo_write():
-    line_count_before = len(AUDIT_LOG.read_text().splitlines()) if AUDIT_LOG.exists() else 0
+def test_pre_write_writes_audit_entry_for_blocked_outside_repo_write():
     result = _run("/tmp/throwaway.py", "print('hi')")
     assert result.returncode == 2, "Sanity check: /tmp/ write should be blocked"
-    assert AUDIT_LOG.exists(), "audit.log was not created"
-    lines_after = AUDIT_LOG.read_text().splitlines()
-    assert len(lines_after) > line_count_before, "No new audit entry was written to audit.log"
-    last_entry = json.loads(lines_after[-1])
-    assert last_entry["tool_name"] == "Write"
-    assert last_entry["hook_event"] == "PreToolUse"
+    [entry] = _records("audit.jsonl")
+    assert entry["tool_name"] == "Write"
+    assert entry["hook_event"] == "PreToolUse"
+
+
+def test_pre_write_blocking_outside_repo_write_records_the_block():
+    result = _run("/tmp/throwaway.py", "print('hi')")
+    assert result.returncode == 2, result.stderr
+    [entry] = _records("blocks/pre-write.jsonl")
+    assert entry["guard"] == "pre-write"
+    assert entry["hook"] == "pre-write.py"
+    assert entry["details"] == [
+        "Do not stage content in /tmp/ or other external paths."
+    ]

@@ -71,10 +71,21 @@ def test_check_rate_without_state_file_uses_repository_state(
     tmp_path, monkeypatch
 ):
     monkeypatch.delenv("RATE_LIMIT_DISABLE", raising=False)
+    monkeypatch.delenv("RATE_STATE_FILE")
     monkeypatch.setattr(rate_limiter.hook_lib, "REPO_ROOT", tmp_path)
     rate_limiter.check_rate("sess1", "bash")
     state_text = (tmp_path / ".claude" / "rate-state.json").read_text()
     assert len(json.loads(state_text)["sess1"]["bash"]) == 1
+
+
+def test_check_rate_with_state_file_variable_counts_in_that_file(
+    tmp_path, monkeypatch
+):
+    monkeypatch.delenv("RATE_LIMIT_DISABLE", raising=False)
+    named_file = tmp_path / "elsewhere" / "rate-state.json"
+    monkeypatch.setenv("RATE_STATE_FILE", str(named_file))
+    rate_limiter.check_rate("sess1", "bash")
+    assert len(json.loads(named_file.read_text())["sess1"]["bash"]) == 1
 
 
 def test_check_rate_state_persists_across_calls(tmp_path):

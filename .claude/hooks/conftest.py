@@ -7,6 +7,9 @@ from pathlib import Path
 
 import pytest
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import hook_lib  # noqa: E402
+
 # Every stand-in is this one program. What it does comes from the settings
 # file named after it, so a tool that an installer provides later can be
 # described before it exists.
@@ -78,6 +81,22 @@ class ToolStubs:
             command, capture_output=True, text=True,
             env={"PATH": str(self.commands), **environment},
         )
+
+
+@pytest.fixture(autouse=True)
+def records_outside_the_project(
+    tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch
+) -> Path:
+    """Send each test's hook records and rate state to a temporary directory.
+
+    A hook that a test starts inherits the two variables, so no test writes
+    to the project's own .claude/logs or .claude/rate-state.json.
+    """
+    scratch = tmp_path_factory.mktemp("hook-records")
+    monkeypatch.setenv("HOOK_RECORDS_DIR", str(scratch / "logs"))
+    monkeypatch.setenv("RATE_STATE_FILE", str(scratch / "rate-state.json"))
+    hook_lib.remember_session({})
+    return scratch
 
 
 @pytest.fixture
