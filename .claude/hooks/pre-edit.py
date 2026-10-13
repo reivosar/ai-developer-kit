@@ -4,6 +4,11 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import fail_closed  # noqa: E402
+
+# Installed before the guards are imported: one that fails to load must block
+# the edit, not let it through unchecked.
+fail_closed.install()
 import anomaly_guard  # noqa: E402
 import audit_log  # noqa: E402
 import content_guard  # noqa: E402

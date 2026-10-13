@@ -113,6 +113,8 @@ Guard modules (imported by entry points):
 - `mcp_guard.py` — checks MCP tool names against `.claude/mcp-allowlist.txt`
 - `audit_log.py` — appends tool invocations to `.claude/audit.log`
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
+- `fail_closed.py` — standard library only; turns an uncaught error into a block (exit 2)
+- `run-hook.py` — the launcher `settings.json` uses for `pre-bash.py`, `pre-write.py`, `pre-edit.py`, `pre-mcp.py`, and `memory_guard.py`; it installs `fail_closed` first, so an error while a hook loads, or a syntax error in the hook, blocks the tool call
 - `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines())
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`

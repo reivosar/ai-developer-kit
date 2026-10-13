@@ -59,6 +59,24 @@ def test_find_repo_root_with_relative_git_directory_returns_toplevel(
     assert hook_lib._find_repo_root() == tmp_path.resolve()
 
 
+@pytest.mark.parametrize(
+    "failure",
+    [
+        hook_lib.subprocess.CalledProcessError(128, ["git"]),
+        FileNotFoundError("git"),
+    ],
+)
+def test_find_repo_root_when_git_cannot_answer_returns_directory_holding_the_kit(
+    monkeypatch: pytest.MonkeyPatch, failure: Exception
+):
+    def fail(*arguments: object, **options: object) -> str:
+        raise failure
+
+    monkeypatch.setattr(hook_lib.subprocess, "check_output", fail)
+    hooks_directory = Path(hook_lib.__file__).resolve().parent
+    assert hook_lib._find_repo_root() == hooks_directory.parents[1]
+
+
 def test_read_text_with_utf8_file_returns_content(tmp_path: Path):
     document = tmp_path / "guide.md"
     document.write_text("first\nsecond\n")
