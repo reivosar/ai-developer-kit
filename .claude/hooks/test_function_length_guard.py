@@ -35,6 +35,18 @@ BRACE_FUNCTIONS = [
     ("order.ts", "const applyDiscount = (total: number): number =>", "applyDiscount"),
     ("order.ts", "async fetchOrder(id: string): Promise<Order>", "fetchOrder"),
     ("order.js", "static create(lines)", "create"),
+    (
+        "orders.rs",
+        "pub fn apply_discount(total: u32) -> Result<u32, Error>",
+        "apply_discount",
+    ),
+    (
+        "orders.rs",
+        "pub async fn fetch<T: Into<String>>(id: T) -> impl Iterator<Item = u32>",
+        "fetch",
+    ),
+    ("orders.rs", "fn label<'a>(&'a self, name: &'a str) -> &'a str", "label"),
+    ('orders.rs', 'pub unsafe extern "C" fn total(count: u32) -> u32', "total"),
 ]
 NOT_FUNCTIONS = [
     ("order.js", "if (ready)"),
@@ -101,6 +113,18 @@ def test_function_lengths_in_brace_language_leaves_out_comments_and_strings():
     assert function_lengths(code, "orders.go") == [("ApplyDiscount", 2)]
 
 
+def test_function_lengths_in_rust_reads_lifetimes_and_char_literals():
+    code = (
+        "fn label<'a>(name: &'a str) -> &'a str {\n"
+        "    let open = '{';\n"
+        "    let quote = '\\'';\n"
+        "    let text = \"}\";\n"
+        "    name\n"
+        "}\n"
+    )
+    assert function_lengths(code, "orders.rs") == [("label", 4)]
+
+
 @pytest.mark.parametrize("file_name, opening", NOT_FUNCTIONS)
 def test_function_lengths_with_block_that_is_not_a_function_returns_nothing(
     file_name: str, opening: str
@@ -114,6 +138,7 @@ def test_function_lengths_with_block_that_is_not_a_function_returns_nothing(
         ("fun total(): Int = lines.sum()\n", "Order.kt"),
         ("  total(rate: number): number;\n", "order.ts"),
         ("  abstract int total(int rate);\n", "Order.java"),
+        ("    fn next(&mut self) -> Option<Order>;\n", "orders.rs"),
         (_python("apply_discount", 30), "orders.rb"),
     ],
 )

@@ -28,9 +28,11 @@ if not settings.get("silent"):
 if stand_in.with_name(stand_in.name + "-cov").exists():
     print("--cov-branch")
 print(settings.get("output", ""))
-for provided in settings.get("provides", {{}}).get(arguments, []):
+provided_commands = settings.get("provides", {{}}).get(arguments, [])
+for provided in provided_commands:
     shutil.copy(stand_in, stand_in.with_name(provided))
-sys.exit(settings.get("status", 0))
+# A call that provides a command succeeded; any other call ends with status.
+sys.exit(0 if provided_commands else settings.get("status", 0))
 """
 
 

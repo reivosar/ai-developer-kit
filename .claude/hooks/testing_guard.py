@@ -69,7 +69,26 @@ _GO = _Language(
     ),
 )
 
-_LANGUAGES: dict[str, _Language] = {".py": _PYTHON, ".go": _GO}
+_RUST = _Language(
+    test_start=(
+        r"#\[(?:\w+::)*test(?:\([^\]]*\))?\](?:\s*#\[[^\]]*\])*"
+        r"\s*(?:pub\s+)?(?:async\s+)?fn\s+(?P<name>\w+)\s*\("
+    ),
+    assertion=r"\b\w*assert\w*!|\bpanic!|\bunreachable!|#\[should_panic",
+    forbidden=(
+        (
+            _ALWAYS_TRUE,
+            r"\bassert!\(\s*true\s*\)|\bassert_eq!\(\s*(\d+)\s*,\s*\1\s*\)",
+        ),
+        (_SLEEP, r"\bsleep\s*\("),
+        (_SNAPSHOT, r"\bassert_\w*snapshot!|\binsta::"),
+    ),
+)
+
+_LANGUAGES: dict[str, _Language] = {".py": _PYTHON, ".go": _GO, ".rs": _RUST}
+# Rust keeps unit tests in the source file, so every Rust file is read; code
+# outside a test function is never part of a test block.
+_INLINE_TEST_EXTENSIONS = {".rs"}
 for _extension in (".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts"):
     _LANGUAGES[_extension] = _JAVASCRIPT
 
@@ -122,7 +141,8 @@ def find_violations(code: str, file_path: str) -> set[str]:
 def _is_guarded_file(file_path: str) -> bool:
     if os.environ.get("TESTING_GUARD_DISABLE"):
         return False
-    return is_test_file(file_path)
+    extension = os.path.splitext(file_path)[1].lower()
+    return is_test_file(file_path) or extension in _INLINE_TEST_EXTENSIONS
 
 
 def _block_added(file_path: str, added: set[str]) -> None:

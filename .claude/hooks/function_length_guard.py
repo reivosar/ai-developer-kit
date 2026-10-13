@@ -5,7 +5,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Iterator, NamedTuple, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from hook_lib import apply_edit, block, read_text  # noqa: E402
@@ -42,11 +42,36 @@ _JAVASCRIPT = (
     r"(?:async[ \t]*)?(?:<[^>\n]*>[ \t]*)?\(",
     _MEMBER,
 )
-_BRACE_LANGUAGES: dict[str, tuple] = {
-    ".go": _GO, ".kt": _KOTLIN, ".kts": _KOTLIN, ".java": (_MEMBER,),
+_RUST = (
+    r"^[ \t]*(?:pub(?:\([^)\n]*\))?[ \t]+)?"
+    r"(?:(?:default|async|const|unsafe|extern)[ \t]+)*"
+    r"fn[ \t]+(?P<name>\w+)[ \t]*(?:<[^(\n]*>)?[ \t]*\(",
+)
+# In Rust a quote also starts a lifetime ('a), so a character literal is one
+# character or one escape between quotes, and a string may span lines.
+_RUST_LITERALS = re.compile(
+    r"""//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|'(?:\\.[^'\n]*|[^'\\\n])'""",
+    re.DOTALL,
+)
+# A Rust signature may hold "=" in a bound such as Iterator<Item = u32>.
+_RUST_BODY_OPENING = re.compile(r"[^;{}]*?\{")
+
+
+class _BraceLanguage(NamedTuple):
+    patterns: tuple  # regexes with a group "name" that end at the "("
+    literals: re.Pattern = _LITERALS
+    body_opening: re.Pattern = _BODY_OPENING
+
+
+_GO_LANGUAGE = _BraceLanguage(_GO)
+_KOTLIN_LANGUAGE = _BraceLanguage(_KOTLIN)
+_BRACE_LANGUAGES: dict[str, _BraceLanguage] = {
+    ".go": _GO_LANGUAGE, ".kt": _KOTLIN_LANGUAGE, ".kts": _KOTLIN_LANGUAGE,
+    ".java": _BraceLanguage((_MEMBER,)),
+    ".rs": _BraceLanguage(_RUST, _RUST_LITERALS, _RUST_BODY_OPENING),
 }
 for _extension in (".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts"):
-    _BRACE_LANGUAGES[_extension] = _JAVASCRIPT
+    _BRACE_LANGUAGES[_extension] = _BraceLanguage(_JAVASCRIPT)
 
 
 def _is_counted(line: str) -> bool:
@@ -93,11 +118,13 @@ def _is_definition(found: re.Match) -> bool:
     return not words & _NOT_DEFINITIONS
 
 
-def _brace_body_length(code: str, found: re.Match) -> Optional[int]:
+def _brace_body_length(
+    code: str, found: re.Match, body_opening: re.Pattern
+) -> Optional[int]:
     if not _is_definition(found):
         return None
     parameters_end = _closing_index(code, found.end() - 1, "()")
-    opening = _BODY_OPENING.match(code, parameters_end + 1)
+    opening = body_opening.match(code, parameters_end + 1)
     if opening is None:
         return None
     body_start = opening.end() - 1
@@ -105,13 +132,15 @@ def _brace_body_length(code: str, found: re.Match) -> Optional[int]:
     return sum(1 for line in body.split("\n") if line.strip())
 
 
-def _brace_function_lengths(code: str, patterns: tuple) -> Iterator[tuple[str, int]]:
+def _brace_function_lengths(
+    code: str, language: _BraceLanguage
+) -> Iterator[tuple[str, int]]:
     # With comments and strings blanked, a line that held only a comment
     # counts as blank, and every brace left opens or closes a block.
-    code = _LITERALS.sub(_blank_out, code)
-    for pattern in patterns:
+    code = language.literals.sub(_blank_out, code)
+    for pattern in language.patterns:
         for found in re.finditer(pattern, code, re.MULTILINE):
-            length = _brace_body_length(code, found)
+            length = _brace_body_length(code, found, language.body_opening)
             if length is not None:
                 yield found.group("name"), length
 
@@ -121,15 +150,15 @@ def function_lengths(code: str, file_path: str) -> list[tuple[str, int]]:
 
     Blank lines, comment lines, and a Python docstring are not counted.
     Python is read through its syntax tree. Go, JavaScript, TypeScript, Java,
-    and Kotlin are read with patterns, which find a function only when its
-    body opens with a brace after the parameter list. A file in any other
+    Kotlin, and Rust are read with patterns, which find a function only when
+    its body opens with a brace after the parameter list. A file in any other
     language, or Python that does not parse, gives an empty list.
     """
     extension = os.path.splitext(file_path)[1].lower()
     if extension == ".py":
         return _python_function_lengths(code)
-    patterns = _BRACE_LANGUAGES.get(extension, ())
-    return list(_brace_function_lengths(code, patterns))
+    language = _BRACE_LANGUAGES.get(extension)
+    return list(_brace_function_lengths(code, language)) if language else []
 
 
 def _over_limit(lengths: list[tuple[str, int]], accepted: dict[str, int]) -> list[str]:

@@ -23,7 +23,7 @@ chmod +x .claude/hooks/*.sh .claude/hooks/*.py
 
 Open Claude Code in your project directory. The rules, skills, and hooks load automatically.
 
-The hooks call external tools: flake8, yamllint, tsc, markdownlint, go, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, or npm, and installs nothing outside that list. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
+The hooks call external tools: flake8, yamllint, tsc, Biome, markdownlint, go, clippy, cargo-llvm-cov, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, npm, or rustup, and installs nothing outside that list. Rust itself is not installed: the Rust tools need rustup to be present. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
 
 ## Usage
 
@@ -93,7 +93,7 @@ Hook scripts enforce constraints the rules alone cannot:
 
 | Hook | Trigger | Purpose |
 |---|---|---|
-| `pre-bash.py` | Before every Bash command | Enforces the allow/deny list in `settings.json`; runs the git, `cp`, commit, sensitive-path, and rate-limit guards; on `git commit`, blocks staged files that fail static analysis and staged Python code below 90% branch or line coverage |
+| `pre-bash.py` | Before every Bash command | Enforces the allow/deny list in `settings.json`; runs the git, `cp`, commit, sensitive-path, and rate-limit guards; on `git commit`, blocks staged files that fail static analysis and staged Python, Go, Rust, or TypeScript code below 90% coverage |
 | `pre-write.py` / `pre-edit.py` | Before file writes/edits | Blocks paths outside the repository or the active worktree, `.env` files, Japanese characters and emoji in content, Markdown documents over 200 lines, names assembled at runtime, tests that break the test rules, public code whose doc comment is missing or does not match its parameters, function bodies longer than 20 lines, and implementation changes without tests; `pre-write.py` also refuses to overwrite an existing file. Without blocking, both return to the agent the references to a changed function and the location of a duplicate function name |
 | `pre-mcp.py` | Before every MCP tool call | Checks the tool name against `mcp-allowlist.txt`; applies the rate limit |
 | `memory_guard.py` | Before file writes, after file writes/edits | Enforces the 200-line limit on the memory index |

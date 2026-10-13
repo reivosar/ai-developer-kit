@@ -48,6 +48,7 @@ pytest .claude/hooks/test_hook_lib_helpers.py
 pytest .claude/hooks/test_fail_closed.py
 pytest .claude/hooks/test_commit_guard.py
 pytest .claude/hooks/test_coverage_guard.py
+pytest .claude/hooks/test_coverage_runners.py
 pytest .claude/hooks/test_git_guard.py
 ```
 
@@ -92,7 +93,8 @@ Entry points (one process spawn per event):
 Guard modules (imported by entry points):
 - `bash_guard.py`, `git_guard.py`, `cp_guard.py` — Bash safety checks
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
-- `coverage_guard.py` — on `git commit`, runs the tests under pytest-cov and blocks when a staged Python file outside `.claude/` is below 90% branch or line coverage; installs pytest or pytest-cov first when one is missing
+- `coverage_guard.py` — on `git commit`, runs the tests under coverage and blocks when a staged Python, Go, Rust, or TypeScript file outside `.claude/` is below 90%; Python is measured here with pytest-cov, which is installed with pytest when either is missing
+- `coverage_runners.py` — measures Go (`go test -coverprofile`), Rust (`cargo llvm-cov`), and TypeScript (vitest or jest) for `coverage_guard.py` and returns a percent per file
 - `env_file_guard.py` — blocks writes to .env files
 - `content_guard.py` — blocks Japanese characters and emoji in file content
 - `doc_length_guard.py` — blocks a Write or Edit that takes a Markdown document past 200 lines
@@ -101,8 +103,8 @@ Guard modules (imported by entry points):
 - `function_definitions.py` — finds function definitions by file extension; shared by `tdd_guard.py` and `reference_notice.py`
 - `testing_guard.py` — blocks a Write or Edit that adds a test with no assertion, an always-true assertion, sleep, a snapshot, or a name outside the convention
 - `doc_comment_guard.py` — blocks a Write or Edit that adds a public function, method, or type with no doc comment, or with one whose parameter list does not match the signature
-- `doc_comments.py` — finds public definitions with their doc comment and parameters (Python, Go, JavaScript, TypeScript, Java, Kotlin); used by `doc_comment_guard.py`
-- `function_length_guard.py` — blocks a Write or Edit that adds a function body longer than 20 lines, or lengthens one that is already longer (Python, Go, JavaScript, TypeScript, Java, Kotlin)
+- `doc_comments.py` — finds public definitions with their doc comment and parameters (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin); used by `doc_comment_guard.py`
+- `function_length_guard.py` — blocks a Write or Edit that adds a function body longer than 20 lines, or lengthens one that is already longer (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin)
 - `static_analysis_guard.py` — on `git commit`, runs `static-analysis.sh` on the staged files and blocks when it reports a problem
 - `tdd_guard.py` — blocks impl edits without staged tests covering modified functions
 - `worktree_guard.py` — when running inside `.claude/worktrees/<name>`, blocks writes outside that worktree
@@ -111,11 +113,11 @@ Guard modules (imported by entry points):
 - `mcp_guard.py` — checks MCP tool names against `.claude/mcp-allowlist.txt`
 - `audit_log.py` — appends tool invocations to `.claude/audit.log`
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit())
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines())
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command; installs a missing linter before running it
-- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
+- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
 - `conftest.py` — pytest fixture `tool_stubs`: a PATH of stand-in commands for tests that run the shell scripts
 
 ### Settings

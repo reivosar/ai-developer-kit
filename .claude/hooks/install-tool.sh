@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Install the external tools the kit's hooks call.
+# Install the external tools the kit's hooks call: linters and test tools for
+# Python, Go, TypeScript, and Rust, and the package managers they need.
 # Usage: install-tool.sh <tool>...   install each named tool that is missing
 #        install-tool.sh --list      print the names this script accepts
 #
@@ -10,6 +11,7 @@
 set -uo pipefail
 
 KIT_TOOLS="pipx npm go flake8 yamllint pytest pytest-cov tsc markdownlint"
+KIT_TOOLS="$KIT_TOOLS biome cargo-clippy cargo-llvm-cov"
 OS="$(uname -s)"
 
 has_command() {
@@ -85,6 +87,24 @@ install_pytest_package() {
     fi
 }
 
+# Rust itself comes from rustup, which this script does not install: without
+# rustup these fail, and the caller reports the missing tool.
+install_clippy() {
+    has_command rustup && rustup component add clippy
+}
+
+install_llvm_cov() {
+    has_command rustup && rustup component add llvm-tools-preview || return 1
+    local output older='`cargo-llvm-cov ([0-9.]+)` supports rustc'
+    output=$(cargo install cargo-llvm-cov 2>&1) && return 0
+    echo "$output"
+    # A toolchain too old for the newest release is told by cargo which
+    # release it can build; that release is installed with its locked
+    # dependencies, which were chosen for the same toolchain.
+    [[ "$output" =~ $older ]] || return 1
+    cargo install cargo-llvm-cov --version "${BASH_REMATCH[1]}" --locked
+}
+
 install_tool() {
     case "$1" in
         pipx) install_pipx ;;
@@ -94,6 +114,9 @@ install_tool() {
         pytest | pytest-cov) install_pytest_package "$1" ;;
         tsc) install_with_npm typescript ;;
         markdownlint) install_with_npm markdownlint-cli ;;
+        biome) install_with_npm @biomejs/biome ;;
+        cargo-clippy) install_clippy ;;
+        cargo-llvm-cov) install_llvm_cov ;;
     esac
 }
 
