@@ -16,6 +16,7 @@ import commit_guard  # noqa: E402
 import coverage_guard  # noqa: E402
 import rate_limiter  # noqa: E402
 import static_analysis_guard  # noqa: E402
+import template_guard  # noqa: E402
 from bash_guard import (  # noqa: E402
     check_python3_path,
     check_raw_operators,
@@ -77,6 +78,7 @@ def main() -> None:
     check_raw_operators(command)
     _block_unlisted_command(command)
     _block_unsafe_command(command)
+    template_guard.check_description(command)
     _block_unfit_commit(command)
     anomaly_guard.check_sensitive_path(command)
     rate_limiter.check_rate(data.get("session_id", "unknown"), "bash")

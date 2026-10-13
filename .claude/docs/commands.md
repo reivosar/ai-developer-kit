@@ -26,21 +26,10 @@ Always use this form. Never `git push --force` without explicit user instruction
 ## pr-create
 
 ```bash
-gh pr create --title "<title>" --body "$(cat <<'EOF'
-## What
-
-<1-3 bullets describing what changed>
-
-## Why
-
-<motivation — what problem this solves or what requirement it fulfills>
-
-## How to test
-
-<concrete steps a reviewer can follow to verify the change works>
-EOF
-)"
+gh pr create --title "<title>" --body-file .trash/pr-body.md
 ```
+
+Write the body file first, with the Write tool, from the project's pull request template, or from `.claude/templates/github/PULL_REQUEST_TEMPLATE.md` when the project has none: keep every heading, replace each comment with the text, and delete an optional section that has nothing to say. `.trash/` is ignored by git. The pre-bash hook blocks the command when a required section is missing or empty.
 
 Title rules: imperative mood, under 72 characters, no trailing period. Derive from commit log (single commit: use subject line; multiple commits: summarize what the set achieves).
 
@@ -141,24 +130,10 @@ gh issue create \
   --repo reivosar/ai-developer-kit \
   --title "<title>" \
   --label "<label>" \
-  --body "$(cat <<'EOF'
-## Insight
-
-<What was missing or should be improved>
-
-## Context
-
-Project: <project name or path>
-Task: <what was being worked on when this was noticed>
-
-## Suggested change
-
-<Which file to change and what to add or modify — leave blank if unknown>
-EOF
-)"
+  --body-file .trash/issue-body.md
 ```
 
-Files a GitHub issue on the kit repository. Choose a label from: `rule-gap`, `skill-gap`, `new-pattern`, `enhancement`.
+Files a GitHub issue on the kit repository. Choose a label from: `rule-gap`, `skill-gap`, `new-pattern`, `enhancement`. Write the body file first from `.claude/templates/github/ISSUE_TEMPLATE/kit_feedback.md`, the same way as for **pr-create**. For an issue on the project itself, drop `--repo` and write the body from `bug_report.md` or `feature_request.md` in the same directory, or from one of the project's own issue templates.
 
 ## find-docs
 
