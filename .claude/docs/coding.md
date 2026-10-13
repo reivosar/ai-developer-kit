@@ -83,7 +83,7 @@ A change location that text search cannot reach from the words of a request or f
 
 ## Enforcement
 
-A rule stated only in prose is not reliably followed, so each rule is paired with the hook that checks it. A rule with no hook is listed as unchecked to keep the gap visible.
+A rule stated only in prose is not reliably followed, so each rule is paired with the hook that checks it. A rule with no hook is listed as unchecked to keep the gap visible. Each block is recorded in `.claude/logs/<date>_<session>/blocks/<guard>.jsonl`, one file per check, so the checks that fired in a session can be counted.
 
 | Rule | Check |
 |---|---|

@@ -7,6 +7,12 @@ contains no Japanese or emoji bytes — avoiding false-positive blocks.
 import os
 import subprocess
 import sys
+import tempfile
+
+# Hooks run by this suite write to a temporary directory, not to .claude/logs.
+RECORDS = tempfile.TemporaryDirectory(prefix="hook-records-")
+os.environ["HOOK_RECORDS_DIR"] = RECORDS.name
+os.environ["RATE_STATE_FILE"] = os.path.join(RECORDS.name, "rate-state.json")
 
 GUARD = os.path.join(os.path.dirname(__file__), "content_guard.py")
 

@@ -111,16 +111,25 @@ Guard modules (imported by entry points):
 - `anomaly_guard.py` — blocks sensitive system paths (`~/.ssh`, `/etc/passwd`, ...) and paths escaping the repo root
 - `prompt_injection_guard.py` — blocks prompt injection patterns in user prompts
 - `mcp_guard.py` — checks MCP tool names against `.claude/mcp-allowlist.txt`
-- `audit_log.py` — appends tool invocations to `.claude/audit.log`
-- `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`
+- `audit_log.py` — appends each tool call to `audit.jsonl` in the session's record directory
+- `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`, or by the file `RATE_STATE_FILE` names
 - `fail_closed.py` — standard library only; turns an uncaught error into a block (exit 2)
 - `run-hook.py` — the launcher `settings.json` uses for `pre-bash.py`, `pre-write.py`, `pre-edit.py`, `pre-mcp.py`, and `memory_guard.py`; it installs `fail_closed` first, so an error while a hook loads, or a syntax error in the hook, blocks the tool call
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines())
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines(), records_dir(), remember_session(), session_records_dir(), append_record()); `block()` records each block before it exits
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command; installs a missing linter before running it
 - `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
 - `conftest.py` — pytest fixture `tool_stubs`: a PATH of stand-in commands for tests that run the shell scripts
+
+### Records
+
+`.claude/logs/<date>_<session>/` — one directory per session, named by the UTC date of the session's first record and the first eight characters of its session id (`2026-10-13_5a429071`). Git ignores `.claude/logs/`.
+
+- `audit.jsonl` — every tool call, written by `audit_log.py`
+- `blocks/<guard>.jsonl` — one line per block, in the file of the guard that blocked it; `wc -l .claude/logs/<date>_<session>/blocks/*.jsonl` counts a session's blocks per check
+
+A hook failure is recorded under `hook_lib`. A failure while a hook loads (`fail_closed.py`) is not recorded. Tests write to a temporary directory: `conftest.py` and the script-style suites set `HOOK_RECORDS_DIR` and `RATE_STATE_FILE`.
 
 ### Settings
 

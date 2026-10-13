@@ -8,10 +8,14 @@ from typing import Optional
 
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from hook_lib import REPO_ROOT  # noqa: E402
+import hook_lib  # noqa: E402
 
 HOOK = Path(__file__).parent / "pre-edit.py"
-AUDIT_LOG = REPO_ROOT / ".claude" / "audit.log"
+
+
+def _records(record_name: str) -> list[dict]:
+    [record_file] = hook_lib.records_dir().glob(f"*/{record_name}")
+    return [json.loads(line) for line in record_file.read_text().splitlines()]
 
 
 def _run(
@@ -44,15 +48,19 @@ def test_pre_edit_allows_file_path_inside_repo_root():
     )
 
 
-def test_pre_edit_writes_audit_log_entry_before_guards_run():
-    line_count_before = len(AUDIT_LOG.read_text().splitlines()) if AUDIT_LOG.exists() else 0
+def test_pre_edit_writes_audit_entry_before_guards_run():
     _run(str(HOOK), old_string="")
-    assert AUDIT_LOG.exists(), "audit.log was not created"
-    lines_after = AUDIT_LOG.read_text().splitlines()
-    assert len(lines_after) > line_count_before, "No new audit entry was written to audit.log"
-    last_entry = json.loads(lines_after[-1])
-    assert last_entry["tool_name"] == "Edit"
-    assert last_entry["hook_event"] == "PreToolUse"
+    [entry] = _records("audit.jsonl")
+    assert entry["tool_name"] == "Edit"
+    assert entry["hook_event"] == "PreToolUse"
+
+
+def test_pre_edit_blocking_a_path_records_the_block_under_its_guard():
+    result = _run("/tmp/evil.py", old_string="")
+    assert result.returncode == 2, result.stderr
+    [entry] = _records("blocks/anomaly_guard.jsonl")
+    assert entry["guard"] == "anomaly_guard"
+    assert entry["hook"] == "pre-edit.py"
 
 
 def test_pre_edit_allows_outside_repo_when_path_escape_disabled():
