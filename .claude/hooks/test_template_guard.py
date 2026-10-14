@@ -150,6 +150,37 @@ def test_check_description_with_inline_body_missing_a_section_exits_2(
     assert "missing section '## Why'" in _blocked_reasons(capsys, command)
 
 
+def _here_document_command(body: str, opening: str = "<<'EOF'", marker: str = "EOF") -> str:
+    return f'gh pr create --title t --body "$(cat {opening}\n{body}{marker}\n)"'
+
+
+@pytest.mark.parametrize(
+    "opening, marker",
+    [("<<'EOF'", "EOF"), ("<<EOF", "EOF"), ("<<-'EOF'", "EOF"), ("<<'BODY'", "BODY")],
+)
+def test_check_description_with_here_document_and_empty_last_section_exits_2(
+    project: Path, capsys: pytest.CaptureFixture, opening: str, marker: str
+):
+    body = "## What\n\nAdds the guard.\n\n## Why\n\n"
+    command = _here_document_command(body, opening, marker)
+    assert "empty section '## Why'" in _blocked_reasons(capsys, command)
+
+
+def test_check_description_with_complete_here_document_body_does_not_block(
+    project: Path,
+):
+    command = _here_document_command(COMPLETE_BODY)
+    assert template_guard.check_description(command) is None
+
+
+def test_check_description_with_here_document_text_naming_the_marker_keeps_it(
+    project: Path,
+):
+    body = "## What\n\nAdds the guard.\n\n## Why\n\nThe EOF marker was read as text.\n"
+    command = _here_document_command(body)
+    assert template_guard.check_description(command) is None
+
+
 @pytest.mark.parametrize(
     "location",
     [

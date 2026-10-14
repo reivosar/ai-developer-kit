@@ -24,6 +24,12 @@ USE_BODY_FILE = "Write the body to a file from the template and pass it with --b
 _DESCRIPTION_RE = re.compile(r"^gh\s+(pr|issue)\s+(create|edit)\b")
 _HEADING_RE = re.compile(r"^## .*$", re.MULTILINE)
 _COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+# A body passed as "$(cat <<'EOF' ... EOF)": the text is what lies between
+# the opening line and the end marker.
+_HERE_DOCUMENT_RE = re.compile(
+    r"\A\$\(cat <<-?\s*['\"]?(?P<marker>\w+)['\"]?\n(?P<text>.*?)(?P=marker)\s*\)\s*\Z",
+    re.DOTALL,
+)
 
 
 def _sections(text: str) -> dict[str, str]:
@@ -94,12 +100,18 @@ def _read_body_file(name: str) -> str:
         block(f"The body file '{name}' cannot be read.", str(error))
 
 
+def _inline_body(value: str) -> str:
+    here_document = _HERE_DOCUMENT_RE.match(value)
+    return here_document.group("text") if here_document else value
+
+
 def _body(segment: str) -> Optional[str]:
     words = _words(segment)
     body_file = _option_value(words, BODY_FILE_OPTIONS)
     if body_file is not None:
         return _read_body_file(body_file)
-    return _option_value(words, BODY_OPTIONS)
+    inline = _option_value(words, BODY_OPTIONS)
+    return None if inline is None else _inline_body(inline)
 
 
 def _project_pull_request_template(project: Path) -> Optional[Path]:
