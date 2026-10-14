@@ -25,7 +25,8 @@ HOOK_MODULES = [
     "pre-mcp.py", "pre-write.py", "prompt_injection_guard.py",
     "rate_limiter.py", "reference_notice.py", "run-hook.py",
     "static_analysis_guard.py",
-    "tdd_guard.py", "testing_guard.py", "user-prompt-submit.py",
+    "tdd_guard.py", "template_guard.py", "testing_guard.py",
+    "user-prompt-submit.py",
     "worktree_guard.py",
 ]
 PY_DOCUMENTED = (

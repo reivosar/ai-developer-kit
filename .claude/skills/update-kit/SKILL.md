@@ -28,7 +28,7 @@ If the clone fails due to authentication, stop and ask the user to run `gh auth 
 
 ## Step 2: Sync docs, rules, skills, and hooks
 
-Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`, `.claude/hooks`.
+Target directories: `.claude/docs`, `.claude/rules`, `.claude/skills`, `.claude/hooks`, `.claude/templates`.
 
 ### 2a. Enumerate upstream files
 

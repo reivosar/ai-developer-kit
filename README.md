@@ -23,6 +23,13 @@ chmod +x .claude/hooks/*.sh .claude/hooks/*.py
 
 Open Claude Code in your project directory. The rules, skills, and hooks load automatically.
 
+To have GitHub offer the kit's pull request and issue templates on its pages, copy them into `.github/`. The hooks check pull request and issue bodies against them either way:
+
+```bash
+mkdir -p .github
+cp -r .claude/templates/github/. .github/
+```
+
 The hooks call external tools: flake8, yamllint, tsc, Biome, markdownlint, go, clippy, cargo-llvm-cov, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, npm, or rustup, and installs nothing outside that list. Rust itself is not installed: the Rust tools need rustup to be present. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
 
 ## Usage
@@ -74,6 +81,7 @@ Everything lives under `.claude/`. There is no application code in this reposito
   mcp-allowlist.txt  # MCP tool names that pre-mcp.py lets through
   worktrees/      # Temporary git worktrees created per task (gitignored)
   logs/           # Hook records, one directory per session (gitignored)
+  templates/      # Pull request and issue templates the hooks check bodies against
 ```
 
 ### Rules
@@ -94,7 +102,7 @@ Hook scripts enforce constraints the rules alone cannot:
 
 | Hook | Trigger | Purpose |
 |---|---|---|
-| `pre-bash.py` | Before every Bash command | Enforces the allow/deny list in `settings.json`; runs the git, `cp`, commit, sensitive-path, and rate-limit guards; on `git commit`, blocks staged files that fail static analysis and staged Python, Go, Rust, or TypeScript code below 90% coverage |
+| `pre-bash.py` | Before every Bash command | Enforces the allow/deny list in `settings.json`; runs the git, `cp`, commit, sensitive-path, and rate-limit guards; blocks `gh pr create` and `gh issue create` when the body does not follow its template; on `git commit`, blocks staged files that fail static analysis and staged Python, Go, Rust, or TypeScript code below 90% coverage |
 | `pre-write.py` / `pre-edit.py` | Before file writes/edits | Blocks paths outside the repository or the active worktree, `.env` files, Japanese characters and emoji in content, Markdown documents over 200 lines, names assembled at runtime, tests that break the test rules, public code whose doc comment is missing or does not match its parameters, function bodies longer than 20 lines, and implementation changes without tests; `pre-write.py` also refuses to overwrite an existing file. Without blocking, both return to the agent the references to a changed function and the location of a duplicate function name |
 | `pre-mcp.py` | Before every MCP tool call | Checks the tool name against `mcp-allowlist.txt`; applies the rate limit |
 | `memory_guard.py` | Before file writes, after file writes/edits | Enforces the 200-line limit on the memory index |

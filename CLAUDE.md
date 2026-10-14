@@ -44,6 +44,7 @@ pytest .claude/hooks/test_doc_comment_guard.py
 pytest .claude/hooks/test_function_length_guard.py
 pytest .claude/hooks/test_static_analysis_guard.py
 pytest .claude/hooks/test_bash_guard.py
+pytest .claude/hooks/test_template_guard.py
 pytest .claude/hooks/test_hook_lib_helpers.py
 pytest .claude/hooks/test_fail_closed.py
 pytest .claude/hooks/test_commit_guard.py
@@ -77,7 +78,7 @@ This kit is Claude Code configuration only — no application code. Everything l
 `.claude/hooks/` — one entry-point script per Claude Code tool event; logic lives in guard modules.
 
 Entry points (one process spawn per event):
-- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + commit checks + static analysis guard + coverage guard + anomaly guard
+- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + template guard + commit checks + static analysis guard + coverage guard + anomaly guard
 - `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
 - `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
@@ -106,6 +107,7 @@ Guard modules (imported by entry points):
 - `doc_comments.py` — finds public definitions with their doc comment and parameters (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin); used by `doc_comment_guard.py`
 - `function_length_guard.py` — blocks a Write or Edit that adds a function body longer than 20 lines, or lengthens one that is already longer (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin)
 - `static_analysis_guard.py` — on `git commit`, runs `static-analysis.sh` on the staged files and blocks when it reports a problem
+- `template_guard.py` — blocks `gh pr create`, `gh pr edit`, `gh issue create`, and `gh issue edit` when the body lacks a required section of its template or leaves a section empty; the templates are the project's own under `.github/`, or the kit's under `.claude/templates/github/`
 - `tdd_guard.py` — blocks impl edits without staged tests covering modified functions
 - `worktree_guard.py` — when running inside `.claude/worktrees/<name>`, blocks writes outside that worktree
 - `anomaly_guard.py` — blocks sensitive system paths (`~/.ssh`, `/etc/passwd`, ...) and paths escaping the repo root
@@ -121,6 +123,10 @@ Guard modules (imported by entry points):
 - `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command; installs a missing linter before running it
 - `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
 - `conftest.py` — pytest fixture `tool_stubs`: a PATH of stand-in commands for tests that run the shell scripts
+
+### Templates
+
+`.claude/templates/github/` — the pull request template and the issue templates (bug report, feature request, kit feedback). `.github/` holds identical copies so GitHub offers them on its pages; `test_template_guard.py` fails when a copy differs. Change a template in `.claude/templates/github/` and copy it to `.github/`. The source of each section is listed in `.claude/docs/git-workflow.md`.
 
 ### Records
 
