@@ -26,22 +26,48 @@ def _separator_length(command: str, index: int) -> int:
     return 1 if command[index] in ";|" else 0
 
 
-def split_segments(command: str) -> list[str]:
-    """Split on &&, ;, and | outside of single or double quotes."""
-    pieces: list[str] = []
+def _syntax_positions(command: str) -> list[tuple[int, bool, bool]]:
+    positions: list[tuple[int, bool, bool]] = []
     in_single = in_double = False
-    start = index = 0
+    index = 0
     while index < len(command):
+        if command[index] == "\\" and not in_single:
+            index += 2  # the shell reads the character after a backslash as text
+            continue
         in_single, in_double = _quote_state(command[index], in_single, in_double)
-        quoted = in_single or in_double
-        length = 0 if quoted else _separator_length(command, index)
+        positions.append((index, in_single, in_double))
+        index += 1
+    return positions
+
+
+def split_segments(command: str) -> list[str]:
+    """Split on &&, ;, and | outside of single or double quotes.
+
+    A character after a backslash is text, as the shell reads it, so an
+    escaped quote does not open or close a quoted part.
+    """
+    pieces: list[str] = []
+    start = 0
+    for index, in_single, in_double in _syntax_positions(command):
+        skipped = in_single or in_double or index < start
+        length = 0 if skipped else _separator_length(command, index)
         if length:
             pieces.append(command[start:index])
             start = index + length
-        index += length or 1
     pieces.append(command[start:])
     segments = [piece.strip() for piece in pieces if piece.strip()]
     return segments if segments else [command]
+
+
+def command_words(segment: str) -> list[str]:
+    """Return the words of one command segment as the shell would split them.
+
+    A segment with an unbalanced quote is split on whitespace instead.
+    """
+    try:
+        return shlex.split(segment)
+    except ValueError:
+        return segment.split()
 
 
 def load_patterns(settings_path: str, key: str) -> list[str]:
@@ -64,27 +90,75 @@ def is_whitelisted(command: str, patterns: list[str]) -> bool:
     return all(any(fnmatch.fnmatch(seg, p) for p in patterns) for seg in segments)
 
 
+_SUBSTITUTION = "command substitution is not permitted. Run the inner command on its own."
+_PROCESS_SUBSTITUTION = (
+    "process substitution '<(' is not permitted. Run the inner command on its own."
+)
+_BACKGROUND = "background operator '&' is not permitted. Run each command separately."
+_ANSI_C_QUOTING = (
+    "ANSI-C quoting $'...' is not permitted: its escapes hide where a quote ends."
+)
+_UNQUOTED_OPERATORS = {
+    ">": "shell redirect operator '>' is not permitted. "
+         "Use explicit file-writing tools instead.",
+    "|": "pipe operator '|' is not permitted. Run each command separately.",
+    "\n": "a second command line is not permitted. Run each command separately.",
+}
+FIND_ACTIONS = (
+    "-delete", "-exec", "-execdir", "-ok", "-okdir",
+    "-fprint", "-fprint0", "-fprintf", "-fls",
+)
+
+
+def _is_lone_ampersand(command: str, index: int) -> bool:
+    neighbors = command[max(index - 1, 0):index + 2]
+    return command[index] == "&" and "&&" not in neighbors
+
+
+def _operator_problem(command: str, index: int, in_double: bool) -> Optional[str]:
+    char, pair = command[index], command[index:index + 2]
+    if pair == "$(" or char == "`":
+        return _SUBSTITUTION  # the shell runs it inside double quotes too
+    if in_double:
+        return None
+    if pair == "$'":
+        return _ANSI_C_QUOTING
+    if pair == "<(":
+        return _PROCESS_SUBSTITUTION
+    if _is_lone_ampersand(command, index):
+        return _BACKGROUND
+    return _UNQUOTED_OPERATORS.get(char)
+
+
 def check_raw_operators(command: str) -> None:
-    """Block '>' or '|' outside of quotes before the allow list runs."""
-    in_single = in_double = False
-    for ch in command:
-        if ch == "'" and not in_double:
-            in_single = not in_single
-        elif ch == '"' and not in_single:
-            in_double = not in_double
-        elif not in_single and not in_double:
-            if ch == '>':
-                hook_lib.block(
-                    "shell redirect operator '>' is not permitted. "
-                    "Use explicit file-writing tools instead.",
-                    f"Command: {command[:300]}",
-                )
-            elif ch == '|':
-                hook_lib.block(
-                    "pipe operator '|' is not permitted. "
-                    "Run each command separately.",
-                    f"Command: {command[:300]}",
-                )
+    """Block shell syntax that runs or chains a command the allow list never sees.
+
+    Outside quotes: a redirect, a pipe, a lone '&', a second line, and
+    process substitution. Outside single quotes: command substitution, which
+    the shell also runs inside double quotes. A character after a backslash
+    is text.
+    """
+    stripped = command.strip()
+    for index, in_single, in_double in _syntax_positions(stripped):
+        problem = None if in_single else _operator_problem(stripped, index, in_double)
+        if problem:
+            hook_lib.block(problem, f"Command: {command[:300]}")
+
+
+def check_find_actions(command: str) -> None:
+    """Block a find that deletes, runs a command, or writes a file.
+
+    find is allowed for listing files; the actions in FIND_ACTIONS do more.
+    """
+    for segment in split_segments(command):
+        words = command_words(segment)
+        actions = [word for word in words if word in FIND_ACTIONS]
+        if words[:1] == ["find"] and actions:
+            hook_lib.block(
+                f"'find {actions[0]}' is not permitted: find may list files,"
+                " not act on them.",
+                f"Command: {command[:300]}",
+            )
 
 
 def _runner_arguments(segment: str) -> list[str]:

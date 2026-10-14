@@ -35,6 +35,95 @@ def test_split_segments_with_no_segment_returns_the_command(command: str):
 
 
 @pytest.mark.parametrize(
+    "command, segments",
+    [
+        ('git status \\" && gh pr close 1 \\"', ['git status \\"', 'gh pr close 1 \\"']),
+        ('grep "a\\"b; c" notes.md', ['grep "a\\"b; c" notes.md']),
+        ("echo a\\;b", ["echo a\\;b"]),
+        ("echo 'a\\' ; ls", ["echo 'a\\'", "ls"]),
+    ],
+)
+def test_split_segments_with_backslash_reads_the_next_character_as_text(
+    command: str, segments: list
+):
+    assert bash_guard.split_segments(command) == segments
+
+
+@pytest.mark.parametrize(
+    "command, problem",
+    [
+        ("git diff > patch.txt", "shell redirect operator '>'"),
+        ("git log | wc", "pipe operator '|'"),
+        ("git status $(gh pr close 1)", "command substitution"),
+        ("git status `gh pr close 1`", "command substitution"),
+        ('git log --format="$(gh pr close 1)"', "command substitution"),
+        ("cat <(gh pr close 1)", "process substitution"),
+        ("git status & gh pr close 1", "background operator '&'"),
+        ("git status\ngh pr close 1", "second command line"),
+        ('git status \\" | gh pr close 1 \\"', "pipe operator '|'"),
+        ("git status $'\\'' ; gh pr close 1 #'", "ANSI-C quoting"),
+    ],
+)
+def test_check_raw_operators_with_syntax_that_runs_another_command_exits_2(
+    command: str, problem: str, capsys: pytest.CaptureFixture
+):
+    with pytest.raises(SystemExit) as blocked:
+        bash_guard.check_raw_operators(command)
+    assert blocked.value.code == 2
+    assert problem in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git log --format='%h $(not run) `nor this`'",
+        'git commit -m "first line\n\nsecond paragraph"',
+        "gh issue list \\\n  --label bug",
+        'grep -n "a\\|b" README.md',
+        'grep -n "say \\"hi\\" | now" README.md',
+        "git status && git log",
+        "echo 'a & b > c'",
+        "git log --format=%h\n",
+    ],
+)
+def test_check_raw_operators_with_quoted_or_escaped_syntax_does_not_block(
+    command: str,
+):
+    assert bash_guard.check_raw_operators(command) is None
+
+
+@pytest.mark.parametrize(
+    "command, action",
+    [
+        ("find . -name '*.py' -delete", "-delete"),
+        ("find . -type f -exec cat {} +", "-exec"),
+        ("cd src && find . -execdir ls {} +", "-execdir"),
+        ("find . -name '*.md' -fprint found.txt", "-fprint"),
+    ],
+)
+def test_check_find_actions_with_action_that_changes_or_runs_exits_2(
+    command: str, action: str, capsys: pytest.CaptureFixture
+):
+    with pytest.raises(SystemExit) as blocked:
+        bash_guard.check_find_actions(command)
+    assert blocked.value.code == 2
+    assert f"find {action}" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "find . -name '*.md' -not -path '*/.git/*'",
+        "find . -path './.claude/docs/*' -type f",
+        "grep -r -delete .",
+        "find . -name 'unbalanced",
+    ],
+)
+def test_check_find_actions_with_listing_only_does_not_block(command: str):
+    assert bash_guard.check_find_actions(command) is None
+
+
+@pytest.mark.parametrize(
     "command, reason",
     [
         (

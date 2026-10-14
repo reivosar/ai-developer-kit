@@ -6,10 +6,10 @@
       "Bash(git diff*)",
       "Bash(git fetch*)",
       "Bash(git pull)",
-      "Bash(git pull origin *)",
-      "Bash(git pull --ff-only*)",
-      "Bash(git merge)",
-      "Bash(git merge *)",
+      "Bash(git pull origin main)",
+      "Bash(git pull --ff-only)",
+      "Bash(git pull --ff-only origin main)",
+      "Bash(git merge origin/main)",
       "Bash(git branch)",
       "Bash(git branch -a*)",
       "Bash(git branch -l*)",
@@ -140,7 +140,10 @@
       "Bash(git commit *--no-verify*)",
       "Bash(git pull --force*)",
       "Bash(git pull --rebase*)",
-      "Bash(gh auth logout*)"
+      "Bash(gh auth logout*)",
+      "Bash(gh *--delete-last*)",
+      "Bash(gh label create *--force*)",
+      "Bash(gh label create * -f*)"
     ],
     "defaultMode": "acceptEdits"
   },
