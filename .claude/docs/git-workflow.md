@@ -50,6 +50,8 @@ Subject line rules:
 5. Delete the branch immediately after merge
 6. Never force-push on diverged history — report the conflict to the user instead
 
+The user merges and closes pull requests. The agent opens them and never merges into `main`: `pre-bash.py` blocks `gh pr merge`, `gh pr close`, `git push` while on `main`, and `git merge` or `git pull` of any branch other than `main`.
+
 PR body: follow the project's pull request template, or `.claude/templates/github/PULL_REQUEST_TEMPLATE.md` when the project has none. See Pull Request and Issue Content below.
 
 Merge requirements:
@@ -62,7 +64,7 @@ Merge requirements:
 - **Default: squash and merge** — one commit per PR on `main`; keeps history linear
 - **Exception: merge commit** — for release branches or when commit history detail matters
 - **Never rebase `main` onto a feature branch** — only rebase feature branches onto `main`
-- Force push is forbidden on `main`; permitted on personal feature branches only
+- Force push is forbidden on every branch for the agent: the allow list has no form of it, and `pre-bash.py` blocks `--force` on every git command
 
 ## Branch Lifecycle
 

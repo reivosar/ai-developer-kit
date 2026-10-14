@@ -78,7 +78,7 @@ This kit is Claude Code configuration only — no application code. Everything l
 `.claude/hooks/` — one entry-point script per Claude Code tool event; logic lives in guard modules.
 
 Entry points (one process spawn per event):
-- `pre-bash.py` — PreToolUse[Bash]: allow/deny list + git/cp guards + template guard + commit checks + static analysis guard + coverage guard + anomaly guard
+- `pre-bash.py` — PreToolUse[Bash]: shell syntax guard + allow/deny list + git/cp/find guards + template guard + commit checks + static analysis guard + coverage guard + anomaly guard
 - `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
 - `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
@@ -92,7 +92,9 @@ Entry points (one process spawn per event):
 - SessionStart runs an inline `chmod +x` over hook scripts (no script file)
 
 Guard modules (imported by entry points):
-- `bash_guard.py`, `git_guard.py`, `cp_guard.py` — Bash safety checks
+- `bash_guard.py` — splits a command into segments (quotes and backslash escapes read as the shell reads them) and checks it against the allow and deny lists; blocks shell syntax that can hide a second command (`$(...)`, backticks, `<(...)`, a lone `&`, a second line, `$'...'`, redirects, pipes), `find` actions, and script paths outside the project
+- `git_guard.py` — blocks `git stash drop`/`clear`, `git checkout --`, `git branch -D`, a commit or push on `main`, options that force, delete, discard, or overwrite (listed per subcommand), `git fetch` into a local branch, `git add` of every file, and a git subcommand the allow list does not name (`git difftool` matched `git diff*`)
+- `cp_guard.py` — blocks `cp` from outside the project and its forcing options; moves an existing destination to the trash first
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
 - `coverage_guard.py` — on `git commit`, runs the tests under coverage and blocks when a staged Python, Go, Rust, or TypeScript file outside `.claude/` is below 90%; Python is measured here with pytest-cov, which is installed with pytest when either is missing
 - `coverage_runners.py` — measures Go (`go test -coverprofile`), Rust (`cargo llvm-cov`), and TypeScript (vitest or jest) for `coverage_guard.py` and returns a percent per file
