@@ -27,7 +27,7 @@ def _run_hook(
 ) -> subprocess.CompletedProcess:
     env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1", **extra_env}
     return subprocess.run(
-        ["python3", str(HOOKS_DIR / hook_name)],
+        [sys.executable, str(HOOKS_DIR / hook_name)],
         input=json.dumps({"tool_input": tool_input}),
         capture_output=True,
         text=True,

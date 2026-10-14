@@ -514,11 +514,12 @@ cases = [
 passed = failed = 0
 for cmd, expect_blocked in cases:
     payload = json.dumps({"tool_input": {"command": cmd}})
-    # This suite tests the allow list alone: the rate limit and the template
-    # check, which have suites of their own, are switched off.
+    # This suite tests the allow list alone: the rate limit, the template
+    # check, and the commit-time test runs have suites of their own.
     env = {
         **os.environ, "MOCK_BRANCH": "feat/test-branch",
         "RATE_LIMIT_DISABLE": "1", "TEMPLATE_GUARD_DISABLE": "1",
+        "COVERAGE_GUARD_DISABLE": "1", "STATIC_ANALYSIS_GUARD_DISABLE": "1",
     }
     result = subprocess.run(
         ["python3", HOOK],
@@ -559,7 +560,10 @@ branch_cases = [
 b_passed = b_failed = 0
 for cmd, expect_blocked, branch in branch_cases:
     payload = json.dumps({"tool_input": {"command": cmd}})
-    env = {**os.environ, "MOCK_BRANCH": branch, "RATE_LIMIT_DISABLE": "1"}
+    env = {
+        **os.environ, "MOCK_BRANCH": branch, "RATE_LIMIT_DISABLE": "1",
+        "COVERAGE_GUARD_DISABLE": "1", "STATIC_ANALYSIS_GUARD_DISABLE": "1",
+    }
     result = subprocess.run(
         ["python3", HOOK],
         input=payload, capture_output=True, text=True, env=env

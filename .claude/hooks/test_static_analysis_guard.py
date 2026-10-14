@@ -112,7 +112,7 @@ def _commit_through_pre_bash() -> subprocess.CompletedProcess:
         **os.environ, "RATE_LIMIT_DISABLE": "1", "COVERAGE_GUARD_DISABLE": "1",
     }
     return subprocess.run(
-        ["python3", str(HOOKS_DIR / "pre-bash.py")],
+        [sys.executable, str(HOOKS_DIR / "pre-bash.py")],
         input=payload, capture_output=True, text=True, env=env,
     )
 

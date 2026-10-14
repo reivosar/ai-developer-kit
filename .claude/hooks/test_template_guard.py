@@ -263,7 +263,7 @@ def test_pre_bash_with_pull_request_body_missing_sections_exits_2():
     command = 'gh pr create --title "Add the guard" --body "## What\n\nAdds it.\n"'
     payload = json.dumps({"tool_name": "Bash", "tool_input": {"command": command}})
     result = subprocess.run(
-        ["python3", str(HOOKS_DIR / "pre-bash.py")], input=payload,
+        [sys.executable, str(HOOKS_DIR / "pre-bash.py")], input=payload,
         capture_output=True, text=True, env={**os.environ, "RATE_LIMIT_DISABLE": "1"},
     )
     assert result.returncode == 2, result.stderr

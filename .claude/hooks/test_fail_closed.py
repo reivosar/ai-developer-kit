@@ -27,7 +27,7 @@ WRITE = json.dumps(
 
 def _run_hook(hook_name: str, stdin_text: str) -> subprocess.CompletedProcess:
     return subprocess.run(
-        ["python3", str(HOOKS_DIR / hook_name)],
+        [sys.executable, str(HOOKS_DIR / hook_name)],
         input=stdin_text,
         capture_output=True,
         text=True,
@@ -72,7 +72,7 @@ def _kit_copy(project: Path) -> Path:
 def _run_copied_hook(hooks: Path, hook_name: str, payload: str):
     environment = {**os.environ, "RATE_LIMIT_DISABLE": "1"}
     return subprocess.run(
-        ["python3", str(hooks / hook_name)], input=payload, capture_output=True,
+        [sys.executable, str(hooks / hook_name)], input=payload, capture_output=True,
         text=True, env=environment, cwd=hooks.parents[1],
     )
 
@@ -122,7 +122,7 @@ def test_pre_bash_outside_a_git_repository_still_enforces_the_allow_list(
 
 def _launch(hooks: Path, hook_name: str, payload: str):
     environment = {**os.environ, "RATE_LIMIT_DISABLE": "1"}
-    command = ["python3", str(hooks / "run-hook.py"), hook_name]
+    command = [sys.executable, str(hooks / "run-hook.py"), hook_name]
     return subprocess.run(
         command, input=payload, capture_output=True, text=True, env=environment,
         cwd=hooks.parents[1],
@@ -157,7 +157,7 @@ def test_launcher_without_an_entry_point_it_can_run_exits_2(
     hooks = _kit_copy(tmp_path)
     arguments = [hook_name] if hook_name else []
     result = subprocess.run(
-        ["python3", str(hooks / "run-hook.py"), *arguments],
+        [sys.executable, str(hooks / "run-hook.py"), *arguments],
         input=WRITE, capture_output=True, text=True,
     )
     assert result.returncode == 2, result.stderr
@@ -208,7 +208,7 @@ def test_install_makes_an_uncaught_error_exit_2(tmp_path: Path):
         "raise ValueError('guard state is corrupt')\n"
     )
     result = subprocess.run(
-        ["python3", str(script)], capture_output=True, text=True
+        [sys.executable, str(script)], capture_output=True, text=True
     )
     assert result.returncode == 2
     assert "BLOCKED: hook failed: ValueError: guard state is corrupt" in result.stderr
@@ -221,7 +221,7 @@ def test_install_leaves_a_deliberate_exit_code_alone(tmp_path: Path, status: int
         f"import sys\nsys.path.insert(0, {str(HOOKS_DIR)!r})\n"
         f"import fail_closed\nfail_closed.install()\nsys.exit({status})\n"
     )
-    result = subprocess.run(["python3", str(script)], capture_output=True)
+    result = subprocess.run([sys.executable, str(script)], capture_output=True)
     assert result.returncode == status
 
 

@@ -51,9 +51,12 @@ pytest .claude/hooks/test_commit_guard.py
 pytest .claude/hooks/test_coverage_guard.py
 pytest .claude/hooks/test_coverage_runners.py
 pytest .claude/hooks/test_git_guard.py
+pytest .claude/hooks/test_entry_points.py
+pytest .claude/hooks/test_cp_guard.py
+pytest .claude/hooks/test_env_file_guard.py
 ```
 
-`pytest .claude/hooks/test_coverage.py` runs the pytest-style suites under coverage and fails when a hook module falls below 90% branch or line coverage. It needs `pytest-cov`. The modules it cannot measure are listed in the file.
+`pytest .claude/hooks/test_coverage.py` runs the pytest-style suites under coverage and fails when a hook module falls below 90% branch or line coverage. It needs `pytest-cov`. Every hook module is measured, with no exemption list: a test that starts a hook as its own process runs it with `sys.executable`, and coverage follows that process. A commit that stages a Python file under `.claude/hooks/` runs this test and is blocked when it fails.
 
 When adding a new allowed or denied Bash command, write a failing test in `test_allow_list.py` first, then update `settings.json`.
 
@@ -96,7 +99,7 @@ Guard modules (imported by entry points):
 - `git_guard.py` — blocks `git stash drop`/`clear`, `git checkout --`, `git branch -D`, a commit or push on `main`, options that force, delete, discard, or overwrite (listed per subcommand), `git fetch` into a local branch, `git add` of every file, and a git subcommand the allow list does not name (`git difftool` matched `git diff*`)
 - `cp_guard.py` — blocks `cp` from outside the project and its forcing options; moves an existing destination to the trash first
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
-- `coverage_guard.py` — on `git commit`, runs the tests under coverage and blocks when a staged Python, Go, Rust, or TypeScript file outside `.claude/` is below 90%; Python is measured here with pytest-cov, which is installed with pytest when either is missing
+- `coverage_guard.py` — on `git commit`, runs the tests under coverage and blocks when a staged Python, Go, Rust, or TypeScript file outside `.claude/` is below 90%; Python is measured here with pytest-cov, which is installed with pytest when either is missing. A staged Python file under `.claude/hooks/` runs `test_coverage.py` instead, so a kit change below 90% is blocked too
 - `coverage_runners.py` — measures Go (`go test -coverprofile`), Rust (`cargo llvm-cov`), and TypeScript (vitest or jest) for `coverage_guard.py` and returns a percent per file
 - `env_file_guard.py` — blocks writes to .env files
 - `content_guard.py` — blocks Japanese characters and emoji in file content

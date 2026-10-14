@@ -29,7 +29,7 @@ def _run(
         "session_id": session_id,
     })
     return subprocess.run(
-        hook_command or ["python3", str(HOOK)],
+        hook_command or [sys.executable, str(HOOK)],
         input=payload, capture_output=True, text=True, env=env,
     )
 
@@ -71,7 +71,7 @@ def test_pre_bash_blocking_a_command_records_the_block_under_its_guard():
 
 
 def test_pre_bash_started_by_the_launcher_records_the_hook_name():
-    launcher_command = ["python3", str(LAUNCHER), "pre-bash.py"]
+    launcher_command = [sys.executable, str(LAUNCHER), "pre-bash.py"]
     result = _run(
         "node --version", session_id="c0ffee00-bash-session",
         hook_command=launcher_command,

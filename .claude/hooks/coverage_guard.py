@@ -19,6 +19,10 @@ TEST_TIMEOUT = 300  # seconds
 INSTALL_TIMEOUT = 300  # seconds
 OUTPUT_LINES = 15
 INSTALLER = Path(__file__).with_name("install-tool.sh")
+# The kit's own hooks are measured by this test, which fails when one of them
+# is below THRESHOLD.
+KIT_COVERAGE_TEST = Path(__file__).with_name("test_coverage.py")
+KIT_HOOKS = (".claude", "hooks")
 # TypeScript files that declare or configure and hold no logic to test.
 _NO_LOGIC_ENDINGS = (".d.ts", ".config.ts", ".config.mts")
 _TESTS_PASSED, _TESTS_FAILED, _USAGE_ERROR, _NO_TESTS_COLLECTED = 0, 1, 4, 5
@@ -187,16 +191,49 @@ def _block_uncovered(below: dict[str, float], listings: list[str]) -> None:
     )
 
 
+def _run_kit_coverage_test() -> subprocess.CompletedProcess:
+    environment = {**os.environ, "COVERAGE_GUARD_DISABLE": "1"}
+    command = ["pytest", "-q", "-p", "no:cacheprovider", str(KIT_COVERAGE_TEST)]
+    return subprocess.run(
+        command, capture_output=True, text=True, timeout=TEST_TIMEOUT,
+        env=environment,
+    )
+
+
+def _stages_kit_hook(staged: list[str]) -> bool:
+    return any(
+        Path(path).parts[:2] == KIT_HOOKS and path.endswith(".py") for path in staged
+    )
+
+
+def _check_kit_coverage(staged: list[str]) -> None:
+    if not _stages_kit_hook(staged) or not KIT_COVERAGE_TEST.is_file():
+        return
+    try:
+        result = _run_kit_coverage_test()
+    except (OSError, subprocess.SubprocessError) as error:
+        block("The kit's hook coverage could not be measured.", str(error))
+    if result.returncode != 0:
+        block(
+            f"The kit's hooks are below {THRESHOLD}% coverage, or a hook test fails.",
+            *_last_lines(result.stdout + result.stderr),
+            f"Run: pytest {KIT_COVERAGE_TEST}",
+        )
+
+
 def check_staged_coverage(command: str) -> None:
     """Block a git commit that stages code below the coverage threshold.
 
     Python, Go, Rust, and TypeScript files are measured, each by its own
     test run. Test files, files under .claude/, and TypeScript declaration
-    and configuration files are not.
+    and configuration files are not. A staged Python file under
+    .claude/hooks/ runs the kit's own coverage test instead.
     """
     if os.environ.get("COVERAGE_GUARD_DISABLE") or not is_commit(command):
         return
-    staged = [path for path in staged_files() if _is_measured(path)]
+    all_staged = staged_files()
+    _check_kit_coverage(all_staged)
+    staged = [path for path in all_staged if _is_measured(path)]
     below: dict[str, float] = {}
     listings: list[str] = []
     for language in _LANGUAGES:
