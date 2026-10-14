@@ -5,13 +5,10 @@ Use these exact command forms. Do not paraphrase or reconstruct from memory. Com
 ## commit
 
 ```bash
-git commit -m "$(cat <<'EOF'
-<type>(<scope>): <summary>
-
-<body>
-EOF
-)"
+git commit -m "<type>(<scope>): <summary>" -m "<body paragraph>"
 ```
+
+Give each paragraph its own `-m`. Command substitution (`$(...)`, backticks) and here-documents are blocked by the pre-bash hook, so write backticks only inside single quotes.
 
 Type, scope, and summary follow Conventional Commits. See `git-workflow.md` for type selection and summary rules. Include a body only when the summary alone is insufficient to convey why the change was made.
 

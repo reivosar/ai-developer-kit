@@ -23,7 +23,6 @@ SCRIPT_RUNNER = re.compile(r"^(?:sys\.exit\(|raise SystemExit)", re.MULTILINE)
 # pytest tests that import it.
 NOT_MEASURED = {
     "anomaly_guard.py",
-    "bash_guard.py",
     "content_guard.py",
     "cp_guard.py",
     "env_file_guard.py",

@@ -18,6 +18,7 @@ import rate_limiter  # noqa: E402
 import static_analysis_guard  # noqa: E402
 import template_guard  # noqa: E402
 from bash_guard import (  # noqa: E402
+    check_find_actions,
     check_python3_path,
     check_raw_operators,
     is_denied,
@@ -29,6 +30,9 @@ from git_guard import (  # noqa: E402
     check_branch_force_delete,
     check_checkout_discard,
     check_commit_on_main,
+    check_forbidden_options,
+    check_git_subcommand,
+    check_push_on_main,
     check_stash_destructive,
 )
 from hook_lib import block, read_hook_input, run_fail_closed  # noqa: E402
@@ -47,6 +51,7 @@ def _block_unlisted_command(command: str) -> None:
         block(f"command not in allow list: {command[:300]}")
     if is_denied(command, deny_patterns):
         block(f"command matches deny list: {command[:300]}")
+    check_git_subcommand(command, allow_patterns)
 
 
 def _block_unsafe_command(command: str) -> None:
@@ -54,6 +59,9 @@ def _block_unsafe_command(command: str) -> None:
     check_checkout_discard(command)
     check_branch_force_delete(command)
     check_commit_on_main(command)
+    check_push_on_main(command)
+    check_forbidden_options(command)
+    check_find_actions(command)
     check_cp_destination(command)
     check_cp_options(command)
     check_cp_source(command)
