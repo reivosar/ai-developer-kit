@@ -18,24 +18,16 @@ PYTEST_TEST = re.compile(r"^\s*def test_", re.MULTILINE)
 # pytest's collection, so it cannot join the measured run.
 SCRIPT_RUNNER = re.compile(r"^(?:sys\.exit\(|raise SystemExit)", re.MULTILINE)
 
-# Reached only through a subprocess or a script-style suite, which the
-# in-process measurement cannot see. Remove a name once its module has
-# pytest tests that import it.
-NOT_MEASURED = {
-    "anomaly_guard.py",
-    "content_guard.py",
-    "cp_guard.py",
-    "env_file_guard.py",
-    "mcp_guard.py",
-    "post-tool.py",
-    "pre-bash.py",
-    "pre-edit.py",
-    "pre-mcp.py",
-    "pre-write.py",
-    "prompt_injection_guard.py",
-    "run-hook.py",
-    "user-prompt-submit.py",
-}
+# Every hook module is measured. A test that starts a hook as its own process
+# runs it with sys.executable, and coverage follows that process; the line
+# that only runs a script directly is not counted.
+COVERAGE_CONFIG = (
+    "[run]\n"
+    "patch = subprocess\n"
+    "[report]\n"
+    "exclude_also =\n"
+    "    if __name__ == .__main__.:\n"
+)
 
 
 def _hook_modules() -> set[str]:
@@ -63,6 +55,8 @@ def _report_paths(names: set[str]) -> list[str]:
 @pytest.fixture(scope="module")
 def report(tmp_path_factory: pytest.TempPathFactory) -> dict:
     report_file = tmp_path_factory.mktemp("coverage") / "coverage.json"
+    config_file = report_file.with_name("coveragerc")
+    config_file.write_text(COVERAGE_CONFIG)
     environment = {
         **os.environ,
         "COVERAGE_FILE": f"{report_file}.data",
@@ -71,7 +65,7 @@ def report(tmp_path_factory: pytest.TempPathFactory) -> dict:
     command = [
         sys.executable, "-m", "pytest", *_pytest_suites(), "-q",
         "-p", "no:cacheprovider", f"--cov={HOOKS_DIR}", "--cov-branch",
-        f"--cov-report=json:{report_file}",
+        f"--cov-config={config_file}", f"--cov-report=json:{report_file}",
     ]
     result = subprocess.run(
         command, capture_output=True, text=True, cwd=KIT_ROOT, env=environment
@@ -80,15 +74,5 @@ def report(tmp_path_factory: pytest.TempPathFactory) -> dict:
     return json.loads(report_file.read_text())
 
 
-def test_measured_hook_modules_meet_coverage_threshold(report: dict):
-    measured = _hook_modules() - NOT_MEASURED
-    assert uncovered_files(report, _report_paths(measured)) == {}
-
-
-def test_not_measured_list_names_only_modules_below_threshold(report: dict):
-    listed = _report_paths(NOT_MEASURED)
-    assert sorted(uncovered_files(report, listed)) == listed
-
-
-def test_not_measured_list_names_only_existing_modules():
-    assert NOT_MEASURED - _hook_modules() == set()
+def test_every_hook_module_meets_coverage_threshold(report: dict):
+    assert uncovered_files(report, _report_paths(_hook_modules())) == {}

@@ -153,7 +153,7 @@ def _run_hook(hook_name: str, tool_input: dict) -> subprocess.CompletedProcess:
         "ANOMALY_PATH_ESCAPE_DISABLE": "1",
     }
     return subprocess.run(
-        ["python3", str(HOOKS_DIR / hook_name)],
+        [sys.executable, str(HOOKS_DIR / hook_name)],
         input=json.dumps({"tool_input": tool_input}),
         capture_output=True,
         text=True,

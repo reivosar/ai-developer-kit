@@ -149,13 +149,80 @@ def test_check_staged_coverage_leaves_no_coverage_file_in_project(project: Path)
 
 @pytest.mark.parametrize(
     "file_name",
-    ["README.md", "test_orders.py", ".claude/hooks/order_guard.py"],
+    ["README.md", "test_orders.py", ".claude/docs/orders.md"],
 )
 def test_check_staged_coverage_with_file_that_is_not_measured_does_not_block(
-    project: Path, file_name: str
+    project: Path, file_name: str, monkeypatch: pytest.MonkeyPatch
 ):
     _stage(project, file_name, ORDERS)
+    monkeypatch.setattr(coverage_guard, "_run_kit_coverage_test", _must_not_run)
     assert coverage_guard.check_staged_coverage(COMMIT) is None
+
+
+def _must_not_run() -> None:
+    raise AssertionError("the kit's coverage test was started")
+
+
+def _kit_test_result(status: int):
+    def run() -> subprocess.CompletedProcess:
+        output = "FAILED test_every_hook_module_meets_coverage_threshold"
+        return subprocess.CompletedProcess(["pytest"], status, output, "")
+    return run
+
+
+def test_check_staged_coverage_with_kit_hook_below_threshold_exits_2(
+    project: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    _stage(project, ".claude/hooks/order_guard.py", ORDERS)
+    monkeypatch.setattr(coverage_guard, "_run_kit_coverage_test", _kit_test_result(1))
+    reasons = _blocked_reasons(capsys)
+    assert "The kit's hooks are below 90% coverage, or a hook test fails." in reasons
+    assert "test_every_hook_module_meets_coverage_threshold" in reasons
+
+
+def test_check_staged_coverage_with_kit_hook_at_threshold_does_not_block(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+):
+    _stage(project, ".claude/hooks/order_guard.py", ORDERS)
+    monkeypatch.setattr(coverage_guard, "_run_kit_coverage_test", _kit_test_result(0))
+    assert coverage_guard.check_staged_coverage(COMMIT) is None
+
+
+def test_check_staged_coverage_when_kit_coverage_test_cannot_start_exits_2(
+    project: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+):
+    def fail_to_start() -> None:
+        raise FileNotFoundError("pytest")
+
+    _stage(project, ".claude/hooks/order_guard.py", ORDERS)
+    monkeypatch.setattr(coverage_guard, "_run_kit_coverage_test", fail_to_start)
+    assert "The kit's hook coverage could not be measured." in _blocked_reasons(capsys)
+
+
+def test_check_staged_coverage_without_kit_coverage_test_does_not_block(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+):
+    _stage(project, ".claude/hooks/order_guard.py", ORDERS)
+    monkeypatch.setattr(coverage_guard, "KIT_COVERAGE_TEST", project / "absent.py")
+    monkeypatch.setattr(coverage_guard, "_run_kit_coverage_test", _must_not_run)
+    assert coverage_guard.check_staged_coverage(COMMIT) is None
+
+
+def test_run_kit_coverage_test_runs_pytest_on_the_kit_coverage_test(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    calls = []
+
+    def run(command: list, **options: object) -> subprocess.CompletedProcess:
+        calls.append((command, options["env"]))
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(coverage_guard.subprocess, "run", run)
+    coverage_guard._run_kit_coverage_test()
+    [(command, environment)] = calls
+    assert command[0] == "pytest"
+    assert command[-1] == str(coverage_guard.KIT_COVERAGE_TEST)
+    assert environment["COVERAGE_GUARD_DISABLE"] == "1"
 
 
 def test_check_staged_coverage_with_other_command_does_not_block(project: Path):
@@ -363,7 +430,7 @@ def test_pre_bash_with_commit_of_untested_branch_exits_2(project: Path):
     payload = json.dumps({"tool_input": {"command": COMMIT}})
     env = {**os.environ, "RATE_LIMIT_DISABLE": "1"}
     result = subprocess.run(
-        ["python3", str(HOOKS_DIR / "pre-bash.py")],
+        [sys.executable, str(HOOKS_DIR / "pre-bash.py")],
         input=payload, capture_output=True, text=True, env=env,
     )
     assert result.returncode == 2, result.stderr

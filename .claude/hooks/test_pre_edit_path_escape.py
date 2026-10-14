@@ -29,7 +29,7 @@ def _run(
     })
     env = {**os.environ, "WORKTREE_GUARD_DISABLE": "1", **(extra_env or {})}
     return subprocess.run(
-        ["python3", str(HOOK)], input=payload, capture_output=True, text=True, env=env
+        [sys.executable, str(HOOK)], input=payload, capture_output=True, text=True, env=env
     )
 
 
