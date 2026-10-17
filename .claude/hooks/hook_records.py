@@ -31,6 +31,9 @@ def remember_session(hook_input: dict) -> None:
 
     The session's name is the first eight letters and digits of session_id.
     An input with no session_id puts the records under NO_SESSION.
+
+    Args:
+        hook_input: the JSON object Claude Code passes to a hook.
     """
     global _session_name
     session_id = str(hook_input.get("session_id") or "")
@@ -66,9 +69,13 @@ def _keep_out_of_git(directory: Path) -> None:
 def append_record(record_name: str, entry: dict) -> None:
     """Append entry as one JSON line to record_name in the session's directory.
 
-    record_name is a path below that directory, such as "audit.jsonl" or
-    "blocks/tdd_guard.jsonl". A record that cannot be written is dropped:
-    recording must never change whether a tool call is blocked.
+    A record that cannot be written is dropped: recording must never change
+    whether a tool call is blocked.
+
+    Args:
+        record_name: a path below that directory, such as "audit.jsonl" or
+            "blocks/tdd_guard.jsonl".
+        entry: the record; it must be serializable as JSON.
     """
     try:
         record_file = session_records_dir() / record_name

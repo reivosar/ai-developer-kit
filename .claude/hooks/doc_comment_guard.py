@@ -18,21 +18,28 @@ _COMMENT_MARKERS = re.compile(r"[/*\s]")
 _TAGGED_PARAMETER = re.compile(
     r"@param\s+(?:\{[^}]*\}\s*)?\[?(?P<name>[A-Za-z_$][\w$]*)"
 )
-_ARGS_SECTION = re.compile(
-    r"^(?:Args|Arguments|Parameters):[ \t]*\n(?P<body>(?:[ \t]+.*\n?|[ \t]*\n)*)",
-    re.MULTILINE,
-)
+_ARGS_HEADINGS = "Args|Arguments|Parameters"
 _ARGS_ENTRY = re.compile(
     r"^(?P<indent>[ \t]+)\*{0,2}(?P<name>\w+)[ \t]*(?:\([^)]*\))?:"
 )
 _GO_ARTICLE = r"(?:(?:A|An|The)\s+)?"
+# Google style lets a docstring that opens with these words describe the
+# value in its first sentence instead of a Returns or Yields section.
+_DESCRIBES_VALUE = re.compile(r"(?:Returns?|Yields?)\b")
+
+
+def _section_body(doc: str, headings: str) -> Optional[str]:
+    section = re.search(
+        rf"^(?:{headings}):[ \t]*\n(?P<body>(?:[ \t]+.*\n?|[ \t]*\n)*)", doc, re.MULTILINE
+    )
+    return None if section is None else section.group("body")
 
 
 def _google_parameters(doc: str) -> Optional[set]:
-    section = _ARGS_SECTION.search(doc)
-    if section is None:
+    body = _section_body(doc, _ARGS_HEADINGS)
+    if body is None:
         return None
-    lines = section.group("body").splitlines()
+    lines = body.splitlines()
     entries = [entry for entry in map(_ARGS_ENTRY.match, lines) if entry]
     # A continuation line is indented deeper than the entry it continues.
     indent = min((len(entry.group("indent")) for entry in entries), default=0)
@@ -67,6 +74,42 @@ def _parameter_violations(definition: Definition, documented: set) -> list[str]:
     return removed + omitted
 
 
+def _missing_sections(definition: Definition) -> list[str]:
+    doc = definition.doc
+    describes_value = _DESCRIBES_VALUE.match(doc)
+    wanted = [
+        ("Args", _ARGS_HEADINGS, bool(definition.params)),
+        ("Returns", "Returns", definition.returns and not describes_value),
+        ("Yields", "Yields", definition.yields and not describes_value),
+        ("Raises", "Raises", bool(definition.raised)),
+    ]
+    return [
+        heading for heading, headings, needed in wanted
+        if needed and _section_body(doc, headings) is None
+    ]
+
+
+# Google style 3.8.3: sections may be left out only where a one-line
+# docstring says enough, so a longer docstring carries them.
+def _google_section_violations(definition: Definition) -> list[str]:
+    if len(definition.doc.strip().splitlines()) < 2:
+        return []
+    name = definition.name
+    article = {"Args": "an"}
+    violations = [
+        f"{name}: docstring of more than one line needs"
+        f" {article.get(heading, 'a')} {heading}: section"
+        for heading in _missing_sections(definition)
+    ]
+    raises = _section_body(definition.doc, "Raises")
+    if raises is not None:
+        violations += [
+            f"{name}: Raises: section omits '{raised}'"
+            for raised in definition.raised if not re.search(rf"\b{raised}\b", raises)
+        ]
+    return violations
+
+
 def _starts_with_name(doc: str, name: str) -> bool:
     return re.match(_GO_ARTICLE + re.escape(name) + r"\b", doc) is not None
 
@@ -77,10 +120,11 @@ def _definition_violations(definition: Definition, extension: str) -> list[str]:
         return [f"{name}: no doc comment"]
     if extension == ".go" and not _starts_with_name(doc, name):
         return [f"{name}: doc comment must start with '{name}'"]
+    sections = _google_section_violations(definition) if extension == ".py" else []
     documented = _documented_parameters(doc, extension)
     if documented is None or definition.params is None:
-        return []
-    return _parameter_violations(definition, documented)
+        return sections
+    return sections + _parameter_violations(definition, documented)
 
 
 def find_violations(code: str, file_path: str) -> list[str]:
@@ -89,7 +133,12 @@ def find_violations(code: str, file_path: str) -> list[str]:
     A public function, method, or type needs a doc comment. A Go comment
     must start with the name it documents. A comment that lists parameters,
     through an Args section in Python or @param tags elsewhere, must list
-    exactly the parameters the signature has.
+    exactly the parameters the signature has. A Python docstring of more than
+    one line carries the Google style sections its function needs.
+
+    Args:
+        code: the source text.
+        file_path: the file's path; its extension picks the language.
     """
     extension = os.path.splitext(file_path)[1].lower()
     return [
@@ -130,6 +179,12 @@ def check_edit(
 
     Violations already in the file are not counted, so existing code can
     still be edited and documented in steps.
+
+    Args:
+        file_path: the file the Edit changes.
+        old_string: the text the Edit replaces.
+        new_string: the text it puts in its place.
+        replace_all: whether every occurrence of old_string is replaced.
     """
     if not _is_guarded_file(file_path) or not Path(file_path).is_file():
         return

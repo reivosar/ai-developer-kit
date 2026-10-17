@@ -1,0 +1,4 @@
+# ESLint and eslint-plugin-jsdoc (install-tool.sh eslint-jsdoc), and the
+# Checkstyle and detekt jars (install-tool.sh checkstyle detekt).
+node_modules/
+jars/

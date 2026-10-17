@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+  "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+  "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<!--
+  Java rules the kit adds: a file holds at most 200 lines, and every public
+  type and method carries a Javadoc comment with an @param for each
+  parameter, an @return for a returned value, and an @throws for each
+  exception it declares, none of them empty. Tests document themselves
+  through their names, so test files are left out.
+-->
+<module name="Checker">
+  <property name="severity" value="error"/>
+  <module name="BeforeExecutionExclusionFileFilter">
+    <property name="fileNamePattern" value="(Test|Tests|IT)\.java$"/>
+  </module>
+  <module name="FileLength">
+    <property name="max" value="200"/>
+  </module>
+  <module name="TreeWalker">
+    <module name="MissingJavadocType">
+      <property name="scope" value="public"/>
+    </module>
+    <module name="MissingJavadocMethod">
+      <property name="scope" value="public"/>
+      <property name="allowMissingPropertyJavadoc" value="false"/>
+    </module>
+    <module name="JavadocMethod">
+      <property name="accessModifiers" value="public"/>
+      <property name="allowMissingParamTags" value="false"/>
+      <property name="allowMissingReturnTag" value="false"/>
+      <property name="validateThrows" value="true"/>
+    </module>
+    <module name="NonEmptyAtclauseDescription"/>
+    <module name="InvalidJavadocPosition"/>
+  </module>
+</module>

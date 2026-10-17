@@ -30,11 +30,11 @@ from git_guard import (  # noqa: E402
     check_branch_force_delete,
     check_checkout_discard,
     check_commit_on_main,
-    check_forbidden_options,
     check_git_subcommand,
     check_push_on_main,
     check_stash_destructive,
 )
+from git_option_guard import check_forbidden_options  # noqa: E402
 from hook_lib import (  # noqa: E402
     add_tool_directory_to_path,
     block,

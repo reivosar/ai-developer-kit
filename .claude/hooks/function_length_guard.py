@@ -64,6 +64,12 @@ def check_edit(
 
     A function that is already over the limit may be edited as long as its
     body does not grow, so existing code can be shortened in steps.
+
+    Args:
+        file_path: the file the Edit changes.
+        old_string: the text the Edit replaces.
+        new_string: the text it puts in its place.
+        replace_all: whether every occurrence of old_string is replaced.
     """
     if not _is_guarded_file(file_path) or not Path(file_path).is_file():
         return

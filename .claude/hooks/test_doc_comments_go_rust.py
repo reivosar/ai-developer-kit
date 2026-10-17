@@ -121,5 +121,5 @@ def test_find_public_definitions_in_go_reads_no_parameters():
 def test_find_public_definitions_in_python_file_reads_the_syntax_tree():
     code = 'def total(rate):\n    """Return the total."""\n    return rate\n'
     assert find_public_definitions(code, "orders.py") == [
-        Definition("total", "Return the total.", ("rate",))
+        Definition("total", "Return the total.", ("rate",), returns=True)
     ]

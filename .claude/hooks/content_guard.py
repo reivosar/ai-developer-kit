@@ -29,6 +29,10 @@ def check_japanese(content: str, file_path: str) -> None:
     """Block content that has Japanese characters.
 
     A file whose path contains locale, i18n, or fixtures is let through.
+
+    Args:
+        content: the text being written.
+        file_path: the file it is written to.
     """
     if _EXEMPT_PATH_RE.search(file_path):
         return

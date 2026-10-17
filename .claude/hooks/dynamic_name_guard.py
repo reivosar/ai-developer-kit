@@ -64,6 +64,11 @@ def check(file_path: str, old_code: str, new_code: str) -> None:
 
     Occurrences already present in old_code are not counted, so code next
     to an existing dynamic lookup can still be edited.
+
+    Args:
+        file_path: the file being changed.
+        old_code: the text the change replaces; empty for a Write.
+        new_code: the text the change writes.
     """
     if not _is_guarded_file(file_path):
         return

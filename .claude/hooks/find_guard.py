@@ -17,6 +17,9 @@ def check_find_actions(command: str) -> None:
     """Block a find that deletes, runs a command, or writes a file.
 
     find is allowed for listing files; the actions in FIND_ACTIONS do more.
+
+    Args:
+        command: the Bash command line.
     """
     for segment in split_segments(command):
         words = command_words(segment)

@@ -33,15 +33,15 @@ pytest .claude/hooks/test_worktree_guard.py
 pytest .claude/hooks/test_pre_bash_audit_rate.py .claude/hooks/test_pre_edit_path_escape.py .claude/hooks/test_pre_write_audit.py
 pytest .claude/hooks/test_docs_sync.py .claude/hooks/test_hook_modules_documented.py
 pytest .claude/hooks/test_doc_length_guard.py
-pytest .claude/hooks/test_static_analysis.py .claude/hooks/test_static_analysis_file_length.py .claude/hooks/test_static_analysis_guard.py .claude/hooks/test_static_analysis_projects.py
-pytest .claude/hooks/test_install_tool.py .claude/hooks/test_install_tool_rust_and_go.py .claude/hooks/test_install_tool_failures.py .claude/hooks/test_setup.py .claude/hooks/test_tool_directory.py
+pytest .claude/hooks/test_static_analysis.py .claude/hooks/test_static_analysis_file_length.py .claude/hooks/test_static_analysis_guard.py .claude/hooks/test_static_analysis_projects.py .claude/hooks/test_static_analysis_docs.py .claude/hooks/test_static_analysis_typescript_docs.py .claude/hooks/test_static_analysis_jvm_docs.py
+pytest .claude/hooks/test_install_tool.py .claude/hooks/test_install_tool_rust_and_go.py .claude/hooks/test_install_tool_failures.py .claude/hooks/test_install_tool_jvm.py .claude/hooks/test_setup.py .claude/hooks/test_tool_directory.py
 pytest .claude/hooks/test_function_definitions.py
 pytest .claude/hooks/test_dynamic_name_guard.py
 pytest .claude/hooks/test_reference_notice.py .claude/hooks/test_reference_notice_hooks.py
 pytest .claude/hooks/test_tdd_guard.py .claude/hooks/test_tdd_guard_upstream.py
 pytest .claude/hooks/test_testing_guard.py .claude/hooks/test_testing_guard_checks.py
 pytest .claude/hooks/test_doc_comments.py .claude/hooks/test_python_doc_comments.py .claude/hooks/test_doc_comments_go_rust.py .claude/hooks/test_doc_comment_shapes.py
-pytest .claude/hooks/test_doc_comment_guard.py .claude/hooks/test_doc_comment_guard_checks.py
+pytest .claude/hooks/test_doc_comment_guard.py .claude/hooks/test_doc_comment_guard_checks.py .claude/hooks/test_google_docstrings.py
 pytest .claude/hooks/test_function_length_guard.py .claude/hooks/test_function_lengths.py
 pytest .claude/hooks/test_template_guard.py .claude/hooks/test_template_guard_templates.py
 pytest .claude/hooks/test_hook_lib_helpers.py
@@ -94,7 +94,8 @@ Entry points (one process spawn per event):
 
 Guard modules (imported by entry points):
 - `bash_guard.py` — splits a command into segments (quotes and backslash escapes read as the shell reads them) and checks it against the allow and deny lists; blocks shell syntax that can hide a second command (`$(...)`, backticks, `<(...)`, a lone `&`, a second line, `$'...'`, redirects, pipes), `find` actions, and script paths outside the project
-- `git_guard.py` — blocks `git stash drop`/`clear`, `git checkout --`, `git branch -D`, a commit or push on `main`, options that force, delete, discard, or overwrite (listed per subcommand), `git fetch` into a local branch, `git add` of every file, and a git subcommand the allow list does not name (`git difftool` matched `git diff*`)
+- `git_guard.py` — blocks `git stash drop`/`clear`, `git checkout --`, `git branch -D`, a commit or push on `main`, and a git subcommand the allow list does not name (`git difftool` matched `git diff*`)
+- `git_option_guard.py` — blocks git options that force, delete, discard, or overwrite (listed per subcommand), `git fetch` into a local branch, and `git add` of every file
 - `cp_guard.py` — blocks `cp` from outside the project and its forcing options; moves an existing destination to the trash first
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
 - `coverage_guard.py` — on `git commit`, runs the tests under coverage and blocks when a staged Python, Go, Rust, or TypeScript file outside `.claude/` is below 90%; Python is measured here with pytest-cov, which is installed with pytest when either is missing. A staged Python file under `.claude/hooks/` runs `test_coverage.py` instead, so a kit change below 90% is blocked too
@@ -106,7 +107,7 @@ Guard modules (imported by entry points):
 - `reference_notice.py` — does not block; returns to the agent the references to a changed function and the location of a function name that is already defined elsewhere
 - `function_definitions.py` — finds function definitions by file extension; shared by `tdd_guard.py` and `reference_notice.py`
 - `testing_guard.py` — blocks a Write or Edit that adds a test with no assertion, an always-true assertion, sleep, a snapshot, or a name outside the convention
-- `doc_comment_guard.py` — blocks a Write or Edit that adds a public function, method, or type with no doc comment, or with one whose parameter list does not match the signature
+- `doc_comment_guard.py` — blocks a Write or Edit that adds a public function, method, or type with no doc comment, with one whose parameter list does not match the signature, or with a Python docstring of more than one line that lacks a Google style section (`Args:`, `Returns:`, `Yields:`, `Raises:`) its function needs
 - `doc_comments.py` — finds public definitions with their doc comment and parameters (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin); used by `doc_comment_guard.py`
 - `function_length_guard.py` — blocks a Write or Edit that adds a function body longer than 20 lines, or lengthens one that is already longer (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin)
 - `static_analysis_guard.py` — on `git commit`, runs `static-analysis.sh` on the staged files and blocks when it reports a problem
@@ -129,8 +130,11 @@ Guard modules (imported by entry points):
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
 - `static-analysis.sh` — lint runner, called by `post-edit.sh`, by the commit check, and as an allowed Bash command; installs a missing linter before running it; adds the 200-line file limit from `lint-config/` (pylint, Biome or ESLint, revive) and counts the lines of Rust and shell files, which have no such lint rule; adds `~/.local/bin`, where the installer puts tools, to PATH
+- doc comment lint in `static-analysis.sh` — Python: ruff's pydocstyle (Google convention) and pydoclint rules (`lint-config/ruff-docs.toml`); TypeScript: ESLint with eslint-plugin-jsdoc (`lint-config/eslint-jsdoc.config.mjs`, installed into `lint-config/node_modules`); Go: revive `exported` and `package-comments`; Rust: `missing_docs` and clippy's `missing_errors_doc`, `missing_panics_doc`, `missing_safety_doc`; Java: Checkstyle (`lint-config/checkstyle-docs.xml`, also the 200-line limit); Kotlin: detekt (`lint-config/detekt-docs.yml`); the two jars live in `lint-config/jars`
+- `install-lint-tools.sh` — sourced by `install-tool.sh`; installs clippy, cargo-llvm-cov, revive, ESLint with eslint-plugin-jsdoc, and the Checkstyle and detekt jars (pinned release URLs; they need a Java runtime)
+- `typescript-lint.sh` — sourced by `static-analysis.sh`; the project's TypeScript linter (ESLint or Biome) and the JSDoc lint
 - `project-checks.sh` — sourced by `static-analysis.sh`; runs `go vet`, `tsc`, and `cargo clippy` once in each project a file belongs to (nearest `go.mod`, `tsconfig.json`, `Cargo.toml`), not in the current directory; tsc runs with `--incremental` and keeps its build info under `~/.cache/ai-developer-kit/tsc/`, outside the project
-- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov, pylint, revive) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`. revive is built with `go install` into `~/.local/bin` (Homebrew only on a Mac without go)
+- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov, pylint, revive, ruff, eslint-jsdoc, checkstyle, detekt) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`. revive is built with `go install` into `~/.local/bin` (Homebrew only on a Mac without go)
 - `conftest.py` — pytest fixtures: hook records in a temporary directory for every test, `tool_stubs` (a PATH of stand-in commands for tests that run the shell scripts), and `pre_bash_blocks` (runs `pre-bash.py` on a command for the allow-list suites)
 
 ### Templates

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Install the external tools the kit's hooks call: linters and test tools for
-# Python, Go, TypeScript, and Rust, and the package managers they need.
+# Python, Go, TypeScript, Rust, Java, and Kotlin, and the package managers
+# they need.
 # Usage: install-tool.sh <tool>...   install each named tool that is missing
 #        install-tool.sh --list      print the names this script accepts
 #
@@ -11,8 +12,14 @@
 set -uo pipefail
 
 KIT_TOOLS="pipx npm go flake8 yamllint pytest pytest-cov tsc markdownlint"
-KIT_TOOLS="$KIT_TOOLS biome cargo-clippy cargo-llvm-cov pylint revive"
+KIT_TOOLS="$KIT_TOOLS biome cargo-clippy cargo-llvm-cov pylint revive ruff eslint-jsdoc"
+KIT_TOOLS="$KIT_TOOLS checkstyle detekt"
 OS="$(uname -s)"
+# The Rust, Go, ESLint, and jar installers.
+HOOKS_DIR="."
+case "${BASH_SOURCE[0]}" in */*) HOOKS_DIR="${BASH_SOURCE[0]%/*}" ;; esac
+# shellcheck source=install-lint-tools.sh
+source "$HOOKS_DIR/install-lint-tools.sh"
 # pipx, pip --user, and go install (GOBIN below) put commands in ~/.local/bin,
 # which the shell that started this script may not have on PATH.
 [ -n "${HOME:-}" ] && PATH="$PATH:$HOME/.local/bin"
@@ -34,7 +41,10 @@ is_installed() {
         [[ "$(pytest --help 2>/dev/null)" == *--cov-branch* ]]
         return
     fi
-    has_command "$1"
+    case "$1" in
+        eslint-jsdoc | checkstyle | detekt) is_lint_tool_installed "$1" ;;
+        *) has_command "$1" ;;
+    esac
 }
 
 # Arguments: the apt package names, then the yum package names.
@@ -90,48 +100,19 @@ install_pytest_package() {
     fi
 }
 
-# Rust itself comes from rustup, which this script does not install: without
-# rustup these fail, and the caller reports the missing tool.
-install_clippy() {
-    has_command rustup && rustup component add clippy
-}
-
-install_llvm_cov() {
-    has_command rustup && rustup component add llvm-tools-preview || return 1
-    local output older='`cargo-llvm-cov ([0-9.]+)` supports rustc'
-    output=$(cargo install cargo-llvm-cov 2>&1) && return 0
-    echo "$output"
-    # A toolchain too old for the newest release is told by cargo which
-    # release it can build; that release is installed with its locked
-    # dependencies, which were chosen for the same toolchain.
-    [[ "$output" =~ $older ]] || return 1
-    cargo install cargo-llvm-cov --version "${BASH_REMATCH[1]}" --locked
-}
-
-# revive is built with go into ~/.local/bin, the directory pipx also installs
-# into. go links it itself, so this needs no Xcode tools on macOS; Homebrew is
-# used only on a Mac that has no go.
-install_revive() {
-    if [ "$OS" = Darwin ] && ! has_command go; then
-        has_command brew && brew install revive
-        return
-    fi
-    # Without HOME, go puts it in its own default directory.
-    ensure_tool go && GOBIN="${HOME:+$HOME/.local/bin}" \
-        go install github.com/mgechev/revive@latest
-}
-
 install_tool() {
     case "$1" in
         pipx) install_pipx ;;
         npm) install_system_package node "nodejs npm" "nodejs npm" ;;
         go) install_system_package go golang-go golang ;;
-        flake8 | yamllint | pylint) install_with_pipx "$1" ;;
+        flake8 | yamllint | pylint | ruff) install_with_pipx "$1" ;;
         revive) install_revive ;;
         pytest | pytest-cov) install_pytest_package "$1" ;;
         tsc) install_with_npm typescript ;;
         markdownlint) install_with_npm markdownlint-cli ;;
         biome) install_with_npm @biomejs/biome ;;
+        eslint-jsdoc) install_eslint_jsdoc ;;
+        checkstyle | detekt) install_jar "$1" ;;
         cargo-clippy) install_clippy ;;
         cargo-llvm-cov) install_llvm_cov ;;
     esac

@@ -33,6 +33,8 @@ INSTALLER="$hooks_dir/install-tool.sh"
 # Linter settings the kit adds: a code file holds at most 200 lines.
 LINT_CONFIG="$hooks_dir/lint-config"
 MAX_FILE_LINES=200
+# The Checkstyle and detekt jars; the installer reads the same directory.
+export LINT_JAR_DIR="${LINT_JAR_DIR:-$LINT_CONFIG/jars}"
 
 # A missing linter is installed, not skipped: a skipped linter reports nothing,
 # which reads the same as a clean file.
@@ -53,6 +55,8 @@ yaml_files=()
 go_files=()
 rs_files=()
 sh_files=()
+java_files=()
+kt_files=()
 
 while IFS= read -r file; do
     [ -f "$file" ] || continue
@@ -65,40 +69,14 @@ while IFS= read -r file; do
         *.go)           go_files+=("$file") ;;
         *.rs)           rs_files+=("$file") ;;
         *.sh|*.bash)    sh_files+=("$file") ;;
+        *.java)         java_files+=("$file") ;;
+        *.kt|*.kts)     kt_files+=("$file") ;;
     esac
 done <<< "$changed_files"
 
-has_eslint_config() {
-    local name
-    for name in eslint.config.js eslint.config.mjs eslint.config.cjs \
-        eslint.config.ts .eslintrc .eslintrc.js .eslintrc.cjs .eslintrc.json \
-        .eslintrc.yml .eslintrc.yaml; do
-        [ -f "$name" ] && return 0
-    done
-    return 1
-}
-
-has_biome_config() {
-    [ -f biome.json ] || [ -f biome.jsonc ]
-}
-
-# A project that configured ESLint is linted by its own rules plus max-lines.
-# Any other project gets Biome: with its own configuration when it has one,
-# otherwise with the kit's, which adds the file length rule to the defaults.
-lint_typescript() {
-    if has_eslint_config; then
-        if require_tool npx; then
-            npx --no-install eslint --rule "max-lines: [error, $MAX_FILE_LINES]" "$@" \
-                || exit_code=1
-        fi
-    elif require_tool biome; then
-        if has_biome_config; then
-            biome lint "$@" || exit_code=1
-        else
-            biome lint --config-path "$LINT_CONFIG" "$@" || exit_code=1
-        fi
-    fi
-}
+# lint_typescript and lint_typescript_docs.
+# shellcheck source=typescript-lint.sh
+source "$hooks_dir/typescript-lint.sh"
 
 # check_projects: go vet, tsc, and clippy, each in the file's own project.
 # shellcheck source=project-checks.sh
@@ -136,6 +114,13 @@ if [ ${#py_files[@]} -gt 0 ] && require_tool flake8; then
     flake8 "${py_files[@]}" || exit_code=1
 fi
 
+# Doc comments follow the Google style guide: ruff's pydocstyle and pydoclint
+# rules. --no-cache keeps ruff from leaving a cache in the project.
+if [ ${#py_files[@]} -gt 0 ] && require_tool ruff; then
+    ruff check --config "$LINT_CONFIG/ruff-docs.toml" --output-format concise --no-cache \
+        "${py_files[@]}" || exit_code=1
+fi
+
 # flake8 has no file length check; pylint's too-many-lines is the one used.
 if [ ${#py_files[@]} -gt 0 ] && require_tool pylint; then
     pylint --disable=all --enable=too-many-lines --max-module-lines="$MAX_FILE_LINES" \
@@ -147,6 +132,7 @@ if [ ${#ts_files[@]} -gt 0 ]; then
         check_projects tsconfig.json "${ts_files[@]}"
     fi
     lint_typescript "${ts_files[@]}"
+    lint_typescript_docs "${ts_files[@]}"
 fi
 
 if [ ${#go_files[@]} -gt 0 ] && require_tool go; then
@@ -169,6 +155,21 @@ fi
 
 if [ ${#sh_files[@]} -gt 0 ]; then
     check_file_length "${sh_files[@]}"
+fi
+
+# Java: Checkstyle with the kit's Javadoc and file length rules, in English.
+# Kotlin: detekt with the kit's KDoc rules; its file length is counted here.
+if [ ${#java_files[@]} -gt 0 ] && require_tool checkstyle; then
+    java -Duser.language=en -jar "$LINT_JAR_DIR/checkstyle.jar" \
+        -c "$LINT_CONFIG/checkstyle-docs.xml" "${java_files[@]}" || exit_code=1
+fi
+
+if [ ${#kt_files[@]} -gt 0 ]; then
+    check_file_length "${kt_files[@]}"
+    if require_tool detekt; then
+        java -jar "$LINT_JAR_DIR/detekt.jar" --config "$LINT_CONFIG/detekt-docs.yml" \
+            --input "$(IFS=,; echo "${kt_files[*]}")" || exit_code=1
+    fi
 fi
 
 if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then

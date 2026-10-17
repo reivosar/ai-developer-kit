@@ -7,7 +7,7 @@ import pytest
 SCRIPT = Path(__file__).parent / "static-analysis.sh"
 LINT_CONFIG = SCRIPT.parent / "lint-config"
 UNUSED_IMPORT = "import os\n"
-CLEAN_MODULE = "VALUE = 1\n"
+CLEAN_MODULE = '"""Values."""\n\nVALUE = 1\n'
 YAML_DOCUMENT = "key: value\n"
 
 

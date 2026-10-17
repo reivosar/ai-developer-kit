@@ -18,6 +18,11 @@ def test_languages_reads_each_extension_with_its_comment_form(
     assert doc_comment_shapes.LANGUAGES[extension].doc_prefix == doc_prefix
 
 
+def test_definition_without_body_facts_neither_returns_nor_raises():
+    definition = doc_comment_shapes.Definition("cancel", "Cancel.", ("order",))
+    assert (definition.returns, definition.yields, definition.raised) == (False, False, ())
+
+
 def test_languages_reads_every_javascript_extension_alike():
     javascript = {
         doc_comment_shapes.LANGUAGES[extension]

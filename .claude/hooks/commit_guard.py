@@ -105,6 +105,9 @@ def check_pre_commit(command: str) -> None:
 
     The checks cover secrets, the branch name, whitespace, .env files, and
     emoji. Any other command, and a commit with nothing staged, is let through.
+
+    Args:
+        command: the Bash command line.
     """
     if not is_commit(command):
         return

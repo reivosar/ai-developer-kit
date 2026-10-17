@@ -37,6 +37,9 @@ def check_staged_files(command: str) -> None:
     static-analysis.sh lints the staged files. Any other command, a commit
     with nothing staged, and every commit while STATIC_ANALYSIS_GUARD_DISABLE
     is set are let through. A script that cannot run blocks the commit.
+
+    Args:
+        command: the Bash command line.
     """
     if os.environ.get("STATIC_ANALYSIS_GUARD_DISABLE") or not is_commit(command):
         return

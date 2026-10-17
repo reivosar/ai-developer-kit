@@ -21,8 +21,13 @@ def block_uncaught(
 ) -> None:
     """Report an uncaught error as a block and end the process with 2.
 
-    The signature is that of sys.excepthook. leave ends the process; a test
-    passes its own to see the status.
+    The signature is that of sys.excepthook.
+
+    Args:
+        error_type: the class of the uncaught error.
+        error: the uncaught error.
+        traceback: where it was raised; not printed.
+        leave: ends the process with a status; a test passes its own.
     """
     print(f"BLOCKED: hook failed: {error_type.__name__}: {error}", file=sys.stderr)
     print(
@@ -48,5 +53,9 @@ def run_entry_point(name: str, directory: Path = Path(__file__).resolve().parent
     run-hook.py calls this after install(), so the script is compiled with
     the handler in place: a syntax error in the script itself blocks the
     tool call like any other error.
+
+    Args:
+        name: the script's file name, such as "pre-bash.py".
+        directory: the directory that holds it; this module's by default.
     """
     runpy.run_path(str(directory / name), run_name="__main__")

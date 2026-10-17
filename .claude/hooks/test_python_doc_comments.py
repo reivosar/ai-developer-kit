@@ -75,3 +75,38 @@ def test_python_definitions_skips_setter_and_overload():
 
 def test_python_definitions_with_syntax_error_returns_nothing():
     assert python_definitions("def broken(:\n") == []
+
+
+PY_BODIES = '''
+def refund(order):
+    def check():
+        raise KeyError(order)
+    if not order:
+        raise errors.PaymentError(order)
+    try:
+        return order.total
+    except OSError:
+        raise
+
+
+def lines(order):
+    yield from order.lines
+
+
+def close(order):
+    order.close()
+    return None
+'''
+
+
+def test_python_definitions_reads_returns_yields_and_raised_from_own_body():
+    found = _by_name(PY_BODIES)
+    facts = {
+        name: (found[name].returns, found[name].yields, found[name].raised)
+        for name in found
+    }
+    assert facts == {
+        "refund": (True, False, ("PaymentError",)),
+        "lines": (False, True, ()),
+        "close": (False, False, ()),
+    }

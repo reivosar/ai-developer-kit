@@ -22,6 +22,9 @@ def check(file_path: str) -> None:
 
     Nothing is blocked outside a worktree or while WORKTREE_GUARD_DISABLE is
     set.
+
+    Args:
+        file_path: the file a Write or Edit names.
     """
     if not file_path:
         return

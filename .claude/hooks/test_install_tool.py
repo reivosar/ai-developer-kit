@@ -9,6 +9,7 @@ SETUP = HOOKS_DIR.parents[1] / "setup.sh"
 KIT_TOOLS = [
     "pipx", "npm", "go", "flake8", "yamllint", "pytest", "pytest-cov", "tsc",
     "markdownlint", "biome", "cargo-clippy", "cargo-llvm-cov", "pylint", "revive",
+    "ruff", "eslint-jsdoc", "checkstyle", "detekt",
 ]
 
 
@@ -40,7 +41,7 @@ def test_install_tool_with_tool_already_present_installs_nothing(tool_stubs):
     assert tool_stubs.calls() == []
 
 
-@pytest.mark.parametrize("tool", ["flake8", "yamllint", "pytest", "pylint"])
+@pytest.mark.parametrize("tool", ["flake8", "yamllint", "pytest", "pylint", "ruff"])
 def test_install_tool_with_missing_python_tool_installs_it_with_pipx(
     tool_stubs, tool: str
 ):

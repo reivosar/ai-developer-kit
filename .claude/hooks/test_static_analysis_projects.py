@@ -110,7 +110,9 @@ def _crate_source(directory: Path) -> Path:
 def _clippy(crate: Path) -> str:
     return (
         f"cargo clippy --manifest-path {crate}/Cargo.toml"
-        " --all-targets --quiet -- -D warnings"
+        " --all-targets --quiet -- -D warnings -D missing_docs"
+        " -D clippy::missing_errors_doc -D clippy::missing_panics_doc"
+        " -D clippy::missing_safety_doc"
     )
 
 

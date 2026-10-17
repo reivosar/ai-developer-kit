@@ -45,11 +45,30 @@ class ToolStubs:
     """A PATH holding only stand-in commands, which record how they are called."""
 
     def __init__(self, home: Path) -> None:
+        """Make the stand-in directories under home, with uname reporting Darwin.
+
+        The kit's ESLint is a stand-in too, under eslint_prefix, and its
+        Checkstyle and detekt jars are empty files under jar_dir, so no script
+        run here reaches the ones install-tool.sh put in lint-config.
+
+        Args:
+            home: an empty directory that will hold the stand-ins and their logs.
+        """
         self.home = home
         self.commands = home / "bin"
         self.commands.mkdir(parents=True)
         (home / "settings").mkdir()
         self.set_system("Darwin")
+        self.eslint_prefix = home / "node"
+        eslint = self.eslint_prefix / "node_modules" / ".bin" / "eslint"
+        eslint.parent.mkdir(parents=True)
+        (self.eslint_prefix / "node_modules" / "eslint-plugin-jsdoc").mkdir()
+        eslint.write_text(_STAND_IN)
+        eslint.chmod(0o755)
+        self.jar_dir = home / "jars"
+        self.jar_dir.mkdir()
+        for jar in ("checkstyle.jar", "detekt.jar"):
+            (self.jar_dir / jar).write_text("")
 
     def configure(self, name: str, **settings: object) -> None:
         """Describe a command that is not on PATH until something provides it."""
@@ -59,8 +78,11 @@ class ToolStubs:
     def add(self, name: str, **settings: object) -> None:
         """Put a command on PATH.
 
-        provides maps an argument string to the commands that call creates,
-        status is the exit code, and output is what the command prints.
+        Args:
+            name: the command's name.
+            **settings: provides maps an argument string to the commands that
+                call creates, status is the exit code, and output is what the
+                command prints.
         """
         self.configure(name, **settings)
         command = self.commands / name
@@ -68,9 +90,11 @@ class ToolStubs:
         command.chmod(0o755)
 
     def set_system(self, system: str) -> None:
+        """Make uname print system, the name the scripts read the OS from."""
         self.add("uname", output=system, silent=True)
 
     def calls(self) -> list[str]:
+        """Return each call of a stand-in so far, as its command line."""
         log = self.home / "calls.log"
         return log.read_text().splitlines() if log.exists() else []
 
@@ -81,7 +105,10 @@ class ToolStubs:
         command = [shutil.which("bash"), str(script), *arguments]
         return subprocess.run(
             command, capture_output=True, text=True,
-            env={"PATH": str(self.commands), **environment},
+            env={
+                "PATH": str(self.commands), "LINT_NODE_PREFIX": str(self.eslint_prefix),
+                "LINT_JAR_DIR": str(self.jar_dir), **environment,
+            },
         )
 
 
@@ -93,6 +120,13 @@ def records_outside_the_project(
 
     A hook that a test starts inherits the two variables, so no test writes
     to the project's own .claude/logs or .claude/rate-state.json.
+
+    Args:
+        tmp_path_factory: makes the temporary directory.
+        monkeypatch: sets the two variables for this test only.
+
+    Returns:
+        The temporary directory.
     """
     scratch = tmp_path_factory.mktemp("hook-records")
     monkeypatch.setenv("HOOK_RECORDS_DIR", str(scratch / "logs"))
@@ -127,6 +161,7 @@ def pre_bash_blocks():
 
 @pytest.fixture
 def tool_stubs(tmp_path: Path) -> ToolStubs:
+    """Return stand-in commands under tmp_path, with the real bash among them."""
     stubs = ToolStubs(tmp_path / "stand-ins")
     # The scripts start each other through "env bash", so the real shell is
     # the one command that has to stay reachable.

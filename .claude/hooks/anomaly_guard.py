@@ -38,6 +38,9 @@ def check_path_escape(path: str) -> None:
 
     An empty path, a path that cannot be resolved, and every path while
     ANOMALY_PATH_ESCAPE_DISABLE is set are let through.
+
+    Args:
+        path: the file path a tool call names.
     """
     if not path or os.environ.get("ANOMALY_PATH_ESCAPE_DISABLE"):
         return

@@ -45,6 +45,12 @@ def split_segments(command: str) -> list[str]:
 
     A character after a backslash is text, as the shell reads it, so an
     escaped quote does not open or close a quoted part.
+
+    Args:
+        command: the Bash command line.
+
+    Returns:
+        The segments in order, without the separators.
     """
     pieces: list[str] = []
     start = 0
@@ -63,6 +69,9 @@ def command_words(segment: str) -> list[str]:
     """Return the words of one command segment as the shell would split them.
 
     A segment with an unbalanced quote is split on whitespace instead.
+
+    Args:
+        segment: one command segment, as split_segments returns it.
     """
     try:
         return shlex.split(segment)
@@ -133,6 +142,9 @@ def check_raw_operators(command: str) -> None:
     process substitution. Outside single quotes: command substitution, which
     the shell also runs inside double quotes. A character after a backslash
     is text.
+
+    Args:
+        command: the Bash command line.
     """
     stripped = command.strip()
     for index, in_single, in_double in _syntax_positions(stripped):
@@ -175,8 +187,7 @@ def _script_path_problem(runner: str, script: str) -> Optional[str]:
 
 
 def check_python3_path(command: str) -> None:
-    """Block python3 and pytest invocations referencing absolute paths, path
-    traversal, or any script path under .claude/worktrees/."""
+    """Block python3 or pytest scripts given by absolute, .., or .claude/worktrees/ paths."""
     for segment in split_segments(command):
         arguments = _runner_arguments(segment.strip())
         script = _first_script(arguments)
