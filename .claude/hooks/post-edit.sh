@@ -46,4 +46,23 @@ case "$EXT" in
     ;;
 esac
 
+# The changed file is linted at once, so a finding is fixed while the change
+# is fresh rather than at commit. Exit 2 hands the findings back to the agent.
+HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Only the project's own files are held to its lint rules: a file elsewhere,
+# such as a memory note, is left alone. Outside a git repository, every file is.
+PROJECT_ROOT="$(git -C "$HOOKS_DIR" rev-parse --show-toplevel 2>/dev/null)"
+case "$FILE" in
+  /*) ABSOLUTE_FILE="$FILE" ;;
+  *) ABSOLUTE_FILE="$PWD/$FILE" ;;
+esac
+if [ -n "$PROJECT_ROOT" ] && [[ "$ABSOLUTE_FILE" != "$PROJECT_ROOT"/* ]]; then
+  exit 0
+fi
+if ! findings=$("$HOOKS_DIR/static-analysis.sh" "$FILE" 2>&1); then
+  echo "BLOCKED: static analysis found problems in $FILE" >&2
+  echo "$findings" >&2
+  exit 2
+fi
+
 exit 0

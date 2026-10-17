@@ -30,7 +30,7 @@ mkdir -p .github
 cp -r .claude/templates/github/. .github/
 ```
 
-The hooks call external tools: flake8, yamllint, tsc, Biome, markdownlint, go, clippy, cargo-llvm-cov, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, npm, or rustup, and installs nothing outside that list. Rust itself is not installed: the Rust tools need rustup to be present. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
+The hooks call external tools: flake8, pylint, yamllint, tsc, Biome, markdownlint, go, revive, clippy, cargo-llvm-cov, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, npm, or rustup, and installs nothing outside that list. Rust itself is not installed: the Rust tools need rustup to be present. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
 
 ## Usage
 
@@ -62,7 +62,7 @@ Invoke skills via slash commands in the Claude Code prompt:
 Run the hook test suites to verify everything works. The full list is in the Tests section of `CLAUDE.md`; for example:
 
 ```bash
-python3 .claude/hooks/test_allow_list.py
+pytest .claude/hooks/test_allow_list.py
 python3 .claude/hooks/test_hook_lib.py
 pytest .claude/hooks/test_docs_sync.py
 ```
@@ -106,7 +106,7 @@ Hook scripts enforce constraints the rules alone cannot:
 | `pre-write.py` / `pre-edit.py` | Before file writes/edits | Blocks paths outside the repository or the active worktree, `.env` files, Japanese characters and emoji in content, Markdown documents over 200 lines, names assembled at runtime, tests that break the test rules, public code whose doc comment is missing or does not match its parameters, function bodies longer than 20 lines, and implementation changes without tests; `pre-write.py` also refuses to overwrite an existing file. Without blocking, both return to the agent the references to a changed function and the location of a duplicate function name |
 | `pre-mcp.py` | Before every MCP tool call | Checks the tool name against `mcp-allowlist.txt`; applies the rate limit |
 | `memory_guard.py` | Before file writes, after file writes/edits | Enforces the 200-line limit on the memory index |
-| `post-edit.sh` | After file writes/edits | Runs the installed formatter on the changed file |
+| `post-edit.sh` | After file writes/edits | Runs the installed formatter on the changed file, then the linters on a file inside the project; a finding, such as a code file over 200 lines, is handed back to be fixed at once |
 | `post-tool.py` | After Bash commands and file writes/edits | Appends the tool call to the session's audit file |
 | `user-prompt-submit.py` | On every user prompt | Prompt injection guard and skill dispatch reminder |
 | `block-read.sh` | Before file reads | No-op kept as a wiring point |

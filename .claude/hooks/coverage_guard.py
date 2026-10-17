@@ -1,31 +1,25 @@
 #!/usr/bin/env python3
 """Guard: block a commit whose staged code its tests do not cover."""
-import json
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from typing import Callable, NamedTuple
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import coverage_runners  # noqa: E402
+import python_coverage  # noqa: E402
 from commit_guard import is_commit, staged_files  # noqa: E402
-from hook_lib import block, tail_lines  # noqa: E402
+from hook_lib import block  # noqa: E402
 from tdd_guard import is_test_file  # noqa: E402
 
 THRESHOLD = 90  # percent, for branches and for lines
-TEST_TIMEOUT = 300  # seconds
-INSTALL_TIMEOUT = 300  # seconds
-OUTPUT_LINES = 15
-INSTALLER = Path(__file__).with_name("install-tool.sh")
 # The kit's own hooks are measured by this test, which fails when one of them
 # is below THRESHOLD.
 KIT_COVERAGE_TEST = Path(__file__).with_name("test_coverage.py")
 KIT_HOOKS = (".claude", "hooks")
 # TypeScript files that declare or configure and hold no logic to test.
 _NO_LOGIC_ENDINGS = (".d.ts", ".config.ts", ".config.mts")
-_TESTS_PASSED, _TESTS_FAILED, _USAGE_ERROR, _NO_TESTS_COLLECTED = 0, 1, 4, 5
 
 
 def _is_measured(path: str) -> bool:
@@ -66,83 +60,8 @@ def uncovered_files(report: dict, paths: list[str]) -> dict[str, float]:
     return {path: value for path, value in percents.items() if value < THRESHOLD}
 
 
-def _run_tests(report_path: str) -> subprocess.CompletedProcess:
-    environment = {
-        **os.environ,
-        "COVERAGE_FILE": report_path + ".data",
-        # A test that runs this hook must not start a second measurement.
-        "COVERAGE_GUARD_DISABLE": "1",
-    }
-    command = [
-        "pytest", "-q", "-p", "no:cacheprovider", "--cov=.", "--cov-branch",
-        f"--cov-report=json:{report_path}",
-    ]
-    return subprocess.run(
-        command, capture_output=True, text=True, timeout=TEST_TIMEOUT,
-        env=environment,
-    )
-
-
-def _last_lines(text: str) -> list[str]:
-    return tail_lines(text, OUTPUT_LINES)
-
-
-def _read_report(result: subprocess.CompletedProcess, report_path: str) -> dict:
-    output = _last_lines(result.stdout + result.stderr)
-    if result.returncode == _TESTS_FAILED:
-        block("Coverage was not measured because tests failed.", *output)
-    if os.path.isfile(report_path):
-        return json.loads(Path(report_path).read_text())
-    if result.returncode == _NO_TESTS_COLLECTED:
-        return {"files": {}}
-    block("Coverage could not be measured.", *output)
-
-
-def _lacks_coverage_plugin(result: subprocess.CompletedProcess) -> bool:
-    return result.returncode == _USAGE_ERROR and "--cov" in result.stderr
-
-
-def _install_test_tools() -> None:
-    result = subprocess.run(
-        [str(INSTALLER), "pytest", "pytest-cov"],
-        capture_output=True, text=True, timeout=INSTALL_TIMEOUT,
-    )
-    if result.returncode != 0:
-        block(
-            "Coverage could not be measured: pytest and pytest-cov are not"
-            " installed, and installing them failed.",
-            *_last_lines(result.stderr),
-        )
-
-
-def _run_tests_after_install(report_path: str) -> subprocess.CompletedProcess:
-    _install_test_tools()
-    return _run_tests(report_path)
-
-
-def _run_tests_with_tools(report_path: str) -> subprocess.CompletedProcess:
-    """Run the tests, installing pytest or pytest-cov first when one is missing."""
-    try:
-        result = _run_tests(report_path)
-    except FileNotFoundError:
-        return _run_tests_after_install(report_path)
-    if _lacks_coverage_plugin(result):
-        return _run_tests_after_install(report_path)
-    return result
-
-
-def _measure() -> dict:
-    with tempfile.TemporaryDirectory() as directory:
-        report_path = os.path.join(directory, "coverage.json")
-        try:
-            result = _run_tests_with_tools(report_path)
-        except (OSError, subprocess.SubprocessError) as error:
-            block("Coverage could not be measured.", str(error))
-        return _read_report(result, report_path)
-
-
 def _python_percents() -> dict[str, float]:
-    files = _measure().get("files", {})
+    files = python_coverage.measure().get("files", {})
     return {path: _percent(entry["summary"]) for path, entry in files.items()}
 
 
@@ -195,8 +114,8 @@ def _run_kit_coverage_test() -> subprocess.CompletedProcess:
     environment = {**os.environ, "COVERAGE_GUARD_DISABLE": "1"}
     command = ["pytest", "-q", "-p", "no:cacheprovider", str(KIT_COVERAGE_TEST)]
     return subprocess.run(
-        command, capture_output=True, text=True, timeout=TEST_TIMEOUT,
-        env=environment,
+        command, capture_output=True, text=True,
+        timeout=python_coverage.TEST_TIMEOUT, env=environment,
     )
 
 
@@ -216,7 +135,7 @@ def _check_kit_coverage(staged: list[str]) -> None:
     if result.returncode != 0:
         block(
             f"The kit's hooks are below {THRESHOLD}% coverage, or a hook test fails.",
-            *_last_lines(result.stdout + result.stderr),
+            *python_coverage.last_lines(result.stdout + result.stderr),
             f"Run: pytest {KIT_COVERAGE_TEST}",
         )
 

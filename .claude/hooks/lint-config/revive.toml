@@ -1,0 +1,3 @@
+# A Go file holds one concept; past 200 lines it holds two.
+[rule.file-length-limit]
+  arguments = [{ max = 200 }]

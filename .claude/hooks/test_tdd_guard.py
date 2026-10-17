@@ -25,12 +25,6 @@ def _stage(project: Path, name: str, content: str) -> None:
     subprocess.run(["git", "-C", str(project), "add", name], check=True)
 
 
-def _write_upstream(project: Path, relative_path: str, content: str) -> None:
-    upstream = project / ".upstream" / relative_path
-    upstream.parent.mkdir(parents=True)
-    upstream.write_text(content)
-
-
 @pytest.mark.parametrize(
     "file_name",
     [
@@ -167,24 +161,6 @@ def test_check_with_staged_test_naming_other_module_file_exits_2(
     _stage(project, "test_guard_wiring.py", 'HOOK = "pre-write.py"\n')
     with pytest.raises(SystemExit) as blocked:
         tdd_guard.check("LIMIT = 1\n", "hooks/pre-edit.py")
-    assert blocked.value.code == 2
-
-
-def test_check_with_content_identical_to_upstream_clone_does_not_block(
-    project: Path,
-):
-    _write_upstream(project, ".claude/hooks/order_guard.py", CANCEL)
-    target = str(project / ".claude" / "hooks" / "order_guard.py")
-    assert tdd_guard.check(CANCEL, target) is None
-
-
-def test_check_with_content_differing_from_upstream_clone_exits_2(
-    project: Path,
-):
-    _write_upstream(project, ".claude/hooks/order_guard.py", CANCEL)
-    target = str(project / ".claude" / "hooks" / "order_guard.py")
-    with pytest.raises(SystemExit) as blocked:
-        tdd_guard.check(CANCEL + "LIMIT = 1\n", target)
     assert blocked.value.code == 2
 
 

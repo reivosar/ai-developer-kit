@@ -104,10 +104,6 @@ _UNQUOTED_OPERATORS = {
     "|": "pipe operator '|' is not permitted. Run each command separately.",
     "\n": "a second command line is not permitted. Run each command separately.",
 }
-FIND_ACTIONS = (
-    "-delete", "-exec", "-execdir", "-ok", "-okdir",
-    "-fprint", "-fprint0", "-fprintf", "-fls",
-)
 
 
 def _is_lone_ampersand(command: str, index: int) -> bool:
@@ -143,22 +139,6 @@ def check_raw_operators(command: str) -> None:
         problem = None if in_single else _operator_problem(stripped, index, in_double)
         if problem:
             hook_lib.block(problem, f"Command: {command[:300]}")
-
-
-def check_find_actions(command: str) -> None:
-    """Block a find that deletes, runs a command, or writes a file.
-
-    find is allowed for listing files; the actions in FIND_ACTIONS do more.
-    """
-    for segment in split_segments(command):
-        words = command_words(segment)
-        actions = [word for word in words if word in FIND_ACTIONS]
-        if words[:1] == ["find"] and actions:
-            hook_lib.block(
-                f"'find {actions[0]}' is not permitted: find may list files,"
-                " not act on them.",
-                f"Command: {command[:300]}",
-            )
 
 
 def _runner_arguments(segment: str) -> list[str]:

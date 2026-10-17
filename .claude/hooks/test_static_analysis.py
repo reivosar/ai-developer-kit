@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(__file__).parent / "static-analysis.sh"
+LINT_CONFIG = SCRIPT.parent / "lint-config"
 UNUSED_IMPORT = "import os\n"
 CLEAN_MODULE = "VALUE = 1\n"
 YAML_DOCUMENT = "key: value\n"
@@ -72,9 +73,13 @@ def test_static_analysis_with_go_file_runs_vet_and_format_check(
     source = _write(tmp_path, "orders.go", "package orders\n")
     tool_stubs.add("go")
     tool_stubs.add("gofmt")
+    tool_stubs.add("revive")
     result = tool_stubs.run_script(SCRIPT, str(source))
     assert result.returncode == 0, result.stderr
-    assert tool_stubs.calls() == ["go vet ./...", f"gofmt -l {source}"]
+    assert tool_stubs.calls() == [
+        f"go vet {source}", f"gofmt -l {source}",
+        f"revive -config {LINT_CONFIG}/revive.toml -set_exit_status {source}",
+    ]
 
 
 def test_static_analysis_with_unformatted_go_file_exits_1(
@@ -82,6 +87,7 @@ def test_static_analysis_with_unformatted_go_file_exits_1(
 ) -> None:
     source = _write(tmp_path, "orders.go", "package orders\n")
     tool_stubs.add("go")
+    tool_stubs.add("revive")
     tool_stubs.add("gofmt", output=str(source))
     result = tool_stubs.run_script(SCRIPT, str(source))
     assert result.returncode == 1
@@ -97,7 +103,9 @@ def test_static_analysis_with_typescript_file_runs_type_check_and_biome(
     tool_stubs.add("biome")
     result = tool_stubs.run_script(SCRIPT, str(source))
     assert result.returncode == 0, result.stderr
-    assert tool_stubs.calls() == ["tsc --noEmit", f"biome lint {source}"]
+    assert tool_stubs.calls() == [
+        f"tsc --noEmit {source}", f"biome lint --config-path {LINT_CONFIG} {source}"
+    ]
 
 
 def test_static_analysis_with_typescript_lint_finding_exits_1(
@@ -124,44 +132,8 @@ def test_static_analysis_in_project_with_eslint_config_runs_eslint(
     result = tool_stubs.run_script(SCRIPT, str(source))
     assert result.returncode == 0, result.stderr
     assert tool_stubs.calls() == [
-        "tsc --noEmit", f"npx --no-install eslint {source}"
-    ]
-
-
-def test_static_analysis_with_rust_file_runs_clippy_with_warnings_denied(
-    tmp_path: Path, tool_stubs
-) -> None:
-    source = _write(tmp_path, "orders.rs", "pub fn total() {}\n")
-    tool_stubs.add("cargo")
-    tool_stubs.add("cargo-clippy")
-    result = tool_stubs.run_script(SCRIPT, str(source))
-    assert result.returncode == 0, result.stderr
-    assert tool_stubs.calls() == [
-        "cargo clippy --all-targets --quiet -- -D warnings"
-    ]
-
-
-def test_static_analysis_with_clippy_finding_exits_1(
-    tmp_path: Path, tool_stubs
-) -> None:
-    source = _write(tmp_path, "orders.rs", "pub fn total() {}\n")
-    tool_stubs.add("cargo", status=1)
-    tool_stubs.add("cargo-clippy")
-    result = tool_stubs.run_script(SCRIPT, str(source))
-    assert result.returncode == 1
-
-
-def test_static_analysis_with_clippy_missing_installs_the_component(
-    tmp_path: Path, tool_stubs
-) -> None:
-    source = _write(tmp_path, "orders.rs", "pub fn total() {}\n")
-    tool_stubs.add("cargo")
-    tool_stubs.add("rustup", provides={"component add clippy": ["cargo-clippy"]})
-    result = tool_stubs.run_script(SCRIPT, str(source))
-    assert result.returncode == 0, result.stderr
-    assert tool_stubs.calls() == [
-        "rustup component add clippy",
-        "cargo clippy --all-targets --quiet -- -D warnings",
+        f"tsc --noEmit {source}",
+        f"npx --no-install eslint --rule max-lines: [error, 200] {source}",
     ]
 
 

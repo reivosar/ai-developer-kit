@@ -28,6 +28,9 @@ case "${BASH_SOURCE[0]}" in
     */*) hooks_dir="${BASH_SOURCE[0]%/*}" ;;
 esac
 INSTALLER="$hooks_dir/install-tool.sh"
+# Linter settings the kit adds: a code file holds at most 200 lines.
+LINT_CONFIG="$hooks_dir/lint-config"
+MAX_FILE_LINES=200
 
 # A missing linter is installed, not skipped: a skipped linter reports nothing,
 # which reads the same as a clean file.
@@ -46,7 +49,7 @@ md_files=()
 json_files=()
 yaml_files=()
 go_files=()
-has_rust=false
+rs_files=()
 
 while IFS= read -r file; do
     [ -f "$file" ] || continue
@@ -57,7 +60,7 @@ while IFS= read -r file; do
         *.json)         json_files+=("$file") ;;
         *.yml|*.yaml)   yaml_files+=("$file") ;;
         *.go)           go_files+=("$file") ;;
-        *.rs)           has_rust=true ;;
+        *.rs)           rs_files+=("$file") ;;
     esac
 done <<< "$changed_files"
 
@@ -71,17 +74,31 @@ has_eslint_config() {
     return 1
 }
 
-# A project that configured ESLint is linted by its own rules. Any other
-# project gets Biome, whose default rules need no configuration.
+has_biome_config() {
+    [ -f biome.json ] || [ -f biome.jsonc ]
+}
+
+# A project that configured ESLint is linted by its own rules plus max-lines.
+# Any other project gets Biome: with its own configuration when it has one,
+# otherwise with the kit's, which adds the file length rule to the defaults.
 lint_typescript() {
     if has_eslint_config; then
         if require_tool npx; then
-            npx --no-install eslint "$@" || exit_code=1
+            npx --no-install eslint --rule "max-lines: [error, $MAX_FILE_LINES]" "$@" \
+                || exit_code=1
         fi
     elif require_tool biome; then
-        biome lint "$@" || exit_code=1
+        if has_biome_config; then
+            biome lint "$@" || exit_code=1
+        else
+            biome lint --config-path "$LINT_CONFIG" "$@" || exit_code=1
+        fi
     fi
 }
+
+# check_projects: go vet, tsc, and clippy, each in the file's own project.
+# shellcheck source=project-checks.sh
+source "$hooks_dir/project-checks.sh"
 
 check_go_format() {
     local unformatted
@@ -99,22 +116,32 @@ if [ ${#py_files[@]} -gt 0 ] && require_tool flake8; then
     flake8 "${py_files[@]}" || exit_code=1
 fi
 
+# flake8 has no file length check; pylint's too-many-lines is the one used.
+if [ ${#py_files[@]} -gt 0 ] && require_tool pylint; then
+    pylint --disable=all --enable=too-many-lines --max-module-lines="$MAX_FILE_LINES" \
+        --score=n "${py_files[@]}" || exit_code=1
+fi
+
 if [ ${#ts_files[@]} -gt 0 ]; then
     if require_tool tsc; then
-        tsc --noEmit || exit_code=1
+        check_projects tsconfig.json "${ts_files[@]}"
     fi
     lint_typescript "${ts_files[@]}"
 fi
 
 if [ ${#go_files[@]} -gt 0 ] && require_tool go; then
-    go vet ./... || exit_code=1
+    check_projects go.mod "${go_files[@]}"
     if require_tool gofmt; then
         check_go_format "${go_files[@]}"
     fi
+    if require_tool revive; then
+        revive -config "$LINT_CONFIG/revive.toml" -set_exit_status "${go_files[@]}" \
+            || exit_code=1
+    fi
 fi
 
-if [ "$has_rust" = true ] && require_tool cargo && require_tool cargo-clippy; then
-    cargo clippy --all-targets --quiet -- -D warnings || exit_code=1
+if [ ${#rs_files[@]} -gt 0 ] && require_tool cargo && require_tool cargo-clippy; then
+    check_projects Cargo.toml "${rs_files[@]}"
 fi
 
 if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then

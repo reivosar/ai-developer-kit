@@ -2,6 +2,7 @@
 """Tests for post-edit.sh: auto-format dispatch and graceful skip on missing files."""
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -50,21 +51,26 @@ try:
 finally:
     os.unlink(sh_file)
 
-# TC-PE-04: .py file — black/autopep8 if available, otherwise skip — always exit 0
+# TC-PE-04: .py file with no lint finding — formatted if a formatter exists — exit 0.
+# A file with a finding exits 2; test_post_edit_lint.py covers that.
 with tempfile.NamedTemporaryFile(suffix=".py", delete=False, mode="w") as f:
-    f.write("x=1\n")
+    f.write("x = 1\n")
     py_file = f.name
 try:
-    check("TC-PE-04 py file exits 0", run_hook(py_file), 0)
+    check("TC-PE-04 clean py file exits 0", run_hook(py_file), 0)
 finally:
     os.unlink(py_file)
 
-# TC-PE-05: .go file — gofmt if available, otherwise skip — always exit 0
+# TC-PE-05: .go file — gofmt rewrites it when gofmt is installed. The exit code
+# is the lint result, which depends on the linters this machine has.
 with tempfile.NamedTemporaryFile(suffix=".go", delete=False, mode="w") as f:
     f.write("package main\nfunc main() {}\n")
     go_file = f.name
 try:
-    check("TC-PE-05 go file exits 0", run_hook(go_file), 0)
+    run_hook(go_file)
+    with open(go_file) as written:
+        formatted = written.read() == "package main\n\nfunc main() {}\n"
+    check("TC-PE-05 go file formatted by gofmt", formatted, bool(shutil.which("gofmt")))
 finally:
     os.unlink(go_file)
 

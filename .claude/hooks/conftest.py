@@ -1,5 +1,6 @@
-"""Shared fixture: stand-in commands for tests that run the kit's shell scripts."""
+"""Shared fixtures: hook records, stand-in commands, and the pre-bash runner."""
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -7,8 +8,9 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import hook_lib  # noqa: E402
+HOOKS_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(HOOKS_DIR))
+import hook_records  # noqa: E402
 
 # Every stand-in is this one program. What it does comes from the settings
 # file named after it, so a tool that an installer provides later can be
@@ -95,8 +97,32 @@ def records_outside_the_project(
     scratch = tmp_path_factory.mktemp("hook-records")
     monkeypatch.setenv("HOOK_RECORDS_DIR", str(scratch / "logs"))
     monkeypatch.setenv("RATE_STATE_FILE", str(scratch / "rate-state.json"))
-    hook_lib.remember_session({})
+    hook_records.remember_session({})
     return scratch
+
+
+@pytest.fixture
+def pre_bash_blocks():
+    """Return a check that runs pre-bash.py on a command and reports a block.
+
+    The allow-list suites test the allow list alone: the rate limit, the
+    template check, and the commit-time test runs have suites of their own.
+    """
+
+    def blocks(command: str, branch: str = "feat/test-branch") -> bool:
+        environment = {
+            **os.environ, "MOCK_BRANCH": branch, "RATE_LIMIT_DISABLE": "1",
+            "TEMPLATE_GUARD_DISABLE": "1", "COVERAGE_GUARD_DISABLE": "1",
+            "STATIC_ANALYSIS_GUARD_DISABLE": "1",
+        }
+        payload = json.dumps({"tool_input": {"command": command}})
+        result = subprocess.run(
+            [sys.executable, str(HOOKS_DIR / "pre-bash.py")], input=payload,
+            capture_output=True, text=True, env=environment,
+        )
+        return result.returncode == 2
+
+    return blocks
 
 
 @pytest.fixture

@@ -1,9 +1,8 @@
-"""Tests for the text and record helpers in hook_lib shared by the guards."""
+"""Tests for the text and output helpers in hook_lib shared by the guards."""
 import io
 import json
 import os
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -93,134 +92,21 @@ def test_read_text_with_non_utf8_file_returns_text_without_raising(
     assert hook_lib.read_text(str(document)).startswith("caf")
 
 
-def _records(record_name: str) -> list[dict]:
-    record_file = hook_lib.session_records_dir() / record_name
-    return [json.loads(line) for line in record_file.read_text().splitlines()]
-
-
-def _utc_today() -> str:
-    return datetime.now(timezone.utc).date().isoformat()
-
-
-def _occupy_records_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    occupied = tmp_path / "occupied"
-    occupied.write_text("a file where the records directory should be")
-    monkeypatch.setenv("HOOK_RECORDS_DIR", str(occupied))
-
-
-def test_records_dir_without_override_returns_logs_under_the_repository(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_emit_additional_context_with_notices_prints_hook_json(
+    capsys: pytest.CaptureFixture,
 ):
-    monkeypatch.delenv("HOOK_RECORDS_DIR")
-    monkeypatch.setattr(hook_lib, "REPO_ROOT", tmp_path)
-    assert hook_lib.records_dir() == tmp_path / ".claude" / "logs"
+    hook_lib.emit_additional_context("PreToolUse", ["first", "second"])
+    output = json.loads(capsys.readouterr().out)
+    assert output == {
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "additionalContext": "first\nsecond",
+        }
+    }
 
 
-def test_records_dir_inside_a_test_returns_directory_outside_the_repository():
-    # The fixture records_outside_the_project in conftest.py names the directory.
-    assert hook_lib.REPO_ROOT not in hook_lib.records_dir().parents
-
-
-def test_session_records_dir_with_session_is_named_by_date_and_session():
-    hook_lib.remember_session({"session_id": "5a429071-2390-4847-942f"})
-    directory = hook_lib.session_records_dir()
-    assert directory == hook_lib.records_dir() / f"{_utc_today()}_5a429071"
-
-
-def test_session_records_dir_with_directory_from_earlier_day_returns_it():
-    hook_lib.remember_session({"session_id": "5a429071-2390-4847-942f"})
-    started = hook_lib.records_dir() / "2026-10-01_5a429071"
-    started.mkdir(parents=True)
-    assert hook_lib.session_records_dir() == started
-
-
-@pytest.mark.parametrize("hook_input", [{}, {"session_id": ""}, {"session_id": None}])
-def test_session_records_dir_without_session_is_named_by_date_alone(
-    hook_input: dict,
+def test_emit_additional_context_with_no_notice_prints_nothing(
+    capsys: pytest.CaptureFixture,
 ):
-    hook_lib.remember_session(hook_input)
-    (hook_lib.records_dir() / "2026-10-01_no-session").mkdir(parents=True)
-    directory = hook_lib.session_records_dir()
-    assert directory == hook_lib.records_dir() / f"{_utc_today()}_no-session"
-
-
-def test_session_records_dir_with_path_in_session_id_stays_inside_records_dir():
-    hook_lib.remember_session({"session_id": "../../etc/passwd"})
-    directory = hook_lib.session_records_dir()
-    assert directory == hook_lib.records_dir() / f"{_utc_today()}_etcpassw"
-
-
-def test_read_hook_input_with_session_id_remembers_the_session(
-    monkeypatch: pytest.MonkeyPatch,
-):
-    monkeypatch.setattr(sys, "stdin", io.StringIO('{"session_id": "9f8e7d6c-1"}'))
-    hook_lib.read_hook_input()
-    assert hook_lib.session_records_dir().name == f"{_utc_today()}_9f8e7d6c"
-
-
-def test_read_stdin_json_with_session_id_remembers_the_session(
-    monkeypatch: pytest.MonkeyPatch,
-):
-    monkeypatch.setattr(sys, "stdin", io.StringIO('{"session_id": "1a2b3c4d-9"}'))
-    hook_lib.read_stdin_json()
-    assert hook_lib.session_records_dir().name == f"{_utc_today()}_1a2b3c4d"
-
-
-def test_read_stdin_json_with_list_input_keeps_the_remembered_session(
-    monkeypatch: pytest.MonkeyPatch,
-):
-    hook_lib.remember_session({"session_id": "5a429071"})
-    monkeypatch.setattr(sys, "stdin", io.StringIO("[1, 2]"))
-    assert hook_lib.read_stdin_json() == [1, 2]
-    assert hook_lib.session_records_dir().name == f"{_utc_today()}_5a429071"
-
-
-def test_append_record_called_twice_writes_one_json_line_per_call():
-    hook_lib.append_record("audit.jsonl", {"tool_name": "Bash"})
-    hook_lib.append_record("audit.jsonl", {"tool_name": "Edit"})
-    assert _records("audit.jsonl") == [{"tool_name": "Bash"}, {"tool_name": "Edit"}]
-
-
-def test_append_record_with_new_directory_keeps_the_records_out_of_git():
-    hook_lib.append_record("blocks/tdd_guard.jsonl", {"reason": "No test found."})
-    assert (hook_lib.records_dir() / ".gitignore").read_text() == "*\n"
-
-
-def test_append_record_with_unwritable_directory_does_not_raise(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-):
-    _occupy_records_dir(tmp_path, monkeypatch)
-    written = hook_lib.append_record("blocks/tdd_guard.jsonl", {"reason": "No test."})
-    assert written is None
-
-
-def test_block_with_reason_and_detail_records_the_calling_guard():
-    with pytest.raises(SystemExit) as blocked:
-        hook_lib.block("No test for 'orders.py' found.", "File: orders.py")
-    assert blocked.value.code == 2
-    [entry] = _records("blocks/test_hook_lib_helpers.jsonl")
-    assert entry["guard"] == "test_hook_lib_helpers"
-    assert entry["reason"] == "No test for 'orders.py' found."
-    assert entry["details"] == ["File: orders.py"]
-    assert datetime.fromisoformat(entry["timestamp"]).tzinfo is not None
-
-
-def test_block_with_unwritable_records_still_exits_2(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
-):
-    _occupy_records_dir(tmp_path, monkeypatch)
-    with pytest.raises(SystemExit) as blocked:
-        hook_lib.block("No test found.")
-    assert blocked.value.code == 2
-    assert "BLOCKED: No test found." in capsys.readouterr().err
-
-
-def test_run_fail_closed_with_raising_hook_records_the_failure_under_hook_lib():
-    def raise_from_guard() -> None:
-        raise RuntimeError("guard broke")
-
-    with pytest.raises(SystemExit) as blocked:
-        hook_lib.run_fail_closed(raise_from_guard)
-    assert blocked.value.code == 2
-    [entry] = _records("blocks/hook_lib.jsonl")
-    assert entry["reason"] == "hook failed: RuntimeError: guard broke"
+    hook_lib.emit_additional_context("PreToolUse", [])
+    assert capsys.readouterr().out == ""

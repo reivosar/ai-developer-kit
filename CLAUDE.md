@@ -8,10 +8,9 @@ Template kit for Claude Code-powered development workflows.
 
 ## Tests
 
-Run each test suite:
+Run each test suite (one line per module under test):
 
 ```bash
-python3 .claude/hooks/test_allow_list.py
 python3 .claude/hooks/test_pre_edit.py
 python3 .claude/hooks/test_pre_write.py
 python3 .claude/hooks/test_post_edit.py
@@ -20,40 +19,39 @@ python3 .claude/hooks/test_hook_lib.py
 python3 .claude/hooks/test_content_guard.py
 python3 .claude/hooks/test_trash_sh.py
 python3 .claude/hooks/test_notify.py
+pytest .claude/hooks/test_allow_list.py .claude/hooks/test_allow_list_git.py .claude/hooks/test_allow_list_git_options.py .claude/hooks/test_allow_list_commands.py
+pytest .claude/hooks/test_bash_guard.py .claude/hooks/test_find_guard.py
+pytest .claude/hooks/test_git_guard.py .claude/hooks/test_git_guard_options.py
+pytest .claude/hooks/test_cp_guard.py
 pytest .claude/hooks/test_prompt_injection_guard.py
 pytest .claude/hooks/test_mcp_guard.py
-pytest .claude/hooks/test_audit_log.py
+pytest .claude/hooks/test_audit_log.py .claude/hooks/test_hook_records.py
 pytest .claude/hooks/test_rate_limiter.py
 pytest .claude/hooks/test_anomaly_guard.py
 pytest .claude/hooks/test_memory_guard.py
 pytest .claude/hooks/test_worktree_guard.py
-pytest .claude/hooks/test_pre_bash_audit_rate.py
-pytest .claude/hooks/test_pre_edit_path_escape.py
-pytest .claude/hooks/test_pre_write_audit.py
-pytest .claude/hooks/test_docs_sync.py
+pytest .claude/hooks/test_pre_bash_audit_rate.py .claude/hooks/test_pre_edit_path_escape.py .claude/hooks/test_pre_write_audit.py
+pytest .claude/hooks/test_docs_sync.py .claude/hooks/test_hook_modules_documented.py
 pytest .claude/hooks/test_doc_length_guard.py
-pytest .claude/hooks/test_static_analysis.py
-pytest .claude/hooks/test_install_tool.py
+pytest .claude/hooks/test_static_analysis.py .claude/hooks/test_static_analysis_file_length.py .claude/hooks/test_static_analysis_guard.py .claude/hooks/test_static_analysis_projects.py
+pytest .claude/hooks/test_install_tool.py .claude/hooks/test_install_tool_rust_and_go.py .claude/hooks/test_install_tool_failures.py .claude/hooks/test_setup.py
 pytest .claude/hooks/test_function_definitions.py
 pytest .claude/hooks/test_dynamic_name_guard.py
-pytest .claude/hooks/test_reference_notice.py
-pytest .claude/hooks/test_tdd_guard.py
-pytest .claude/hooks/test_testing_guard.py
-pytest .claude/hooks/test_doc_comments.py
-pytest .claude/hooks/test_doc_comment_guard.py
-pytest .claude/hooks/test_function_length_guard.py
-pytest .claude/hooks/test_static_analysis_guard.py
-pytest .claude/hooks/test_bash_guard.py
-pytest .claude/hooks/test_template_guard.py
+pytest .claude/hooks/test_reference_notice.py .claude/hooks/test_reference_notice_hooks.py
+pytest .claude/hooks/test_tdd_guard.py .claude/hooks/test_tdd_guard_upstream.py
+pytest .claude/hooks/test_testing_guard.py .claude/hooks/test_testing_guard_checks.py
+pytest .claude/hooks/test_doc_comments.py .claude/hooks/test_python_doc_comments.py .claude/hooks/test_doc_comments_go_rust.py .claude/hooks/test_doc_comment_shapes.py
+pytest .claude/hooks/test_doc_comment_guard.py .claude/hooks/test_doc_comment_guard_checks.py
+pytest .claude/hooks/test_function_length_guard.py .claude/hooks/test_function_lengths.py
+pytest .claude/hooks/test_template_guard.py .claude/hooks/test_template_guard_templates.py
 pytest .claude/hooks/test_hook_lib_helpers.py
-pytest .claude/hooks/test_fail_closed.py
+pytest .claude/hooks/test_fail_closed.py .claude/hooks/test_fail_closed_handlers.py
 pytest .claude/hooks/test_commit_guard.py
-pytest .claude/hooks/test_coverage_guard.py
-pytest .claude/hooks/test_coverage_runners.py
-pytest .claude/hooks/test_git_guard.py
+pytest .claude/hooks/test_coverage_guard.py .claude/hooks/test_coverage_guard_kit.py .claude/hooks/test_coverage_guard_languages.py .claude/hooks/test_python_coverage.py
+pytest .claude/hooks/test_coverage_runners.py .claude/hooks/test_coverage_runners_typescript.py
 pytest .claude/hooks/test_entry_points.py
-pytest .claude/hooks/test_cp_guard.py
 pytest .claude/hooks/test_env_file_guard.py
+pytest .claude/hooks/test_post_edit_lint.py
 ```
 
 `pytest .claude/hooks/test_coverage.py` runs the pytest-style suites under coverage and fails when a hook module falls below 90% branch or line coverage. It needs `pytest-cov`. Every hook module is measured, with no exemption list: a test that starts a hook as its own process runs it with `sys.executable`, and coverage follows that process. A commit that stages a Python file under `.claude/hooks/` runs this test and is blocked when it fails.
@@ -85,7 +83,7 @@ Entry points (one process spawn per event):
 - `pre-write.py` — PreToolUse[Write]: env file guard + file-exists guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
 - `pre-edit.py` — PreToolUse[Edit]: env file guard + content guard + document length guard + dynamic name guard + testing guard + doc comment guard + function length guard + TDD guard + worktree guard + reference notice
 - `pre-mcp.py` — PreToolUse[mcp__.*]: MCP tool allowlist + rate limiting + audit log
-- `post-edit.sh` — PostToolUse[Write|Edit]: auto-format; prints WARNING on formatter failure
+- `post-edit.sh` — PostToolUse[Write|Edit]: auto-format, then run `static-analysis.sh` on the changed file when it is inside the project and exit 2 with its findings, so the agent fixes them at once
 - `post-tool.py` — PostToolUse[Bash|Write|Edit]: audit logging
 - `user-prompt-submit.py` — UserPromptSubmit: prompt injection guard + skill dispatch reminder
 - `memory_guard.py` — PreToolUse[Write] + PostToolUse[Write|Edit]: enforces MEMORY.md 200-line limit
@@ -122,12 +120,18 @@ Guard modules (imported by entry points):
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`, or by the file `RATE_STATE_FILE` names
 - `fail_closed.py` — standard library only; turns an uncaught error into a block (exit 2)
 - `run-hook.py` — the launcher `settings.json` uses for `pre-bash.py`, `pre-write.py`, `pre-edit.py`, `pre-mcp.py`, and `memory_guard.py`; it installs `fail_closed` first, so an error while a hook loads, or a syntax error in the hook, blocks the tool call
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines(), records_dir(), remember_session(), session_records_dir(), append_record()); `block()` records each block before it exits
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines()); `block()` records each block before it exits
+- `hook_records.py` — where records go (records_dir(), remember_session(), session_records_dir(), append_record(), utc_now()); used by `hook_lib.py` and `audit_log.py`
+- `find_guard.py` — blocks `find` actions (`-delete`, `-exec`, ...); used by `pre-bash.py`
+- `python_coverage.py` — measures Python with pytest-cov for `coverage_guard.py`, installing pytest and pytest-cov first when either is missing
+- `doc_comment_shapes.py`, `python_doc_comments.py` — the per-language definition patterns, and the Python reader, behind `doc_comments.py`
+- `function_lengths.py` — measures function bodies per language for `function_length_guard.py`
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
-- `static-analysis.sh` — standalone lint runner invoked as an allowed Bash command; installs a missing linter before running it
-- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
-- `conftest.py` — pytest fixture `tool_stubs`: a PATH of stand-in commands for tests that run the shell scripts
+- `static-analysis.sh` — lint runner, called by `post-edit.sh`, by the commit check, and as an allowed Bash command; installs a missing linter before running it; adds the 200-line file limit from `lint-config/` (pylint, Biome or ESLint, revive)
+- `project-checks.sh` — sourced by `static-analysis.sh`; runs `go vet`, `tsc`, and `cargo clippy` once in each project a file belongs to (nearest `go.mod`, `tsconfig.json`, `Cargo.toml`), not in the current directory
+- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov, pylint, revive) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
+- `conftest.py` — pytest fixtures: hook records in a temporary directory for every test, `tool_stubs` (a PATH of stand-in commands for tests that run the shell scripts), and `pre_bash_blocks` (runs `pre-bash.py` on a command for the allow-list suites)
 
 ### Templates
 

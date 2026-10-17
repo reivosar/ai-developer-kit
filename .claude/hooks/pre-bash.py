@@ -17,8 +17,8 @@ import coverage_guard  # noqa: E402
 import rate_limiter  # noqa: E402
 import static_analysis_guard  # noqa: E402
 import template_guard  # noqa: E402
+from find_guard import check_find_actions  # noqa: E402
 from bash_guard import (  # noqa: E402
-    check_find_actions,
     check_python3_path,
     check_raw_operators,
     is_denied,

@@ -3,31 +3,50 @@ set -euo pipefail
 
 OS="$(uname -s)"
 
-install_python3() {
+# install_runtime <command> <label> <url> <brew formula> <apt packages> <yum packages>
+# installs a language runtime with the system's package manager, or names
+# where to get it when there is none. A package list is one word-split string.
+install_runtime() {
+    local command="$1" label="$2" url="$3" formula="$4" apt_packages="$5" yum_packages="$6"
     case "$OS" in
         Darwin)
             if command -v brew >/dev/null 2>&1; then
-                echo "Installing/upgrading python3 via Homebrew..."
-                brew upgrade python3 2>/dev/null || brew install python3
+                echo "Installing/upgrading $command via Homebrew..."
+                brew upgrade "$formula" 2>/dev/null || brew install "$formula"
             else
-                echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Python from https://www.python.org/" >&2
+                echo "SKIP: Homebrew not found. Install from https://brew.sh/ or $label from $url" >&2
             fi
             ;;
         Linux)
             if command -v apt-get >/dev/null 2>&1; then
-                echo "Installing/upgrading python3 via apt..."
-                sudo apt-get install -y python3 python3-pip
+                echo "Installing/upgrading $command via apt..."
+                # shellcheck disable=SC2086
+                sudo apt-get install -y $apt_packages
             elif command -v yum >/dev/null 2>&1; then
-                echo "Installing/upgrading python3 via yum..."
-                sudo yum install -y python3 python3-pip
+                echo "Installing/upgrading $command via yum..."
+                # shellcheck disable=SC2086
+                sudo yum install -y $yum_packages
             else
-                echo "SKIP: No supported package manager found. Install Python from https://www.python.org/" >&2
+                echo "SKIP: No supported package manager found. Install $label from $url" >&2
             fi
             ;;
         *)
-            echo "SKIP: Unsupported OS: $OS. Install Python from https://www.python.org/" >&2
+            echo "SKIP: Unsupported OS: $OS. Install $label from $url" >&2
             ;;
     esac
+}
+
+install_python3() {
+    install_runtime python3 Python https://www.python.org/ python3 \
+        "python3 python3-pip" "python3 python3-pip"
+}
+
+install_node() {
+    install_runtime node Node.js https://nodejs.org/ node "nodejs npm" "nodejs npm"
+}
+
+install_go() {
+    install_runtime go Go https://go.dev/dl/ go golang-go golang
 }
 
 install_pipx() {
@@ -91,60 +110,6 @@ install_tsc() {
 
 install_markdownlint() {
     install_npm_package markdownlint-cli
-}
-
-install_node() {
-    case "$OS" in
-        Darwin)
-            if command -v brew >/dev/null 2>&1; then
-                echo "Installing/upgrading node via Homebrew..."
-                brew upgrade node 2>/dev/null || brew install node
-            else
-                echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Node.js from https://nodejs.org/" >&2
-            fi
-            ;;
-        Linux)
-            if command -v apt-get >/dev/null 2>&1; then
-                echo "Installing/upgrading node via apt..."
-                sudo apt-get install -y nodejs npm
-            elif command -v yum >/dev/null 2>&1; then
-                echo "Installing/upgrading node via yum..."
-                sudo yum install -y nodejs npm
-            else
-                echo "SKIP: No supported package manager found. Install Node.js from https://nodejs.org/" >&2
-            fi
-            ;;
-        *)
-            echo "SKIP: Unsupported OS: $OS. Install Node.js from https://nodejs.org/" >&2
-            ;;
-    esac
-}
-
-install_go() {
-    case "$OS" in
-        Darwin)
-            if command -v brew >/dev/null 2>&1; then
-                echo "Installing/upgrading go via Homebrew..."
-                brew upgrade go 2>/dev/null || brew install go
-            else
-                echo "SKIP: Homebrew not found. Install from https://brew.sh/ or Go from https://go.dev/dl/" >&2
-            fi
-            ;;
-        Linux)
-            if command -v apt-get >/dev/null 2>&1; then
-                echo "Installing/upgrading go via apt..."
-                sudo apt-get install -y golang-go
-            elif command -v yum >/dev/null 2>&1; then
-                echo "Installing/upgrading go via yum..."
-                sudo yum install -y golang
-            else
-                echo "SKIP: No supported package manager found. Install Go from https://go.dev/dl/" >&2
-            fi
-            ;;
-        *)
-            echo "SKIP: Unsupported OS: $OS. Install Go from https://go.dev/dl/" >&2
-            ;;
-    esac
 }
 
 # The installer holds the list of tools the hooks call, so a tool added there

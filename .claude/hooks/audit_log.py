@@ -6,7 +6,7 @@ import sys
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import hook_lib  # noqa: E402
+import hook_records  # noqa: E402
 
 AUDIT_RECORD = "audit.jsonl"
 _SECRET_KEY_RE = re.compile(r"secret|key|token|password|credential", re.IGNORECASE)
@@ -28,4 +28,4 @@ def record(hook_event: str, tool_name: str, tool_input: dict) -> None:
         "tool_name": tool_name,
         "tool_input": _mask_secrets(tool_input),
     }
-    hook_lib.append_record(AUDIT_RECORD, entry)
+    hook_records.append_record(AUDIT_RECORD, entry)

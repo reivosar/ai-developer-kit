@@ -8,7 +8,7 @@
 - Public functions, methods, and types carry a doc comment — see Doc Comments
 - No commented-out code — delete it; git history preserves it
 - Max function / method body: 20 lines (blank lines and comments excluded); if exceeded, extract until each function fits, and keep a function extracted only to meet this limit in the same file as its caller
-- A code file holds one concept or one feature. At 200 lines, check whether it holds two; if it does, split by distinct responsibility. Never split one concept across files only to reduce the line count — a concept spread over files is harder to find and to change than a long file
+- A code file, tests included, has at most 200 lines and holds one concept or one feature. At the limit, split it by distinct responsibility; a single concept that needs more than 200 lines is too large and is split into smaller concepts. The linters enforce the limit when a file is written and at commit: pylint `too-many-lines` for Python, ESLint `max-lines` or Biome `noExcessiveLinesPerFile` for TypeScript, revive `file-length-limit` for Go. Rust and shell scripts have no such lint rule and are unchecked
 - Markdown documents have a hard 200-line limit — see `documentation.md`
 
 ## Naming Conventions

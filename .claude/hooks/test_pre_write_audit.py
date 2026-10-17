@@ -6,13 +6,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import hook_lib  # noqa: E402
+import hook_records  # noqa: E402
 
 HOOK = Path(__file__).parent / "pre-write.py"
 
 
 def _records(record_name: str) -> list[dict]:
-    [record_file] = hook_lib.records_dir().glob(f"*/{record_name}")
+    [record_file] = hook_records.records_dir().glob(f"*/{record_name}")
     return [json.loads(line) for line in record_file.read_text().splitlines()]
 
 
