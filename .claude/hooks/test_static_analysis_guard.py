@@ -13,7 +13,7 @@ import static_analysis_guard  # noqa: E402
 HOOKS_DIR = Path(__file__).parent
 COMMIT = "git commit -m 'add discount'"
 UNUSED_IMPORT = "import os\n"
-CLEAN_MODULE = "VALUE = 1\n"
+CLEAN_MODULE = '"""Values."""\n\nVALUE = 1\n'
 
 
 @pytest.fixture

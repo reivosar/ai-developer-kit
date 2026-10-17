@@ -168,7 +168,8 @@ def test_pre_bash_with_commit_of_untested_branch_exits_2(project: Path):
     _stage(project, "orders.py", ORDERS)
     _stage(project, "test_orders.py", ONE_BRANCH_TEST)
     payload = json.dumps({"tool_input": {"command": COMMIT}})
-    env = {**os.environ, "RATE_LIMIT_DISABLE": "1"}
+    # The linters have a commit check of their own; this one is the tests'.
+    env = {**os.environ, "RATE_LIMIT_DISABLE": "1", "STATIC_ANALYSIS_GUARD_DISABLE": "1"}
     result = subprocess.run(
         [sys.executable, str(HOOKS_DIR / "pre-bash.py")],
         input=payload, capture_output=True, text=True, env=env,

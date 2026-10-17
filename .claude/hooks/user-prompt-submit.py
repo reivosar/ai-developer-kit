@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""UserPromptSubmit entry point: prompt injection guard and skill reminder."""
 import os
 import sys
 

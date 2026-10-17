@@ -15,9 +15,14 @@ SCRIPT_NAME = re.compile(r"[\w-]+\.(?:py|sh)\b")
 BACKTICKED_MARKDOWN_NAME = re.compile(r"`[^`\s]*?([\w-]+\.md)`")
 
 
+# Worktrees hold other checkouts, and node_modules holds the packages that
+# install-tool.sh eslint-jsdoc installs; neither is part of the kit.
+_NOT_KIT = {"worktrees", "node_modules"}
+
+
 def _is_kit_file(path: Path) -> bool:
     relative_parts = path.relative_to(CLAUDE_DIR).parts
-    return path.is_file() and "worktrees" not in relative_parts
+    return path.is_file() and not _NOT_KIT & set(relative_parts)
 
 
 def _existing_file_names() -> set[str]:

@@ -1,3 +1,8 @@
 # A Go file holds one concept; past 200 lines it holds two.
 [rule.file-length-limit]
   arguments = [{ max = 200 }]
+
+# Every exported name carries a doc comment that starts with the name, as the
+# Google Go style guide asks; so does every package.
+[rule.exported]
+[rule.package-comments]

@@ -13,7 +13,7 @@ PYLINT_FILE_LENGTH = (
 
 def _module(directory: Path, line_count: int) -> Path:
     module = directory / "orders.py"
-    module.write_text(STATEMENT * line_count)
+    module.write_text('"""Orders."""\n' + STATEMENT * (line_count - 1))
     return module
 
 
@@ -38,21 +38,22 @@ def test_static_analysis_with_python_file_runs_pylint_for_file_length(
 ):
     module = _module(tmp_path, 1)
     tool_stubs.add("flake8")
+    tool_stubs.add("ruff")
     tool_stubs.add("pylint")
     result = tool_stubs.run_script(SCRIPT, str(module))
     assert result.returncode == 0, result.stderr
-    assert tool_stubs.calls() == [f"flake8 {module}", f"{PYLINT_FILE_LENGTH} {module}"]
+    assert f"{PYLINT_FILE_LENGTH} {module}" in tool_stubs.calls()
 
 
 def test_static_analysis_with_pylint_missing_installs_it(tmp_path: Path, tool_stubs):
     module = _module(tmp_path, 1)
     tool_stubs.add("flake8")
+    tool_stubs.add("ruff")
     tool_stubs.add("pipx", provides={"install pylint": ["pylint"]})
     result = tool_stubs.run_script(SCRIPT, str(module))
     assert result.returncode == 0, result.stderr
-    assert tool_stubs.calls() == [
-        f"flake8 {module}", "pipx install pylint", f"{PYLINT_FILE_LENGTH} {module}"
-    ]
+    calls = tool_stubs.calls()
+    assert calls[calls.index("pipx install pylint") + 1] == f"{PYLINT_FILE_LENGTH} {module}"
 
 
 @pytest.mark.parametrize("name, line", [

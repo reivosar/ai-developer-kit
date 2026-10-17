@@ -45,11 +45,25 @@ class ToolStubs:
     """A PATH holding only stand-in commands, which record how they are called."""
 
     def __init__(self, home: Path) -> None:
+        """Make the stand-in directories under home, with uname reporting Darwin.
+
+        The kit's ESLint is a stand-in too, under eslint_prefix, so no script
+        run here reaches the one install-tool.sh put in lint-config.
+
+        Args:
+            home: an empty directory that will hold the stand-ins and their logs.
+        """
         self.home = home
         self.commands = home / "bin"
         self.commands.mkdir(parents=True)
         (home / "settings").mkdir()
         self.set_system("Darwin")
+        self.eslint_prefix = home / "node"
+        eslint = self.eslint_prefix / "node_modules" / ".bin" / "eslint"
+        eslint.parent.mkdir(parents=True)
+        (self.eslint_prefix / "node_modules" / "eslint-plugin-jsdoc").mkdir()
+        eslint.write_text(_STAND_IN)
+        eslint.chmod(0o755)
 
     def configure(self, name: str, **settings: object) -> None:
         """Describe a command that is not on PATH until something provides it."""
@@ -86,7 +100,10 @@ class ToolStubs:
         command = [shutil.which("bash"), str(script), *arguments]
         return subprocess.run(
             command, capture_output=True, text=True,
-            env={"PATH": str(self.commands), **environment},
+            env={
+                "PATH": str(self.commands), "LINT_NODE_PREFIX": str(self.eslint_prefix),
+                **environment,
+            },
         )
 
 

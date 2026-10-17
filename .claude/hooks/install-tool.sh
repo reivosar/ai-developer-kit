@@ -11,8 +11,15 @@
 set -uo pipefail
 
 KIT_TOOLS="pipx npm go flake8 yamllint pytest pytest-cov tsc markdownlint"
-KIT_TOOLS="$KIT_TOOLS biome cargo-clippy cargo-llvm-cov pylint revive"
+KIT_TOOLS="$KIT_TOOLS biome cargo-clippy cargo-llvm-cov pylint revive ruff eslint-jsdoc"
 OS="$(uname -s)"
+# eslint-jsdoc is ESLint with eslint-plugin-jsdoc, installed where the kit's
+# lint-config/eslint-jsdoc.config.mjs loads the plugin from.
+case "${BASH_SOURCE[0]}" in
+    */*) LINT_NODE_PREFIX="${LINT_NODE_PREFIX:-${BASH_SOURCE[0]%/*}/lint-config}" ;;
+    *) LINT_NODE_PREFIX="${LINT_NODE_PREFIX:-lint-config}" ;;
+esac
+ESLINT_JSDOC_PACKAGES="eslint@9 eslint-plugin-jsdoc typescript-eslint"
 # pipx, pip --user, and go install (GOBIN below) put commands in ~/.local/bin,
 # which the shell that started this script may not have on PATH.
 [ -n "${HOME:-}" ] && PATH="$PATH:$HOME/.local/bin"
@@ -32,6 +39,11 @@ is_installed() {
     if [ "$1" = pytest-cov ]; then
         # pytest-cov has no command of its own; pytest gains its options.
         [[ "$(pytest --help 2>/dev/null)" == *--cov-branch* ]]
+        return
+    fi
+    if [ "$1" = eslint-jsdoc ]; then
+        [ -x "$LINT_NODE_PREFIX/node_modules/.bin/eslint" ] \
+            && [ -d "$LINT_NODE_PREFIX/node_modules/eslint-plugin-jsdoc" ]
         return
     fi
     has_command "$1"
@@ -126,12 +138,15 @@ install_tool() {
         pipx) install_pipx ;;
         npm) install_system_package node "nodejs npm" "nodejs npm" ;;
         go) install_system_package go golang-go golang ;;
-        flake8 | yamllint | pylint) install_with_pipx "$1" ;;
+        flake8 | yamllint | pylint | ruff) install_with_pipx "$1" ;;
         revive) install_revive ;;
         pytest | pytest-cov) install_pytest_package "$1" ;;
         tsc) install_with_npm typescript ;;
         markdownlint) install_with_npm markdownlint-cli ;;
         biome) install_with_npm @biomejs/biome ;;
+        # shellcheck disable=SC2086
+        eslint-jsdoc) ensure_tool npm \
+            && npm install --prefix "$LINT_NODE_PREFIX" --no-save $ESLINT_JSDOC_PACKAGES ;;
         cargo-clippy) install_clippy ;;
         cargo-llvm-cov) install_llvm_cov ;;
     esac

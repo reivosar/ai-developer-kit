@@ -1,0 +1,19 @@
+# Doc comment rules for Python, held to the Google Python Style Guide 3.8.3:
+# pydocstyle (D) with the Google convention, and pydoclint (DOC), which
+# compares Returns, Yields, and Raises with the function body. A one-line
+# docstring may leave the sections out, as the guide allows. Tests document
+# themselves through their names, so test files are left out.
+[lint]
+preview = true
+select = ["D", "DOC"]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.pydoclint]
+ignore-one-line-docstrings = true
+
+[lint.per-file-ignores]
+"**/test_*.py" = ["D", "DOC"]
+"**/*_test.py" = ["D", "DOC"]
+"**/tests/**" = ["D", "DOC"]

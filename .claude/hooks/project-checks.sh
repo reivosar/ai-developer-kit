@@ -4,6 +4,13 @@
 # file belongs to, not in the directory the script was started from.
 # Builtins only: the tests run the script with a PATH of stand-ins.
 
+# Public Rust items carry doc comments, with the Errors, Panics, and Safety
+# sections the Rust API guidelines ask for.
+RUST_DOC_LINTS=(
+    -D missing_docs -D clippy::missing_errors_doc -D clippy::missing_panics_doc
+    -D clippy::missing_safety_doc
+)
+
 # nearest_project <directory> <marker> prints the nearest directory at or
 # above directory that holds marker, or nothing.
 nearest_project() {
@@ -59,7 +66,8 @@ check_projects() {
             "tsconfig.json project") type_check_project "$path" ;;
             "tsconfig.json file") tsc --noEmit "$path" ;;
             "Cargo.toml project")
-                cargo clippy --manifest-path "$path/Cargo.toml" --all-targets --quiet -- -D warnings ;;
+                cargo clippy --manifest-path "$path/Cargo.toml" --all-targets --quiet -- \
+                    -D warnings "${RUST_DOC_LINTS[@]}" ;;
             "Cargo.toml file")
                 echo "static-analysis: $path belongs to no Cargo package, so clippy did not check it." >&2 ;;
         esac </dev/null || exit_code=1
