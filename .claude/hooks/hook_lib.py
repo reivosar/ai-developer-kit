@@ -36,6 +36,23 @@ REPO_ROOT: Path = _find_repo_root()
 WORKTREES_DIR: Path = REPO_ROOT / ".claude" / "worktrees"
 
 
+def add_tool_directory_to_path() -> None:
+    """Add ~/.local/bin to PATH, where pipx and install-tool.sh put commands.
+
+    A tool installed there by a commit check is then found by the command
+    that runs next, even when the shell Claude Code started lacks the
+    directory. Without HOME, PATH is left as it is.
+    """
+    home = os.environ.get("HOME")
+    if not home:
+        return
+    tool_directory = os.path.join(home, ".local", "bin")
+    directories = os.environ.get("PATH", "").split(os.pathsep)
+    if tool_directory not in directories:
+        listed = [directory for directory in directories if directory]
+        os.environ["PATH"] = os.pathsep.join(listed + [tool_directory])
+
+
 def read_text(file_path: str) -> str:
     """Return a file's text; undecodable bytes are replaced, not raised."""
     return Path(file_path).read_text(errors="replace")

@@ -56,17 +56,22 @@ def test_install_tool_for_rust_tool_without_rustup_exits_1(tool_stubs, tool: str
     assert f"could not install {tool}" in result.stderr
 
 
-def test_install_tool_with_revive_missing_on_macos_installs_it_with_brew(tool_stubs):
+def test_install_tool_with_revive_missing_on_macos_without_go_uses_brew(tool_stubs):
     tool_stubs.add("brew", provides={"install revive": ["revive"]})
     result = tool_stubs.run_script(INSTALLER, "revive")
     assert result.returncode == 0, result.stderr
     assert tool_stubs.calls() == ["brew install revive"]
 
 
-def test_install_tool_with_revive_missing_on_linux_builds_it_with_go(tool_stubs):
-    tool_stubs.set_system("Linux")
+# go builds revive with its own linker, so it needs no Xcode tools on macOS.
+@pytest.mark.parametrize("system", ["Linux", "Darwin"])
+def test_install_tool_with_revive_missing_and_go_present_builds_it_with_go(
+    tool_stubs, system: str
+):
+    tool_stubs.set_system(system)
     install = "install github.com/mgechev/revive@latest"
     tool_stubs.add("go", provides={install: ["revive"]})
+    tool_stubs.add("brew")
     result = tool_stubs.run_script(INSTALLER, "revive")
     assert result.returncode == 0, result.stderr
     assert tool_stubs.calls() == [f"go {install}"]

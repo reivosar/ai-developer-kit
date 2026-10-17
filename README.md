@@ -30,7 +30,7 @@ mkdir -p .github
 cp -r .claude/templates/github/. .github/
 ```
 
-The hooks call external tools: flake8, pylint, yamllint, tsc, Biome, markdownlint, go, revive, clippy, cargo-llvm-cov, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, npm, or rustup, and installs nothing outside that list. Rust itself is not installed: the Rust tools need rustup to be present. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
+The hooks call external tools: flake8, pylint, yamllint, tsc, Biome, markdownlint, go, revive, clippy, cargo-llvm-cov, pytest, and pytest-cov. When one is missing, `.claude/hooks/install-tool.sh` installs it through Homebrew, apt or yum, pipx, npm, go, or rustup, and installs nothing outside that list. Tools that pipx and go install land in `~/.local/bin`, which the hooks add to PATH themselves. Rust itself is not installed: the Rust tools need rustup to be present. Formatters are not installed: `post-edit.sh` runs prettier, black, gofmt, rubocop, or shfmt only when the project already has it.
 
 ## Usage
 

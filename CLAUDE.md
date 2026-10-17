@@ -34,7 +34,7 @@ pytest .claude/hooks/test_pre_bash_audit_rate.py .claude/hooks/test_pre_edit_pat
 pytest .claude/hooks/test_docs_sync.py .claude/hooks/test_hook_modules_documented.py
 pytest .claude/hooks/test_doc_length_guard.py
 pytest .claude/hooks/test_static_analysis.py .claude/hooks/test_static_analysis_file_length.py .claude/hooks/test_static_analysis_guard.py .claude/hooks/test_static_analysis_projects.py
-pytest .claude/hooks/test_install_tool.py .claude/hooks/test_install_tool_rust_and_go.py .claude/hooks/test_install_tool_failures.py .claude/hooks/test_setup.py
+pytest .claude/hooks/test_install_tool.py .claude/hooks/test_install_tool_rust_and_go.py .claude/hooks/test_install_tool_failures.py .claude/hooks/test_setup.py .claude/hooks/test_tool_directory.py
 pytest .claude/hooks/test_function_definitions.py
 pytest .claude/hooks/test_dynamic_name_guard.py
 pytest .claude/hooks/test_reference_notice.py .claude/hooks/test_reference_notice_hooks.py
@@ -120,7 +120,7 @@ Guard modules (imported by entry points):
 - `rate_limiter.py` — per-session rate limiting backed by `.claude/rate-state.json`, or by the file `RATE_STATE_FILE` names
 - `fail_closed.py` — standard library only; turns an uncaught error into a block (exit 2)
 - `run-hook.py` — the launcher `settings.json` uses for `pre-bash.py`, `pre-write.py`, `pre-edit.py`, `pre-mcp.py`, and `memory_guard.py`; it installs `fail_closed` first, so an error while a hook loads, or a syntax error in the hook, blocks the tool call
-- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines()); `block()` records each block before it exits
+- `hook_lib.py` — shared utilities (REPO_ROOT, block(), run_fail_closed(), read_hook_input(), emit_additional_context(), read_stdin_json(), read_text(), apply_edit(), tail_lines(), add_tool_directory_to_path(), which `pre-bash.py` calls before the commit checks); `block()` records each block before it exits
 - `hook_records.py` — where records go (records_dir(), remember_session(), session_records_dir(), append_record(), utc_now()); used by `hook_lib.py` and `audit_log.py`
 - `find_guard.py` — blocks `find` actions (`-delete`, `-exec`, ...); used by `pre-bash.py`
 - `python_coverage.py` — measures Python with pytest-cov for `coverage_guard.py`, installing pytest and pytest-cov first when either is missing
@@ -128,9 +128,9 @@ Guard modules (imported by entry points):
 - `function_lengths.py` — measures function bodies per language for `function_length_guard.py`
 - `hook-lib.sh` — shared utilities for shell hooks (HOOKS_DIR, REPO_ROOT); sourced by `trash.sh`
 - `trash.sh` — moves files to `.trash/<timestamp>/`; always use this instead of `rm`
-- `static-analysis.sh` — lint runner, called by `post-edit.sh`, by the commit check, and as an allowed Bash command; installs a missing linter before running it; adds the 200-line file limit from `lint-config/` (pylint, Biome or ESLint, revive)
-- `project-checks.sh` — sourced by `static-analysis.sh`; runs `go vet`, `tsc`, and `cargo clippy` once in each project a file belongs to (nearest `go.mod`, `tsconfig.json`, `Cargo.toml`), not in the current directory
-- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov, pylint, revive) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`
+- `static-analysis.sh` — lint runner, called by `post-edit.sh`, by the commit check, and as an allowed Bash command; installs a missing linter before running it; adds the 200-line file limit from `lint-config/` (pylint, Biome or ESLint, revive) and counts the lines of Rust and shell files, which have no such lint rule; adds `~/.local/bin`, where the installer puts tools, to PATH
+- `project-checks.sh` — sourced by `static-analysis.sh`; runs `go vet`, `tsc`, and `cargo clippy` once in each project a file belongs to (nearest `go.mod`, `tsconfig.json`, `Cargo.toml`), not in the current directory; tsc runs with `--incremental` and keeps its build info under `~/.cache/ai-developer-kit/tsc/`, outside the project
+- `install-tool.sh` — installs a missing tool the hooks call (pipx, npm, go, flake8, yamllint, pytest, pytest-cov, tsc, markdownlint, biome, cargo-clippy, cargo-llvm-cov, pylint, revive) and accepts no other name; an allowed Bash command, also called by `static-analysis.sh`, `coverage_guard.py`, and `setup.sh`. revive is built with `go install` into `~/.local/bin` (Homebrew only on a Mac without go)
 - `conftest.py` — pytest fixtures: hook records in a temporary directory for every test, `tool_stubs` (a PATH of stand-in commands for tests that run the shell scripts), and `pre_bash_blocks` (runs `pre-bash.py` on a command for the allow-list suites)
 
 ### Templates

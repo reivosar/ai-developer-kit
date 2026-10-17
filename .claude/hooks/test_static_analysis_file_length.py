@@ -2,6 +2,8 @@
 import subprocess
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).parent / "static-analysis.sh"
 STATEMENT = "VALUE = 1\n"
 PYLINT_FILE_LENGTH = (
@@ -51,6 +53,37 @@ def test_static_analysis_with_pylint_missing_installs_it(tmp_path: Path, tool_st
     assert tool_stubs.calls() == [
         f"flake8 {module}", "pipx install pylint", f"{PYLINT_FILE_LENGTH} {module}"
     ]
+
+
+@pytest.mark.parametrize("name, line", [
+    ("lib.rs", "pub fn total() {}\n"), ("deploy.sh", "echo done\n"),
+    ("deploy.bash", "echo done\n"),
+])
+def test_static_analysis_with_file_no_linter_measures_over_200_lines_exits_1(
+    tmp_path: Path, tool_stubs, name: str, line: str
+):
+    source = tmp_path / name
+    source.write_text(line * 201)
+    tool_stubs.add("cargo")
+    tool_stubs.add("cargo-clippy")
+    result = tool_stubs.run_script(SCRIPT, str(source))
+    assert result.returncode == 1
+    assert f"{source}: 201 lines, more than 200" in result.stdout
+
+
+@pytest.mark.parametrize("name, text", [
+    ("lib.rs", "pub fn total() {}\n" * 200), ("deploy.sh", "echo done\n" * 200),
+    ("deploy.sh", "echo done\n" * 199 + "echo last"),
+])
+def test_static_analysis_with_file_no_linter_measures_within_200_lines_exits_0(
+    tmp_path: Path, tool_stubs, name: str, text: str
+):
+    source = tmp_path / name
+    source.write_text(text)
+    tool_stubs.add("cargo")
+    tool_stubs.add("cargo-clippy")
+    result = tool_stubs.run_script(SCRIPT, str(source))
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_static_analysis_with_go_file_over_limit_exits_1(tmp_path: Path, tool_stubs):

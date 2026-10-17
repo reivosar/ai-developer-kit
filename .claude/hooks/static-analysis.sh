@@ -28,6 +28,8 @@ case "${BASH_SOURCE[0]}" in
     */*) hooks_dir="${BASH_SOURCE[0]%/*}" ;;
 esac
 INSTALLER="$hooks_dir/install-tool.sh"
+# The installer puts linters in ~/.local/bin; the caller's PATH may lack it.
+[ -n "${HOME:-}" ] && PATH="$PATH:$HOME/.local/bin"
 # Linter settings the kit adds: a code file holds at most 200 lines.
 LINT_CONFIG="$hooks_dir/lint-config"
 MAX_FILE_LINES=200
@@ -50,6 +52,7 @@ json_files=()
 yaml_files=()
 go_files=()
 rs_files=()
+sh_files=()
 
 while IFS= read -r file; do
     [ -f "$file" ] || continue
@@ -61,6 +64,7 @@ while IFS= read -r file; do
         *.yml|*.yaml)   yaml_files+=("$file") ;;
         *.go)           go_files+=("$file") ;;
         *.rs)           rs_files+=("$file") ;;
+        *.sh|*.bash)    sh_files+=("$file") ;;
     esac
 done <<< "$changed_files"
 
@@ -99,6 +103,22 @@ lint_typescript() {
 # check_projects: go vet, tsc, and clippy, each in the file's own project.
 # shellcheck source=project-checks.sh
 source "$hooks_dir/project-checks.sh"
+
+# Clippy and the shell have no rule for file length, so the lines are counted
+# here; a last line without a newline counts too.
+check_file_length() {
+    local file line count
+    for file in "$@"; do
+        count=0
+        while IFS= read -r line || [ -n "$line" ]; do
+            count=$((count + 1))
+        done < "$file"
+        if [ "$count" -gt "$MAX_FILE_LINES" ]; then
+            echo "$file: $count lines, more than $MAX_FILE_LINES"
+            exit_code=1
+        fi
+    done
+}
 
 check_go_format() {
     local unformatted
@@ -140,8 +160,15 @@ if [ ${#go_files[@]} -gt 0 ] && require_tool go; then
     fi
 fi
 
-if [ ${#rs_files[@]} -gt 0 ] && require_tool cargo && require_tool cargo-clippy; then
-    check_projects Cargo.toml "${rs_files[@]}"
+if [ ${#rs_files[@]} -gt 0 ]; then
+    check_file_length "${rs_files[@]}"
+    if require_tool cargo && require_tool cargo-clippy; then
+        check_projects Cargo.toml "${rs_files[@]}"
+    fi
+fi
+
+if [ ${#sh_files[@]} -gt 0 ]; then
+    check_file_length "${sh_files[@]}"
 fi
 
 if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then

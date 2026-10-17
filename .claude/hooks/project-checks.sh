@@ -33,6 +33,19 @@ projects_of() {
     done
 }
 
+# type_check_project <dir> runs tsc on a TypeScript project. tsc has no cache of
+# its own, so --incremental keeps what one run learned for the next; the record
+# goes under ~/.cache, never into the project. go vet and clippy cache their
+# results themselves.
+type_check_project() {
+    if [ -z "${HOME:-}" ]; then
+        tsc --noEmit -p "$1"
+        return
+    fi
+    local build_info="$HOME/.cache/ai-developer-kit/tsc/${1//\//_}.tsbuildinfo"
+    tsc --noEmit -p "$1" --incremental --tsBuildInfoFile "$build_info"
+}
+
 # check_projects <marker> <file>... runs the module check once in each project
 # the files belong to and sets exit_code on a finding. clippy cannot check a
 # file outside a Cargo package; saying so keeps that from reading as clean.
@@ -43,7 +56,7 @@ check_projects() {
         case "$marker $kind" in
             "go.mod project") go -C "$path" vet ./... ;;
             "go.mod file") go vet "$path" ;;
-            "tsconfig.json project") tsc --noEmit -p "$path" ;;
+            "tsconfig.json project") type_check_project "$path" ;;
             "tsconfig.json file") tsc --noEmit "$path" ;;
             "Cargo.toml project")
                 cargo clippy --manifest-path "$path/Cargo.toml" --all-targets --quiet -- -D warnings ;;

@@ -74,6 +74,23 @@ def test_static_analysis_with_typescript_project_checks_that_project(
     assert f"tsc --noEmit -p {project}" in tool_stubs.calls()
 
 
+def test_static_analysis_with_typescript_project_keeps_build_info_outside_it(
+    tmp_path: Path, tool_stubs
+):
+    project = tmp_path / "web"
+    source = _source(project, "order.ts", "tsconfig.json")
+    home = tmp_path / "home"
+    tool_stubs.add("tsc")
+    tool_stubs.add("biome")
+    tool_stubs.run_script(SCRIPT, str(source), HOME=str(home))
+    cache = home / ".cache" / "ai-developer-kit" / "tsc"
+    build_info = cache / (str(project).replace("/", "_") + ".tsbuildinfo")
+    assert (
+        f"tsc --noEmit -p {project} --incremental --tsBuildInfoFile {build_info}"
+        in tool_stubs.calls()
+    )
+
+
 def test_static_analysis_with_typescript_file_outside_any_project_checks_the_file(
     tmp_path: Path, tool_stubs
 ):

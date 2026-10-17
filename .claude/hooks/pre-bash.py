@@ -35,7 +35,12 @@ from git_guard import (  # noqa: E402
     check_push_on_main,
     check_stash_destructive,
 )
-from hook_lib import block, read_hook_input, run_fail_closed  # noqa: E402
+from hook_lib import (  # noqa: E402
+    add_tool_directory_to_path,
+    block,
+    read_hook_input,
+    run_fail_closed,
+)
 
 
 SETTINGS_PATH = str(Path(__file__).resolve().parent.parent / "settings.json")
@@ -70,6 +75,8 @@ def _block_unsafe_command(command: str) -> None:
 
 def _block_unfit_commit(command: str) -> None:
     # The cheap checks run first: the diff, then the linters, then the tests.
+    # The linters and test tools they install go to ~/.local/bin.
+    add_tool_directory_to_path()
     commit_guard.check_pre_commit(command)
     static_analysis_guard.check_staged_files(command)
     coverage_guard.check_staged_coverage(command)
