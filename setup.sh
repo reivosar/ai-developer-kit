@@ -3,9 +3,17 @@ set -euo pipefail
 
 OS="$(uname -s)"
 
-# install_runtime <command> <label> <url> <brew formula> <apt packages> <yum packages>
-# installs a language runtime with the system's package manager, or names
-# where to get it when there is none. A package list is one word-split string.
+#######################################
+# Install or upgrade a language runtime with the system's package manager,
+# or name where to get it when there is none.
+# Globals:
+#   OS
+# Arguments:
+#   The runtime's command, its name, the URL to get it from, the Homebrew
+#   formula, then the apt and the yum packages, each one word-split string.
+# Outputs:
+#   Progress, to stdout; where to get the runtime, to stderr.
+#######################################
 install_runtime() {
     local command="$1" label="$2" url="$3" formula="$4" apt_packages="$5" yum_packages="$6"
     case "$OS" in
@@ -36,19 +44,13 @@ install_runtime() {
     esac
 }
 
-install_python3() {
-    install_runtime python3 Python https://www.python.org/ python3 \
-        "python3 python3-pip" "python3 python3-pip"
-}
-
-install_node() {
-    install_runtime node Node.js https://nodejs.org/ node "nodejs npm" "nodejs npm"
-}
-
-install_go() {
-    install_runtime go Go https://go.dev/dl/ go golang-go golang
-}
-
+#######################################
+# Install or upgrade pipx: with Homebrew, apt, or else pip3.
+# Globals:
+#   OS
+# Outputs:
+#   Progress, to stdout; where to get pipx, to stderr.
+#######################################
 install_pipx() {
     case "$OS" in
         Darwin)
@@ -76,6 +78,13 @@ install_pipx() {
     esac
 }
 
+#######################################
+# Install or upgrade a Python command with pipx; skipped without pipx.
+# Arguments:
+#   The package's name.
+# Outputs:
+#   Progress, to stdout; the skip, to stderr.
+#######################################
 install_pip_package() {
     local package="$1"
     if ! command -v pipx >/dev/null 2>&1; then
@@ -86,14 +95,13 @@ install_pip_package() {
     pipx install "$package" 2>/dev/null || pipx upgrade "$package"
 }
 
-install_flake8() {
-    install_pip_package flake8
-}
-
-install_yamllint() {
-    install_pip_package yamllint
-}
-
+#######################################
+# Install or upgrade a Node package globally with npm; skipped without npm.
+# Arguments:
+#   The package's name.
+# Outputs:
+#   Progress, to stdout; the skip, to stderr.
+#######################################
 install_npm_package() {
     local package="$1"
     if ! command -v npm >/dev/null 2>&1; then
@@ -104,16 +112,13 @@ install_npm_package() {
     npm install -g "$package"@latest --quiet
 }
 
-install_tsc() {
-    install_npm_package typescript
-}
-
-install_markdownlint() {
-    install_npm_package markdownlint-cli
-}
-
-# The installer holds the list of tools the hooks call, so a tool added there
-# is installed here without this file naming it.
+#######################################
+# Install every hook tool that is still missing. The installer holds the list
+# of tools the hooks call, so a tool added there is installed here without
+# this file naming it.
+# Outputs:
+#   Progress, to stdout; a warning, to stderr, when a tool could not be had.
+#######################################
 install_missing_kit_tools() {
     local kit_root="."
     case "$0" in
@@ -126,6 +131,11 @@ install_missing_kit_tools() {
         || echo "WARNING: some hook tools could not be installed." >&2
 }
 
+#######################################
+# Print the version of each tool, and warn about a package manager missing.
+# Outputs:
+#   The versions, to stdout; the warnings, to stderr.
+#######################################
 verify_tools() {
     echo ""
     echo "Tool versions:"
@@ -147,17 +157,25 @@ verify_tools() {
     fi
 }
 
+#######################################
+# Install the runtimes and the tools the kit's hooks call.
+# Globals:
+#   OS
+# Outputs:
+#   Progress, to stdout; skips and warnings, to stderr.
+#######################################
 main() {
     echo "Setting up ai-developer-kit static analysis tools (OS: $OS)"
     echo ""
-    install_python3
+    install_runtime python3 Python https://www.python.org/ python3 \
+        "python3 python3-pip" "python3 python3-pip"
     install_pipx
-    install_flake8
-    install_yamllint
-    install_node
-    install_tsc
-    install_markdownlint
-    install_go
+    install_pip_package flake8
+    install_pip_package yamllint
+    install_runtime node Node.js https://nodejs.org/ node "nodejs npm" "nodejs npm"
+    install_npm_package typescript
+    install_npm_package markdownlint-cli
+    install_runtime go Go https://go.dev/dl/ go golang-go golang
     install_missing_kit_tools
     verify_tools
     echo ""

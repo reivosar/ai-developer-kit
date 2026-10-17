@@ -74,6 +74,34 @@ def test_static_analysis_with_typescript_doc_comment_gap_exits_1(
     assert rule in result.stdout
 
 
+@pytest.mark.parametrize("name", ["orders.js", "orders.jsx", "orders.mjs", "orders.cjs"])
+def test_static_analysis_with_javascript_file_runs_linter_and_jsdoc_but_not_tsc(
+    tmp_path: Path, tool_stubs, name: str
+):
+    source = tmp_path / name
+    source.write_text("export function refund(total) {\n  return total;\n}\n")
+    for command in ["tsc", "biome"]:
+        tool_stubs.add(command)
+    result = tool_stubs.run_script(SCRIPT, str(source))
+    assert result.returncode == 0, result.stderr
+    assert not any(call.startswith("tsc") for call in tool_stubs.calls())
+    assert any(call.startswith("biome lint") for call in tool_stubs.calls())
+    eslint_log = tool_stubs.eslint_prefix / "node_modules" / "calls.log"
+    assert eslint_log.read_text().splitlines() == [
+        f"eslint --config {CONFIG} --no-warn-ignored {source}"
+    ]
+
+
+def test_static_analysis_with_undocumented_javascript_export_exits_1(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "orders.js").write_text("export function refund(total) {\n  return total;\n}\n")
+    result = subprocess.run([str(SCRIPT), "orders.js"], capture_output=True, text=True)
+    assert result.returncode == 1
+    assert "jsdoc/require-jsdoc" in result.stdout
+
+
 def test_static_analysis_with_documented_typescript_reports_no_jsdoc_rule(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):

@@ -11,8 +11,13 @@ RUST_DOC_LINTS=(
     -D clippy::missing_safety_doc
 )
 
-# nearest_project <directory> <marker> prints the nearest directory at or
-# above directory that holds marker, or nothing.
+#######################################
+# Find the nearest directory at or above a directory that holds a marker file.
+# Arguments:
+#   The directory to start from, then the marker's file name.
+# Outputs:
+#   The directory found, to stdout; nothing when none holds the marker.
+#######################################
 nearest_project() {
     local directory="$1" marker="$2"
     while :; do
@@ -22,8 +27,14 @@ nearest_project() {
     done
 }
 
-# projects_of <marker> <file>... prints "project <dir>" once for each project
-# the files belong to, and "file <path>" for a file that belongs to none.
+#######################################
+# Group files by the project each belongs to.
+# Arguments:
+#   The marker file that makes a directory a project, then the files.
+# Outputs:
+#   "project <dir>" once for each project, and "file <path>" for each file
+#   that belongs to none, to stdout.
+#######################################
 projects_of() {
     local marker="$1" file folder project seen=$'\n'
     shift
@@ -40,10 +51,18 @@ projects_of() {
     done
 }
 
-# type_check_project <dir> runs tsc on a TypeScript project. tsc has no cache of
-# its own, so --incremental keeps what one run learned for the next; the record
-# goes under ~/.cache, never into the project. go vet and clippy cache their
+#######################################
+# Type-check a TypeScript project. tsc has no cache of its own, so
+# --incremental keeps what one run learned for the next; the record goes
+# under ~/.cache, never into the project. go vet and clippy cache their
 # results themselves.
+# Globals:
+#   HOME
+# Arguments:
+#   The project's directory, the one holding tsconfig.json.
+# Outputs:
+#   tsc's findings, to stdout.
+#######################################
 type_check_project() {
     if [ -z "${HOME:-}" ]; then
         tsc --noEmit -p "$1"
@@ -53,9 +72,17 @@ type_check_project() {
     tsc --noEmit -p "$1" --incremental --tsBuildInfoFile "$build_info"
 }
 
-# check_projects <marker> <file>... runs the module check once in each project
-# the files belong to and sets exit_code on a finding. clippy cannot check a
-# file outside a Cargo package; saying so keeps that from reading as clean.
+#######################################
+# Run the module check (go vet, tsc, clippy) once in each project the files
+# belong to. clippy cannot check a file outside a Cargo package; saying so
+# keeps that from reading as clean.
+# Globals:
+#   RUST_DOC_LINTS: read. exit_code: set to 1 on a finding.
+# Arguments:
+#   The marker file (go.mod, tsconfig.json, or Cargo.toml), then the files.
+# Outputs:
+#   The checks' findings, to stdout; a Rust file in no package, to stderr.
+#######################################
 check_projects() {
     local marker="$1" kind path
     shift
