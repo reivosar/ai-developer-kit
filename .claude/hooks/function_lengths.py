@@ -146,6 +146,10 @@ def function_lengths(code: str, file_path: str) -> list[tuple[str, int]]:
     Kotlin, and Rust are read with patterns, which find a function only when
     its body opens with a brace after the parameter list. A file in any other
     language, or Python that does not parse, gives an empty list.
+
+    Args:
+        code: the source text.
+        file_path: the file's path; its extension picks the language.
     """
     extension = os.path.splitext(file_path)[1].lower()
     if extension == ".py":

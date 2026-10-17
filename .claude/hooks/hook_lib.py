@@ -82,6 +82,10 @@ def read_hook_input() -> dict:
 
     A blocking hook must not read unusable input as "nothing to check",
     so this raises where read_stdin_json returns an empty object.
+
+    Raises:
+        ValueError: the input is not JSON, is not a JSON object, or has a
+            tool_input that is not a JSON object.
     """
     try:
         data = json.load(sys.stdin)
@@ -126,6 +130,10 @@ def tail_lines(text: str, count: int) -> list[str]:
 
     Tool output can hold one line of many thousand characters, such as a
     linker command. Left whole, it buries the lines that say what failed.
+
+    Args:
+        text: tool output.
+        count: how many lines to keep from its end.
     """
     return [line[:MAX_LINE] for line in text.strip().splitlines()[-count:]]
 
@@ -135,6 +143,10 @@ def block(reason: str, *detail_lines: str) -> NoReturn:
 
     The record goes to blocks/<guard>.jsonl in the session's directory. The
     guard is the file that called block, so one file counts one check.
+
+    Args:
+        reason: why the tool call is blocked, in one line.
+        *detail_lines: lines that show what was found and what to do instead.
     """
     guard = Path(sys._getframe(1).f_code.co_filename).stem
     hook_records.append_record(f"blocks/{guard}.jsonl", {

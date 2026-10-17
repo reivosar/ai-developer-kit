@@ -51,6 +51,10 @@ def uncovered_files(report: dict, paths: list[str]) -> dict[str, float]:
 
     The percent is the lower of branch and line coverage. A file that no
     test imported is absent from the report and counts as 0.
+
+    Args:
+        report: a coverage.py JSON report.
+        paths: the files to look up, named as the report names them.
     """
     files = report.get("files", {})
     percents = {
@@ -147,6 +151,9 @@ def check_staged_coverage(command: str) -> None:
     test run. Test files, files under .claude/, and TypeScript declaration
     and configuration files are not. A staged Python file under
     .claude/hooks/ runs the kit's own coverage test instead.
+
+    Args:
+        command: the Bash command line.
     """
     if os.environ.get("COVERAGE_GUARD_DISABLE") or not is_commit(command):
         return

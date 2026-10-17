@@ -11,6 +11,10 @@ class Definition(NamedTuple):
     name: str
     doc: Optional[str]  # None when the definition has no doc comment
     params: Optional[tuple]  # None when the parameters cannot be read
+    # Read for Python only, where Google style asks for Returns, Yields, Raises.
+    returns: bool = False  # the body returns a value other than None
+    yields: bool = False  # the body is a generator
+    raised: tuple = ()  # names of the exceptions the body raises itself
 
 
 class Language(NamedTuple):

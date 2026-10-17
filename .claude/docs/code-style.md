@@ -59,7 +59,8 @@ Every public function, method, and type carries a doc comment in the language's 
 | Kotlin | `/** */` (KDoc) | no `private`, `internal`, or `protected` modifier |
 | Rust | `///` lines directly above; attributes may sit in between | `pub` with no restriction such as `pub(crate)` |
 
-- A comment that lists parameters (`Args:` in Python, `@param` elsewhere) lists exactly the parameters the signature has. A one-line summary with no parameter list is enough for a simple function.
+- Python follows the Google Python Style Guide 3.8.3. A one-line docstring is enough where the name and signature say what the function does. A docstring of more than one line carries the sections its function needs: `Args:` naming every parameter, `Returns:` for a value other than None (unless the summary starts with "Return" and says what it is), `Yields:` for a generator, and `Raises:` naming each exception the function raises itself.
+- Java, JavaScript, TypeScript, and Go follow their Google style guides, which do not ask for a tag per parameter: `@param` and `@return` are written where they add information. A comment that lists parameters (`Args:` in Python, `@param` elsewhere) lists exactly the parameters the signature has.
 - A method that overrides another (`@Override`, `override`), a property setter, and an `@overload` need no comment of their own.
 - Private code needs no doc comment.
 

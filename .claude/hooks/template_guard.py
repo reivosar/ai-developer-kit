@@ -49,6 +49,9 @@ def required_sections(template_text: str) -> list[str]:
     """Return the headings of a template that every body must fill.
 
     A section is optional when its text starts with the OPTIONAL_MARK comment.
+
+    Args:
+        template_text: the text of a pull request or issue template.
     """
     return [
         heading for heading, content in _sections(template_text).items()
@@ -61,6 +64,10 @@ def find_problems(body: str, template_text: str) -> list[str]:
 
     A required section that the body lacks is missing. A section of the
     template that the body has with nothing in it but comments is empty.
+
+    Args:
+        body: the pull request or issue body.
+        template_text: the text of the template it is held to.
     """
     written = _sections(body)
     missing = [
@@ -169,6 +176,9 @@ def check_description(command: str) -> None:
     project has none. An issue passes when it follows any one issue template
     of the project or of the kit. Nothing is checked while
     TEMPLATE_GUARD_DISABLE is set.
+
+    Args:
+        command: the Bash command line.
     """
     if os.environ.get("TEMPLATE_GUARD_DISABLE"):
         return

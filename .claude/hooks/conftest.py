@@ -59,8 +59,11 @@ class ToolStubs:
     def add(self, name: str, **settings: object) -> None:
         """Put a command on PATH.
 
-        provides maps an argument string to the commands that call creates,
-        status is the exit code, and output is what the command prints.
+        Args:
+            name: the command's name.
+            **settings: provides maps an argument string to the commands that
+                call creates, status is the exit code, and output is what the
+                command prints.
         """
         self.configure(name, **settings)
         command = self.commands / name
@@ -68,9 +71,11 @@ class ToolStubs:
         command.chmod(0o755)
 
     def set_system(self, system: str) -> None:
+        """Make uname print system, the name the scripts read the OS from."""
         self.add("uname", output=system, silent=True)
 
     def calls(self) -> list[str]:
+        """Return each call of a stand-in so far, as its command line."""
         log = self.home / "calls.log"
         return log.read_text().splitlines() if log.exists() else []
 
@@ -93,6 +98,13 @@ def records_outside_the_project(
 
     A hook that a test starts inherits the two variables, so no test writes
     to the project's own .claude/logs or .claude/rate-state.json.
+
+    Args:
+        tmp_path_factory: makes the temporary directory.
+        monkeypatch: sets the two variables for this test only.
+
+    Returns:
+        The temporary directory.
     """
     scratch = tmp_path_factory.mktemp("hook-records")
     monkeypatch.setenv("HOOK_RECORDS_DIR", str(scratch / "logs"))
@@ -127,6 +139,7 @@ def pre_bash_blocks():
 
 @pytest.fixture
 def tool_stubs(tmp_path: Path) -> ToolStubs:
+    """Return stand-in commands under tmp_path, with the real bash among them."""
     stubs = ToolStubs(tmp_path / "stand-ins")
     # The scripts start each other through "env bash", so the real shell is
     # the one command that has to stay reachable.

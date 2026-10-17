@@ -140,6 +140,10 @@ def find_public_definitions(code: str, file_path: str) -> list[Definition]:
     Java, and Kotlin are read with patterns, which find a definition only
     when its visibility is written on the definition line. A file in any
     other language, or Python that does not parse, gives an empty list.
+
+    Args:
+        code: the source text.
+        file_path: the file's path; its extension picks the language.
     """
     extension = os.path.splitext(file_path)[1].lower()
     if extension == ".py":

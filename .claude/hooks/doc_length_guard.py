@@ -49,6 +49,12 @@ def check_edit(
 
     An edit that shortens a document already over the limit is allowed,
     so an oversized document can be trimmed in several steps.
+
+    Args:
+        file_path: the file the Edit changes.
+        old_string: the text the Edit replaces.
+        new_string: the text it puts in its place.
+        replace_all: whether every occurrence of old_string is replaced.
     """
     if not _is_guarded_document(file_path) or not Path(file_path).is_file():
         return

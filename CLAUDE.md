@@ -41,7 +41,7 @@ pytest .claude/hooks/test_reference_notice.py .claude/hooks/test_reference_notic
 pytest .claude/hooks/test_tdd_guard.py .claude/hooks/test_tdd_guard_upstream.py
 pytest .claude/hooks/test_testing_guard.py .claude/hooks/test_testing_guard_checks.py
 pytest .claude/hooks/test_doc_comments.py .claude/hooks/test_python_doc_comments.py .claude/hooks/test_doc_comments_go_rust.py .claude/hooks/test_doc_comment_shapes.py
-pytest .claude/hooks/test_doc_comment_guard.py .claude/hooks/test_doc_comment_guard_checks.py
+pytest .claude/hooks/test_doc_comment_guard.py .claude/hooks/test_doc_comment_guard_checks.py .claude/hooks/test_google_docstrings.py
 pytest .claude/hooks/test_function_length_guard.py .claude/hooks/test_function_lengths.py
 pytest .claude/hooks/test_template_guard.py .claude/hooks/test_template_guard_templates.py
 pytest .claude/hooks/test_hook_lib_helpers.py
@@ -94,7 +94,8 @@ Entry points (one process spawn per event):
 
 Guard modules (imported by entry points):
 - `bash_guard.py` — splits a command into segments (quotes and backslash escapes read as the shell reads them) and checks it against the allow and deny lists; blocks shell syntax that can hide a second command (`$(...)`, backticks, `<(...)`, a lone `&`, a second line, `$'...'`, redirects, pipes), `find` actions, and script paths outside the project
-- `git_guard.py` — blocks `git stash drop`/`clear`, `git checkout --`, `git branch -D`, a commit or push on `main`, options that force, delete, discard, or overwrite (listed per subcommand), `git fetch` into a local branch, `git add` of every file, and a git subcommand the allow list does not name (`git difftool` matched `git diff*`)
+- `git_guard.py` — blocks `git stash drop`/`clear`, `git checkout --`, `git branch -D`, a commit or push on `main`, and a git subcommand the allow list does not name (`git difftool` matched `git diff*`)
+- `git_option_guard.py` — blocks git options that force, delete, discard, or overwrite (listed per subcommand), `git fetch` into a local branch, and `git add` of every file
 - `cp_guard.py` — blocks `cp` from outside the project and its forcing options; moves an existing destination to the trash first
 - `commit_guard.py` — secret detection, branch name, whitespace, .env, emoji in staged diff
 - `coverage_guard.py` — on `git commit`, runs the tests under coverage and blocks when a staged Python, Go, Rust, or TypeScript file outside `.claude/` is below 90%; Python is measured here with pytest-cov, which is installed with pytest when either is missing. A staged Python file under `.claude/hooks/` runs `test_coverage.py` instead, so a kit change below 90% is blocked too
@@ -106,7 +107,7 @@ Guard modules (imported by entry points):
 - `reference_notice.py` — does not block; returns to the agent the references to a changed function and the location of a function name that is already defined elsewhere
 - `function_definitions.py` — finds function definitions by file extension; shared by `tdd_guard.py` and `reference_notice.py`
 - `testing_guard.py` — blocks a Write or Edit that adds a test with no assertion, an always-true assertion, sleep, a snapshot, or a name outside the convention
-- `doc_comment_guard.py` — blocks a Write or Edit that adds a public function, method, or type with no doc comment, or with one whose parameter list does not match the signature
+- `doc_comment_guard.py` — blocks a Write or Edit that adds a public function, method, or type with no doc comment, with one whose parameter list does not match the signature, or with a Python docstring of more than one line that lacks a Google style section (`Args:`, `Returns:`, `Yields:`, `Raises:`) its function needs
 - `doc_comments.py` — finds public definitions with their doc comment and parameters (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin); used by `doc_comment_guard.py`
 - `function_length_guard.py` — blocks a Write or Edit that adds a function body longer than 20 lines, or lengthens one that is already longer (Python, Go, JavaScript, TypeScript, Rust, Java, Kotlin)
 - `static_analysis_guard.py` — on `git commit`, runs `static-analysis.sh` on the staged files and blocks when it reports a problem

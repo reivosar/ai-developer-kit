@@ -87,8 +87,12 @@ def _go_blocks(profile: str) -> dict[str, tuple[str, int, bool]]:
 def go_profile_percents(profile: str, module: str) -> dict[str, float]:
     """Return the statement coverage percent of each file in a Go profile.
 
-    The profile names files by import path; module is the module's import
-    path, and the result names them relative to the module root.
+    The profile names files by import path; the result names them relative
+    to the module root.
+
+    Args:
+        profile: the text of a go test -coverprofile file.
+        module: the module's import path, as go.mod declares it.
     """
     totals: dict[str, list[int]] = {}
     for file, statements, reached in _go_blocks(profile).values():
@@ -102,6 +106,9 @@ def go_percents() -> dict[str, float]:
     """Run the Go tests and return the statement coverage percent per file.
 
     Go measures statements, not branches. A failing test blocks the commit.
+
+    Returns:
+        Each file, relative to the module root, with its percent.
     """
     _ensure_tool("go")
     module = _run(["go", "list", "-m"]).stdout.strip()
@@ -129,6 +136,9 @@ def rust_percents() -> dict[str, float]:
     The percent is the lower of line and region coverage from cargo llvm-cov,
     and of branch coverage when the toolchain measures it. A failing test
     blocks the commit.
+
+    Returns:
+        Each file, relative to the project root, with its percent.
     """
     _ensure_tool("cargo-llvm-cov")
     with tempfile.TemporaryDirectory() as directory:
@@ -164,6 +174,9 @@ def typescript_percents() -> dict[str, float]:
     The runner is vitest or jest, whichever package.json names, and the
     percent is the lower of line and branch coverage. A failing test blocks
     the commit, and so does a project with neither runner.
+
+    Returns:
+        Each file, relative to the project root, with its percent.
     """
     runner = _typescript_runner()
     with tempfile.TemporaryDirectory() as directory:

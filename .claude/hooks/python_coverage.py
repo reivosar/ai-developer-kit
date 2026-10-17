@@ -88,6 +88,9 @@ def measure() -> dict:
 
     pytest and pytest-cov are installed first when one is missing. Failing
     tests, or a run that cannot measure, block the commit.
+
+    Returns:
+        The coverage.py JSON report, as a dict.
     """
     with tempfile.TemporaryDirectory() as directory:
         report_path = os.path.join(directory, "coverage.json")

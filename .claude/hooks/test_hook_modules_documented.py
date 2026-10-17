@@ -13,11 +13,11 @@ HOOKS_DIR = Path(__file__).parent
 # names the module. A new hook module fails the list test until it is added.
 HOOK_MODULES = [
     "anomaly_guard.py", "audit_log.py", "bash_guard.py", "commit_guard.py",
-    "content_guard.py", "coverage_guard.py", "coverage_runners.py", "cp_guard.py",
+    "conftest.py", "content_guard.py", "coverage_guard.py", "coverage_runners.py", "cp_guard.py",
     "doc_comment_guard.py", "doc_comment_shapes.py", "doc_comments.py",
     "doc_length_guard.py", "dynamic_name_guard.py", "env_file_guard.py",
     "fail_closed.py", "find_guard.py", "function_definitions.py",
-    "function_length_guard.py", "function_lengths.py", "git_guard.py",
+    "function_length_guard.py", "function_lengths.py", "git_guard.py", "git_option_guard.py",
     "hook_lib.py", "hook_records.py", "mcp_guard.py", "memory_guard.py",
     "post-tool.py", "pre-bash.py", "pre-edit.py", "pre-mcp.py", "pre-write.py",
     "prompt_injection_guard.py", "python_coverage.py", "python_doc_comments.py",
@@ -35,7 +35,6 @@ def test_find_violations_in_hook_module_returns_nothing(module_name: str):
 
 def test_hook_module_list_names_every_hook_module():
     modules = [
-        path.name for path in HOOKS_DIR.glob("*.py")
-        if not path.name.startswith("test_") and path.name != "conftest.py"
+        path.name for path in HOOKS_DIR.glob("*.py") if not path.name.startswith("test_")
     ]
     assert HOOK_MODULES == sorted(modules)

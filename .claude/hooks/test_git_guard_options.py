@@ -1,4 +1,5 @@
-"""Tests for git_guard: options that force, delete, or discard, and unnamed subcommands."""
+"""Tests for git_option_guard (options that force, delete, or discard) and
+git_guard (subcommands the allow list does not name)."""
 import os
 import sys
 
@@ -6,6 +7,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import git_guard  # noqa: E402
+import git_option_guard  # noqa: E402
 
 ALLOW_PATTERNS = ["git diff*", "git show*", "git commit*", "git stash", "git fetch*", "ls*"]
 
@@ -43,7 +45,7 @@ def test_check_forbidden_options_with_forcing_option_exits_2(
     command: str, option: str, capsys: pytest.CaptureFixture
 ):
     with pytest.raises(SystemExit) as blocked:
-        git_guard.check_forbidden_options(command)
+        git_option_guard.check_forbidden_options(command)
     assert blocked.value.code == 2
     assert f"'{option}'" in capsys.readouterr().err
 
@@ -56,7 +58,7 @@ def test_check_forbidden_options_with_fetch_into_a_local_branch_exits_2(
     command: str, capsys: pytest.CaptureFixture
 ):
     with pytest.raises(SystemExit) as blocked:
-        git_guard.check_forbidden_options(command)
+        git_option_guard.check_forbidden_options(command)
     assert blocked.value.code == 2
     assert "local branch" in capsys.readouterr().err
 
@@ -88,7 +90,7 @@ def test_check_forbidden_options_with_fetch_into_a_local_branch_exits_2(
     ],
 )
 def test_check_forbidden_options_with_safe_command_does_not_block(command: str):
-    assert git_guard.check_forbidden_options(command) is None
+    assert git_option_guard.check_forbidden_options(command) is None
 
 
 @pytest.mark.parametrize(
@@ -98,7 +100,7 @@ def test_check_forbidden_options_with_add_of_everything_exits_2(
     command: str, capsys: pytest.CaptureFixture
 ):
     with pytest.raises(SystemExit) as blocked:
-        git_guard.check_forbidden_options(command)
+        git_option_guard.check_forbidden_options(command)
     assert blocked.value.code == 2
     assert "stages every change" in capsys.readouterr().err
 

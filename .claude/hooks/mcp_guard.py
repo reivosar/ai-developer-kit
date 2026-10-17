@@ -20,8 +20,11 @@ def _load_allowlist(allowlist_file: Path) -> list[str]:
 def check_mcp_tool(tool_name: str, allowlist_file: Optional[Path] = None) -> None:
     """Block an MCP tool whose name matches no pattern in the allowlist.
 
-    A name that does not start with mcp__ is let through. The allowlist is
-    .claude/mcp-allowlist.txt unless allowlist_file names another file.
+    A name that does not start with mcp__ is let through.
+
+    Args:
+        tool_name: the tool's name, such as "mcp__github__create_issue".
+        allowlist_file: the allowlist; .claude/mcp-allowlist.txt when None.
     """
     if not tool_name.startswith("mcp__"):
         return

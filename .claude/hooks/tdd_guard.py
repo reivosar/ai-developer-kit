@@ -124,6 +124,11 @@ def check(code: str, file_path: str) -> None:
 
     A change to public functions needs a test file that names one of them. Any
     other change needs a test file for the module.
+
+    Args:
+        code: the code the change touches: a Write's content, or the text an
+            Edit replaces.
+        file_path: the file being changed.
     """
     if not _is_checked(code, file_path):
         return
