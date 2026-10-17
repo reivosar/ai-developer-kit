@@ -11,8 +11,11 @@
 set -uo pipefail
 
 KIT_TOOLS="pipx npm go flake8 yamllint pytest pytest-cov tsc markdownlint"
-KIT_TOOLS="$KIT_TOOLS biome cargo-clippy cargo-llvm-cov"
+KIT_TOOLS="$KIT_TOOLS biome cargo-clippy cargo-llvm-cov pylint revive"
 OS="$(uname -s)"
+# pipx, pip --user, and go install (GOBIN below) put commands in ~/.local/bin,
+# which the shell that started this script may not have on PATH.
+[ -n "${HOME:-}" ] && PATH="$PATH:$HOME/.local/bin"
 
 has_command() {
     command -v "$1" >/dev/null 2>&1
@@ -105,12 +108,26 @@ install_llvm_cov() {
     cargo install cargo-llvm-cov --version "${BASH_REMATCH[1]}" --locked
 }
 
+# revive is built with go into ~/.local/bin, the directory pipx also installs
+# into. go links it itself, so this needs no Xcode tools on macOS; Homebrew is
+# used only on a Mac that has no go.
+install_revive() {
+    if [ "$OS" = Darwin ] && ! has_command go; then
+        has_command brew && brew install revive
+        return
+    fi
+    # Without HOME, go puts it in its own default directory.
+    ensure_tool go && GOBIN="${HOME:+$HOME/.local/bin}" \
+        go install github.com/mgechev/revive@latest
+}
+
 install_tool() {
     case "$1" in
         pipx) install_pipx ;;
         npm) install_system_package node "nodejs npm" "nodejs npm" ;;
         go) install_system_package go golang-go golang ;;
-        flake8 | yamllint) install_with_pipx "$1" ;;
+        flake8 | yamllint | pylint) install_with_pipx "$1" ;;
+        revive) install_revive ;;
         pytest | pytest-cov) install_pytest_package "$1" ;;
         tsc) install_with_npm typescript ;;
         markdownlint) install_with_npm markdownlint-cli ;;

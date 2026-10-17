@@ -1,5 +1,4 @@
 """Tests for reference_notice: report references and duplicate definitions."""
-import json
 import os
 import subprocess
 import sys
@@ -8,7 +7,6 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import hook_lib  # noqa: E402
 import reference_notice  # noqa: E402
 
 HOOKS_DIR = Path(__file__).parent
@@ -28,22 +26,6 @@ def repo(tmp_path: Path) -> Path:
     (root / "api.py").write_text(API)
     (root / "jobs.py").write_text(JOBS)
     return root
-
-
-def _run_hook(hook_name: str, tool_input: dict) -> subprocess.CompletedProcess:
-    env = {
-        **os.environ,
-        "WORKTREE_GUARD_DISABLE": "1",
-        "ANOMALY_PATH_ESCAPE_DISABLE": "1",
-        "TDD_GUARD_DISABLE": "1",
-    }
-    return subprocess.run(
-        [sys.executable, str(HOOKS_DIR / hook_name)],
-        input=json.dumps({"tool_input": tool_input}),
-        capture_output=True,
-        text=True,
-        env=env,
-    )
 
 
 def test_for_edit_with_changed_signature_reports_reference_count(repo: Path):
@@ -151,67 +133,3 @@ def test_for_edit_with_notice_disabled_returns_no_notice(
     orders = str(repo / "orders.py")
     notices = reference_notice.for_edit(orders, OLD_SIGNATURE, NEW_SIGNATURE)
     assert notices == []
-
-
-def test_emit_additional_context_with_notices_prints_hook_json(
-    capsys: pytest.CaptureFixture,
-):
-    hook_lib.emit_additional_context("PreToolUse", ["first", "second"])
-    output = json.loads(capsys.readouterr().out)
-    assert output == {
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "additionalContext": "first\nsecond",
-        }
-    }
-
-
-def test_emit_additional_context_with_no_notice_prints_nothing(
-    capsys: pytest.CaptureFixture,
-):
-    hook_lib.emit_additional_context("PreToolUse", [])
-    assert capsys.readouterr().out == ""
-
-
-def test_pre_edit_with_changed_signature_returns_context_and_exits_0(
-    repo: Path,
-):
-    tool_input = {
-        "file_path": str(repo / "orders.py"),
-        "old_string": OLD_SIGNATURE,
-        "new_string": NEW_SIGNATURE,
-    }
-    result = _run_hook("pre-edit.py", tool_input)
-    assert result.returncode == 0, result.stderr
-    context = json.loads(result.stdout)["hookSpecificOutput"]
-    assert context["hookEventName"] == "PreToolUse"
-    assert "3 lines in 2 other files" in context["additionalContext"]
-
-
-def test_pre_edit_with_unchanged_signature_prints_nothing(repo: Path):
-    tool_input = {
-        "file_path": str(repo / "orders.py"),
-        "old_string": "    return order_id",
-        "new_string": "    return str(order_id)",
-    }
-    result = _run_hook("pre-edit.py", tool_input)
-    assert result.returncode == 0, result.stderr
-    assert result.stdout == ""
-
-
-def test_pre_write_with_existing_definition_returns_context_and_exits_0():
-    probe = HOOKS_DIR / "_reference_notice_probe.py"
-    content = (
-        "def read_stdin_json():\n"
-        '    """Return an empty object."""\n'
-        "    return {}\n"
-    )
-    result = _run_hook(
-        "pre-write.py", {"file_path": str(probe), "content": content}
-    )
-    assert result.returncode == 0, result.stderr
-    context = json.loads(result.stdout)["hookSpecificOutput"]
-    assert "`read_stdin_json` is already defined in" in (
-        context["additionalContext"]
-    )
-    assert ".claude/hooks/hook_lib.py" in context["additionalContext"]

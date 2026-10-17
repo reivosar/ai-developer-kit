@@ -1,12 +1,13 @@
 """Shared hook utilities for Python hooks."""
 import json
 import os
-import re
 import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, NoReturn
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hook_records  # noqa: E402
 
 
 def _git_rev_parse(hooks_dir: Path, option: str) -> str:
@@ -33,75 +34,23 @@ def _find_repo_root() -> Path:
 
 REPO_ROOT: Path = _find_repo_root()
 WORKTREES_DIR: Path = REPO_ROOT / ".claude" / "worktrees"
-RECORDS_DIR_VARIABLE = "HOOK_RECORDS_DIR"
-NO_SESSION = "no-session"
-SESSION_NAME_LENGTH = 8
-# One hook process checks one tool call, so its session is kept for the whole
-# process: block() is called from every guard and none of them has the input.
-_session_name = NO_SESSION
 
 
-def records_dir() -> Path:
-    """Return the directory that holds the records of every session.
+def add_tool_directory_to_path() -> None:
+    """Add ~/.local/bin to PATH, where pipx and install-tool.sh put commands.
 
-    It is .claude/logs unless HOOK_RECORDS_DIR names another directory. The
-    tests set the variable, so they stay out of the project's own records.
+    A tool installed there by a commit check is then found by the command
+    that runs next, even when the shell Claude Code started lacks the
+    directory. Without HOME, PATH is left as it is.
     """
-    named = os.environ.get(RECORDS_DIR_VARIABLE)
-    return Path(named) if named else REPO_ROOT / ".claude" / "logs"
-
-
-def remember_session(hook_input: dict) -> None:
-    """Keep the session of a hook input, so its records share one directory.
-
-    The session's name is the first eight letters and digits of session_id.
-    An input with no session_id puts the records under NO_SESSION.
-    """
-    global _session_name
-    session_id = str(hook_input.get("session_id") or "")
-    letters_and_digits = re.sub(r"[^A-Za-z0-9]", "", session_id)
-    _session_name = letters_and_digits[:SESSION_NAME_LENGTH] or NO_SESSION
-
-
-def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def session_records_dir() -> Path:
-    """Return the directory for the records of the remembered session.
-
-    Its name is the UTC date of the session's first record and the session's
-    name, as in 2026-10-13_5a429071. A session that runs past midnight keeps
-    its directory. Records with no session go under the current date.
-    """
-    root = records_dir()
-    started = sorted(root.glob(f"*_{_session_name}"))
-    if started and _session_name != NO_SESSION:
-        return started[0]
-    return root / f"{_utc_now().date().isoformat()}_{_session_name}"
-
-
-def _keep_out_of_git(directory: Path) -> None:
-    ignore_file = directory / ".gitignore"
-    if not ignore_file.exists():
-        ignore_file.write_text("*\n")
-
-
-def append_record(record_name: str, entry: dict) -> None:
-    """Append entry as one JSON line to record_name in the session's directory.
-
-    record_name is a path below that directory, such as "audit.jsonl" or
-    "blocks/tdd_guard.jsonl". A record that cannot be written is dropped:
-    recording must never change whether a tool call is blocked.
-    """
-    try:
-        record_file = session_records_dir() / record_name
-        record_file.parent.mkdir(parents=True, exist_ok=True)
-        _keep_out_of_git(records_dir())
-        with record_file.open("a") as records:
-            records.write(json.dumps(entry) + "\n")
-    except Exception:
-        pass
+    home = os.environ.get("HOME")
+    if not home:
+        return
+    tool_directory = os.path.join(home, ".local", "bin")
+    directories = os.environ.get("PATH", "").split(os.pathsep)
+    if tool_directory not in directories:
+        listed = [directory for directory in directories if directory]
+        os.environ["PATH"] = os.pathsep.join(listed + [tool_directory])
 
 
 def read_text(file_path: str) -> str:
@@ -124,7 +73,7 @@ def read_stdin_json() -> dict:
     except Exception:
         return {}
     if isinstance(data, dict):
-        remember_session(data)
+        hook_records.remember_session(data)
     return data
 
 
@@ -140,7 +89,7 @@ def read_hook_input() -> dict:
         raise ValueError(f"hook input is not JSON: {error}") from error
     if not isinstance(data, dict):
         raise ValueError("hook input is not a JSON object")
-    remember_session(data)
+    hook_records.remember_session(data)
     if not isinstance(data.get("tool_input", {}), dict):
         raise ValueError("tool_input is not a JSON object")
     return data
@@ -188,8 +137,8 @@ def block(reason: str, *detail_lines: str) -> NoReturn:
     guard is the file that called block, so one file counts one check.
     """
     guard = Path(sys._getframe(1).f_code.co_filename).stem
-    append_record(f"blocks/{guard}.jsonl", {
-        "timestamp": _utc_now().isoformat(),
+    hook_records.append_record(f"blocks/{guard}.jsonl", {
+        "timestamp": hook_records.utc_now().isoformat(),
         "guard": guard,
         "hook": Path(sys.argv[0]).name,
         "reason": reason,

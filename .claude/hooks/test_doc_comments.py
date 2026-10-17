@@ -1,4 +1,4 @@
-"""Tests for doc_comments: public definitions, their doc comment, their parameters."""
+"""Tests for doc_comments: Java, Kotlin, and TypeScript definitions and their doc comments."""
 import os
 import sys
 
@@ -7,71 +7,6 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from doc_comments import Definition, find_public_definitions  # noqa: E402
 
-PY_ORDER = '''
-class Order:
-    """An order and its lines."""
-
-    def __init__(self, lines):
-        self.lines = lines
-
-    def total(self, rate, *fees, rounding=0, **options):
-        """Return the total."""
-        def add(left, right):
-            return left + right
-        return add(rate, rounding)
-
-    def _reset(self):
-        self.lines = []
-
-
-async def fetch_order(order_id):
-    return order_id
-
-
-def _parse(text):
-    return text
-'''
-PY_ACCESSORS = '''
-class Order:
-    """An order."""
-
-    @property
-    def total(self):
-        """Return the total."""
-        return self._total
-
-    @total.setter
-    def total(self, value):
-        self._total = value
-
-    @typing.overload
-    def find(self, key: int): ...
-'''
-GO_ORDER = '''package orders
-
-// Order is one customer order.
-type Order struct{}
-
-type Line struct{}
-
-type draft struct{}
-
-// Total returns the sum of the lines.
-// It never returns a negative number.
-func (o *Order) Total(rate int) int {
-    return rate
-}
-
-// ApplyDiscount is separated from its function by a blank line.
-
-func ApplyDiscount(total int) int {
-    return total
-}
-
-func applyFee(total int) int {
-    return total
-}
-'''
 JAVA_ORDER = '''package shop;
 
 /**
@@ -174,121 +109,9 @@ export function render({ total, rate }: Props, label: string): string {
 '''
 
 
-RUST_ORDER = '''
-/// An order and its lines.
-#[derive(Debug, Clone)]
-pub struct Order {
-    lines: Vec<Line>,
-}
-
-pub enum Status {
-    Open,
-}
-
-impl Order {
-    /// Returns the total of the lines.
-    /// Never negative.
-    pub fn total(&self, rate: u32) -> u32 {
-        rate
-    }
-
-    pub async fn fetch<T: Into<String>>(id: T) -> Order {
-        todo!()
-    }
-
-    pub(crate) fn reset(&mut self) {}
-
-    fn touch(&self) {}
-}
-
-/// A source of orders.
-pub trait OrderSource {
-    fn next(&mut self) -> Option<Order>;
-}
-
-// Not a doc comment.
-pub const fn limit() -> u32 {
-    20
-}
-'''
-
-
-def test_find_public_definitions_in_rust_lists_pub_items_only():
-    assert sorted(_by_name(RUST_ORDER, "orders.rs")) == [
-        "Order", "OrderSource", "Status", "fetch", "limit", "total",
-    ]
-
-
-def test_find_public_definitions_in_rust_reads_doc_lines_above_attributes():
-    found = _by_name(RUST_ORDER, "orders.rs")
-    assert found["Order"].doc == "An order and its lines."
-    assert found["total"].doc == "Returns the total of the lines.\nNever negative."
-
-
-def test_find_public_definitions_in_rust_ignores_plain_comment():
-    found = _by_name(RUST_ORDER, "orders.rs")
-    assert found["limit"].doc is None
-    assert found["Status"].doc is None
-    assert found["total"].params is None
-
-
 def _by_name(code: str, file_name: str) -> dict[str, Definition]:
     found = find_public_definitions(code, file_name)
     return {definition.name: definition for definition in found}
-
-
-def test_find_public_definitions_in_python_lists_public_names_only():
-    assert sorted(_by_name(PY_ORDER, "orders.py")) == [
-        "Order", "Order.total", "fetch_order",
-    ]
-
-
-def test_find_public_definitions_in_python_reads_docstring():
-    found = _by_name(PY_ORDER, "orders.py")
-    assert found["Order.total"].doc == "Return the total."
-    assert found["fetch_order"].doc is None
-
-
-def test_find_public_definitions_in_python_reads_parameters_without_self():
-    found = _by_name(PY_ORDER, "orders.py")
-    assert found["Order.total"].params == (
-        "rate", "rounding", "fees", "options",
-    )
-    assert found["Order"].params is None
-
-
-def test_find_public_definitions_in_python_skips_setter_and_overload():
-    found = find_public_definitions(PY_ACCESSORS, "orders.py")
-    assert [definition.name for definition in found] == ["Order", "Order.total"]
-
-
-def test_find_public_definitions_in_python_with_syntax_error_returns_nothing():
-    assert find_public_definitions("def broken(:\n", "orders.py") == []
-
-
-def test_find_public_definitions_in_go_lists_exported_names_only():
-    assert sorted(_by_name(GO_ORDER, "orders.go")) == [
-        "ApplyDiscount", "Line", "Order", "Total",
-    ]
-
-
-def test_find_public_definitions_in_go_reads_comment_lines_above():
-    found = _by_name(GO_ORDER, "orders.go")
-    assert found["Order"].doc == "Order is one customer order."
-    assert found["Total"].doc == (
-        "Total returns the sum of the lines.\n"
-        "It never returns a negative number."
-    )
-
-
-def test_find_public_definitions_in_go_without_adjacent_comment_has_no_doc():
-    found = _by_name(GO_ORDER, "orders.go")
-    assert found["Line"].doc is None
-    assert found["ApplyDiscount"].doc is None
-
-
-def test_find_public_definitions_in_go_reads_no_parameters():
-    assert _by_name(GO_ORDER, "orders.go")["Total"].params is None
 
 
 def test_find_public_definitions_in_java_lists_public_names_only():

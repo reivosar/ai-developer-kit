@@ -12,7 +12,7 @@ import audit_log  # noqa: E402
 
 
 def _audit_entries() -> list[dict]:
-    audit_file = audit_log.hook_lib.session_records_dir() / "audit.jsonl"
+    audit_file = audit_log.hook_records.session_records_dir() / "audit.jsonl"
     return [json.loads(line) for line in audit_file.read_text().splitlines()]
 
 
@@ -25,10 +25,10 @@ def test_record_writes_single_jsonl_entry():
 
 
 def test_record_writes_to_the_directory_of_the_session():
-    audit_log.hook_lib.remember_session({"session_id": "5a429071-2390"})
+    audit_log.hook_records.remember_session({"session_id": "5a429071-2390"})
     audit_log.record("PostToolUse", "Bash", {"command": "git status"})
     [entry] = _audit_entries()
-    session_directory = audit_log.hook_lib.session_records_dir()
+    session_directory = audit_log.hook_records.session_records_dir()
     assert entry["timestamp"].endswith("+00:00")
     assert session_directory.name == entry["timestamp"][:10] + "_5a429071"
 

@@ -1,4 +1,4 @@
-"""Tests for coverage_runners: coverage per file for Go, Rust, and TypeScript."""
+"""Tests for coverage_runners: coverage per file for Go and Rust."""
 import json
 import os
 import sys
@@ -32,16 +32,6 @@ echo "cargo $*" >> "$CALLS"
 for argument in "$@"; do
     case "$argument" in
         --output-path=*) printf '%s' "$REPORT" > "${argument#--output-path=}" ;;
-    esac
-done
-exit "${STATUS:-0}"
-"""
-FAKE_NPX = """#!/bin/sh
-echo "npx $*" >> "$CALLS"
-for argument in "$@"; do
-    case "$argument" in
-        --coverage.reportsDirectory=*|--coverageDirectory=*)
-            printf '%s' "$REPORT" > "${argument#*=}/coverage-summary.json" ;;
     esac
 done
 exit "${STATUS:-0}"
@@ -84,12 +74,6 @@ def _rust_report(project: Path, lines: float, regions: float) -> str:
     source = str(project / "src" / "lib.rs")
     files = [{"filename": source, "summary": summary}]
     return json.dumps({"data": [{"files": files}]})
-
-
-def _typescript_summary(project: Path, lines: object, branches: object) -> str:
-    entry = {"lines": {"pct": lines}, "branches": {"pct": branches}}
-    source = str(project / "src" / "order.ts")
-    return json.dumps({"total": entry, source: entry})
 
 
 def test_go_profile_percents_counts_statements_per_file():
@@ -165,47 +149,3 @@ def test_rust_percents_when_coverage_command_cannot_be_installed_exits_2(
     reasons = _blocked_reasons(capsys, coverage_runners.rust_percents)
     assert "cargo-llvm-cov is not installed, and installing it failed" in reasons
     assert "could not install it" in reasons
-
-
-@pytest.mark.parametrize(
-    "runner, command",
-    [
-        ("vitest", "npx --no-install vitest run --coverage"),
-        ("jest", "npx --no-install jest --coverage"),
-    ],
-)
-def test_typescript_percents_runs_the_runner_package_json_names(
-    project: Path, monkeypatch: pytest.MonkeyPatch, runner: str, command: str
-):
-    _fake_tool(project, "npx", FAKE_NPX)
-    package = {"devDependencies": {runner: "^1.0.0", "typescript": "^5.0.0"}}
-    (project / "package.json").write_text(json.dumps(package))
-    monkeypatch.setenv("REPORT", _typescript_summary(project, 100, 50))
-    assert coverage_runners.typescript_percents() == {"src/order.ts": 50}
-    assert _calls(project)[0].startswith(command)
-
-
-def test_typescript_percents_with_unknown_percent_counts_it_as_covered(
-    project: Path, monkeypatch: pytest.MonkeyPatch
-):
-    _fake_tool(project, "npx", FAKE_NPX)
-    (project / "package.json").write_text('{"dependencies": {"vitest": "1"}}')
-    monkeypatch.setenv("REPORT", _typescript_summary(project, 80, "Unknown"))
-    assert coverage_runners.typescript_percents() == {"src/order.ts": 80}
-
-
-@pytest.mark.parametrize("package", ['{"devDependencies": {"mocha": "1"}}', "{"])
-def test_typescript_percents_without_supported_runner_exits_2(
-    project: Path, capsys: pytest.CaptureFixture, package: str
-):
-    (project / "package.json").write_text(package)
-    reasons = _blocked_reasons(capsys, coverage_runners.typescript_percents)
-    assert "package.json names neither vitest nor jest" in reasons
-
-
-def test_typescript_percents_when_runner_cannot_start_exits_2(
-    project: Path, capsys: pytest.CaptureFixture
-):
-    (project / "package.json").write_text('{"devDependencies": {"jest": "1"}}')
-    reasons = _blocked_reasons(capsys, coverage_runners.typescript_percents)
-    assert "Coverage could not be measured." in reasons
