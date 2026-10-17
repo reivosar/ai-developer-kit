@@ -11,6 +11,16 @@ fi
 
 EXT="${FILE##*.}"
 
+#######################################
+# Run a formatter on the changed file; a formatter that fails is reported,
+# not fatal, since the file was already written.
+# Globals:
+#   FILE: read.
+# Arguments:
+#   The formatter's name for the warning, then its command line.
+# Outputs:
+#   A warning, to stderr, when the formatter fails.
+#######################################
 run_fmt() {
   local label="$1"; shift
   "$@" 2>/dev/null || echo "WARNING: $label failed on $FILE" >&2

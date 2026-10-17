@@ -36,8 +36,18 @@ MAX_FILE_LINES=200
 # The Checkstyle and detekt jars; the installer reads the same directory.
 export LINT_JAR_DIR="${LINT_JAR_DIR:-$LINT_CONFIG/jars}"
 
-# A missing linter is installed, not skipped: a skipped linter reports nothing,
-# which reads the same as a clean file.
+#######################################
+# Make sure a linter is there, installing it when it is missing: a skipped
+# linter reports nothing, which reads the same as a clean file.
+# Globals:
+#   INSTALLER: read. exit_code: set to 1 when the tool cannot be had.
+# Arguments:
+#   The tool's kit name, as install-tool.sh --list prints it.
+# Outputs:
+#   An error, to stderr, when it cannot be installed.
+# Returns:
+#   1 when the tool is still missing.
+#######################################
 require_tool() {
     local tool="$1"
     command -v "$tool" >/dev/null 2>&1 && return 0
@@ -49,6 +59,7 @@ require_tool() {
 
 py_files=()
 ts_files=()
+js_files=()
 md_files=()
 json_files=()
 yaml_files=()
@@ -63,6 +74,7 @@ while IFS= read -r file; do
     case "$file" in
         *.py)           py_files+=("$file") ;;
         *.ts|*.tsx)     ts_files+=("$file") ;;
+        *.js|*.jsx|*.mjs|*.cjs) js_files+=("$file") ;;
         *.md)           md_files+=("$file") ;;
         *.json)         json_files+=("$file") ;;
         *.yml|*.yaml)   yaml_files+=("$file") ;;
@@ -74,30 +86,30 @@ while IFS= read -r file; do
     esac
 done <<< "$changed_files"
 
-# lint_typescript and lint_typescript_docs.
+# lint_typescript and lint_typescript_docs; lint_java and lint_kotlin.
 # shellcheck source=typescript-lint.sh
 source "$hooks_dir/typescript-lint.sh"
+# shellcheck source=jvm-lint.sh
+source "$hooks_dir/jvm-lint.sh"
 
 # check_projects: go vet, tsc, and clippy, each in the file's own project.
 # shellcheck source=project-checks.sh
 source "$hooks_dir/project-checks.sh"
 
-# Clippy and the shell have no rule for file length, so the lines are counted
-# here; a last line without a newline counts too.
-check_file_length() {
-    local file line count
-    for file in "$@"; do
-        count=0
-        while IFS= read -r line || [ -n "$line" ]; do
-            count=$((count + 1))
-        done < "$file"
-        if [ "$count" -gt "$MAX_FILE_LINES" ]; then
-            echo "$file: $count lines, more than $MAX_FILE_LINES"
-            exit_code=1
-        fi
-    done
-}
+# check_file_length, for the languages whose linter has no file length rule,
+# and check_shell_docs, the Google style header comment of shell functions.
+# shellcheck source=file-checks.sh
+source "$hooks_dir/file-checks.sh"
 
+#######################################
+# Fail Go files that gofmt would change.
+# Globals:
+#   exit_code: set to 1 on a finding.
+# Arguments:
+#   The Go files.
+# Outputs:
+#   The files that are not formatted, to stdout.
+#######################################
 check_go_format() {
     local unformatted
     unformatted=$(gofmt -l "$@")
@@ -135,6 +147,12 @@ if [ ${#ts_files[@]} -gt 0 ]; then
     lint_typescript_docs "${ts_files[@]}"
 fi
 
+# JavaScript has no type check; the same linter and JSDoc rules apply.
+if [ ${#js_files[@]} -gt 0 ]; then
+    lint_typescript "${js_files[@]}"
+    lint_typescript_docs "${js_files[@]}"
+fi
+
 if [ ${#go_files[@]} -gt 0 ] && require_tool go; then
     check_projects go.mod "${go_files[@]}"
     if require_tool gofmt; then
@@ -155,22 +173,11 @@ fi
 
 if [ ${#sh_files[@]} -gt 0 ]; then
     check_file_length "${sh_files[@]}"
+    check_shell_docs "${sh_files[@]}"
 fi
 
-# Java: Checkstyle with the kit's Javadoc and file length rules, in English.
-# Kotlin: detekt with the kit's KDoc rules; its file length is counted here.
-if [ ${#java_files[@]} -gt 0 ] && require_tool checkstyle; then
-    java -Duser.language=en -jar "$LINT_JAR_DIR/checkstyle.jar" \
-        -c "$LINT_CONFIG/checkstyle-docs.xml" "${java_files[@]}" || exit_code=1
-fi
-
-if [ ${#kt_files[@]} -gt 0 ]; then
-    check_file_length "${kt_files[@]}"
-    if require_tool detekt; then
-        java -jar "$LINT_JAR_DIR/detekt.jar" --config "$LINT_CONFIG/detekt-docs.yml" \
-            --input "$(IFS=,; echo "${kt_files[*]}")" || exit_code=1
-    fi
-fi
+[ ${#java_files[@]} -gt 0 ] && lint_java "${java_files[@]}"
+[ ${#kt_files[@]} -gt 0 ] && lint_kotlin "${kt_files[@]}"
 
 if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then
     markdownlint "${md_files[@]}" || exit_code=1

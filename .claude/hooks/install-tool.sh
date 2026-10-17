@@ -20,14 +20,33 @@ HOOKS_DIR="."
 case "${BASH_SOURCE[0]}" in */*) HOOKS_DIR="${BASH_SOURCE[0]%/*}" ;; esac
 # shellcheck source=install-lint-tools.sh
 source "$HOOKS_DIR/install-lint-tools.sh"
+# The Homebrew, apt, yum, pipx, npm, and pip installers.
+# shellcheck source=install-packages.sh
+source "$HOOKS_DIR/install-packages.sh"
 # pipx, pip --user, and go install (GOBIN below) put commands in ~/.local/bin,
 # which the shell that started this script may not have on PATH.
 [ -n "${HOME:-}" ] && PATH="$PATH:$HOME/.local/bin"
 
+#######################################
+# Tell whether a command is on PATH.
+# Arguments:
+#   The command's name.
+# Returns:
+#   0 when it is, 1 otherwise.
+#######################################
 has_command() {
     command -v "$1" >/dev/null 2>&1
 }
 
+#######################################
+# Tell whether a name is one of the kit's tools.
+# Globals:
+#   KIT_TOOLS
+# Arguments:
+#   The name.
+# Returns:
+#   0 when it is, 1 otherwise.
+#######################################
 is_kit_tool() {
     case " $KIT_TOOLS " in
         *" $1 "*) return 0 ;;
@@ -35,9 +54,16 @@ is_kit_tool() {
     return 1
 }
 
+#######################################
+# Tell whether a kit tool is present. pytest-cov has no command of its own;
+# pytest gains its options.
+# Arguments:
+#   The tool's kit name.
+# Returns:
+#   0 when it is present, 1 otherwise.
+#######################################
 is_installed() {
     if [ "$1" = pytest-cov ]; then
-        # pytest-cov has no command of its own; pytest gains its options.
         [[ "$(pytest --help 2>/dev/null)" == *--cov-branch* ]]
         return
     fi
@@ -47,59 +73,13 @@ is_installed() {
     esac
 }
 
-# Arguments: the apt package names, then the yum package names.
-install_linux_package() {
-    # sudo -n fails at once when it would need a password no one can type.
-    # The names are left unquoted so that "nodejs npm" becomes two packages.
-    if has_command apt-get; then
-        # shellcheck disable=SC2086
-        sudo -n apt-get install -y $1
-    elif has_command yum; then
-        # shellcheck disable=SC2086
-        sudo -n yum install -y $2
-    else
-        return 1
-    fi
-}
-
-# Arguments: the Homebrew formula, the apt package names, the yum package names.
-install_system_package() {
-    case "$OS" in
-        Darwin) has_command brew && brew install "$1" ;;
-        Linux) install_linux_package "$2" "$3" ;;
-        *) return 1 ;;
-    esac
-}
-
-install_pipx() {
-    if [ "$OS" = Linux ] && ! has_command apt-get; then
-        pip3 install --user pipx
-    else
-        install_system_package pipx pipx pipx
-    fi
-}
-
-install_with_pipx() {
-    ensure_tool pipx && pipx install "$1"
-}
-
-install_with_npm() {
-    ensure_tool npm && npm install -g "$1" --quiet
-}
-
-# Tests import the project's own packages, so inside a virtualenv pytest has
-# to live in that virtualenv. Outside one, pipx keeps the system Python as the
-# operating system shipped it.
-install_pytest_package() {
-    if [ -n "${VIRTUAL_ENV:-}" ]; then
-        python3 -m pip install "$1"
-    elif [ "$1" = pytest ]; then
-        install_with_pipx pytest
-    else
-        ensure_tool pytest && ensure_tool pipx && pipx inject pytest "$1"
-    fi
-}
-
+#######################################
+# Install one kit tool with whichever installer it needs.
+# Arguments:
+#   The tool's kit name.
+# Returns:
+#   Non-zero when the installer fails.
+#######################################
 install_tool() {
     case "$1" in
         pipx) install_pipx ;;
@@ -118,6 +98,15 @@ install_tool() {
     esac
 }
 
+#######################################
+# Install a kit tool unless it is present, and check it is present after.
+# Arguments:
+#   The tool's kit name.
+# Outputs:
+#   Progress and errors, to stderr, with the installer's own output.
+# Returns:
+#   1 when the tool could not be installed or is still not found.
+#######################################
 ensure_tool() {
     is_installed "$1" && return 0
     echo "Installing $1..." >&2
@@ -131,6 +120,18 @@ ensure_tool() {
     fi
 }
 
+#######################################
+# End the script with 2 when a name is not one of the kit's tools, before
+# anything is installed.
+# Globals:
+#   KIT_TOOLS
+# Arguments:
+#   The names asked for.
+# Outputs:
+#   The unknown name and the known ones, to stderr.
+# Returns:
+#   Exits 2 on an unknown name.
+#######################################
 reject_unknown_tools() {
     local tool
     for tool in "$@"; do
@@ -140,6 +141,18 @@ reject_unknown_tools() {
     done
 }
 
+#######################################
+# Install each named tool that is missing, or list the names accepted.
+# Globals:
+#   KIT_TOOLS
+# Arguments:
+#   Tool names, or --list.
+# Outputs:
+#   The names with --list, to stdout; usage and errors, to stderr.
+# Returns:
+#   Exits 0 when every tool is there, 1 when one could not be installed,
+#   and 2 on a usage error or an unknown name.
+#######################################
 main() {
     if [ $# -eq 0 ]; then
         echo "Usage: install-tool.sh <tool>... | --list" >&2
