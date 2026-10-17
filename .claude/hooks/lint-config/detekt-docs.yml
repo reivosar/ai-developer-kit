@@ -1,0 +1,42 @@
+# Kotlin rules the kit adds: every public class, function, and property
+# carries a KDoc comment, and the comment's @param and @property tags match
+# the declaration. Kotlin's coding conventions describe parameters in the
+# comment's prose rather than in an @param per parameter, so none is required.
+# detekt leaves test sources out of these rules by default. The other rule
+# sets are off: the kit adds only the doc rules to a project.
+console-reports:
+  exclude:
+    - "ProjectStatisticsReport"
+    - "ComplexityReport"
+    - "NotificationReport"
+complexity:
+  active: false
+coroutines:
+  active: false
+empty-blocks:
+  active: false
+exceptions:
+  active: false
+naming:
+  active: false
+performance:
+  active: false
+potential-bugs:
+  active: false
+style:
+  active: false
+comments:
+  active: true
+  UndocumentedPublicClass:
+    active: true
+  UndocumentedPublicFunction:
+    active: true
+  UndocumentedPublicProperty:
+    active: true
+  OutdatedDocumentation:
+    active: true
+    allowParamOnConstructorProperties: true
+  KDocReferencesNonPublicProperty:
+    active: true
+  EndOfSentenceFormat:
+    active: false

@@ -47,8 +47,9 @@ class ToolStubs:
     def __init__(self, home: Path) -> None:
         """Make the stand-in directories under home, with uname reporting Darwin.
 
-        The kit's ESLint is a stand-in too, under eslint_prefix, so no script
-        run here reaches the one install-tool.sh put in lint-config.
+        The kit's ESLint is a stand-in too, under eslint_prefix, and its
+        Checkstyle and detekt jars are empty files under jar_dir, so no script
+        run here reaches the ones install-tool.sh put in lint-config.
 
         Args:
             home: an empty directory that will hold the stand-ins and their logs.
@@ -64,6 +65,10 @@ class ToolStubs:
         (self.eslint_prefix / "node_modules" / "eslint-plugin-jsdoc").mkdir()
         eslint.write_text(_STAND_IN)
         eslint.chmod(0o755)
+        self.jar_dir = home / "jars"
+        self.jar_dir.mkdir()
+        for jar in ("checkstyle.jar", "detekt.jar"):
+            (self.jar_dir / jar).write_text("")
 
     def configure(self, name: str, **settings: object) -> None:
         """Describe a command that is not on PATH until something provides it."""
@@ -102,7 +107,7 @@ class ToolStubs:
             command, capture_output=True, text=True,
             env={
                 "PATH": str(self.commands), "LINT_NODE_PREFIX": str(self.eslint_prefix),
-                **environment,
+                "LINT_JAR_DIR": str(self.jar_dir), **environment,
             },
         )
 

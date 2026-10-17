@@ -63,7 +63,8 @@ Every public function, method, and type carries a doc comment in the language's 
 - JavaScript and TypeScript: every exported function, class, and method has a JSDoc comment with a description, an `@param` with a description for each parameter, `@returns` for a returned value, and `@throws` for what it throws.
 - Go: every exported name, and every package, has a comment that starts with the name. Rust: every public item has a `///` comment, with `# Errors` for a function returning `Result`, `# Panics` for one that can panic, and `# Safety` for an `unsafe` one.
 - A comment that lists parameters (`Args:` in Python, `@param` elsewhere) lists exactly the parameters the signature has.
-- The linters in `static-analysis.sh` enforce these rules when a file is written and at commit: ruff (`D`, `DOC`) for Python, eslint-plugin-jsdoc for JavaScript and TypeScript, revive for Go, rustc and clippy for Rust. Java and Kotlin are checked only by `doc_comment_guard.py`: a public definition has a comment, and its `@param` tags fit the signature.
+- Java: every public type and method has a Javadoc with an `@param` for each parameter, `@return` for a returned value, and `@throws` for each declared exception, none empty. Kotlin: every public class, function, and property has a KDoc; parameters are described in its prose, as the Kotlin coding conventions ask, and any `@param` matches the declaration.
+- The linters in `static-analysis.sh` enforce these rules when a file is written and at commit: ruff (`D`, `DOC`) for Python, eslint-plugin-jsdoc for JavaScript and TypeScript, revive for Go, rustc and clippy for Rust, Checkstyle for Java, detekt for Kotlin.
 - A method that overrides another (`@Override`, `override`), a property setter, and an `@overload` need no comment of their own.
 - Private code needs no doc comment.
 

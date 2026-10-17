@@ -33,6 +33,8 @@ INSTALLER="$hooks_dir/install-tool.sh"
 # Linter settings the kit adds: a code file holds at most 200 lines.
 LINT_CONFIG="$hooks_dir/lint-config"
 MAX_FILE_LINES=200
+# The Checkstyle and detekt jars; the installer reads the same directory.
+export LINT_JAR_DIR="${LINT_JAR_DIR:-$LINT_CONFIG/jars}"
 
 # A missing linter is installed, not skipped: a skipped linter reports nothing,
 # which reads the same as a clean file.
@@ -53,6 +55,8 @@ yaml_files=()
 go_files=()
 rs_files=()
 sh_files=()
+java_files=()
+kt_files=()
 
 while IFS= read -r file; do
     [ -f "$file" ] || continue
@@ -65,6 +69,8 @@ while IFS= read -r file; do
         *.go)           go_files+=("$file") ;;
         *.rs)           rs_files+=("$file") ;;
         *.sh|*.bash)    sh_files+=("$file") ;;
+        *.java)         java_files+=("$file") ;;
+        *.kt|*.kts)     kt_files+=("$file") ;;
     esac
 done <<< "$changed_files"
 
@@ -149,6 +155,21 @@ fi
 
 if [ ${#sh_files[@]} -gt 0 ]; then
     check_file_length "${sh_files[@]}"
+fi
+
+# Java: Checkstyle with the kit's Javadoc and file length rules, in English.
+# Kotlin: detekt with the kit's KDoc rules; its file length is counted here.
+if [ ${#java_files[@]} -gt 0 ] && require_tool checkstyle; then
+    java -Duser.language=en -jar "$LINT_JAR_DIR/checkstyle.jar" \
+        -c "$LINT_CONFIG/checkstyle-docs.xml" "${java_files[@]}" || exit_code=1
+fi
+
+if [ ${#kt_files[@]} -gt 0 ]; then
+    check_file_length "${kt_files[@]}"
+    if require_tool detekt; then
+        java -jar "$LINT_JAR_DIR/detekt.jar" --config "$LINT_CONFIG/detekt-docs.yml" \
+            --input "$(IFS=,; echo "${kt_files[*]}")" || exit_code=1
+    fi
 fi
 
 if [ ${#md_files[@]} -gt 0 ] && require_tool markdownlint; then

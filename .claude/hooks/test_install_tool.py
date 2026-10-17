@@ -9,7 +9,7 @@ SETUP = HOOKS_DIR.parents[1] / "setup.sh"
 KIT_TOOLS = [
     "pipx", "npm", "go", "flake8", "yamllint", "pytest", "pytest-cov", "tsc",
     "markdownlint", "biome", "cargo-clippy", "cargo-llvm-cov", "pylint", "revive",
-    "ruff", "eslint-jsdoc",
+    "ruff", "eslint-jsdoc", "checkstyle", "detekt",
 ]
 
 
